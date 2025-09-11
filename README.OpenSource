@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "libavif'",
+        "License": "View license",
+        "License File": "LICENSE",
+        "Version Number": "v1.3.0",
+        "Owner": "AOMediaCodec"
+        "Upstream URL": "https://github.com/AOMediaCodec/libavif",
+        "Description": "Library for encoding and decoding .avif files"
+    }
+]
