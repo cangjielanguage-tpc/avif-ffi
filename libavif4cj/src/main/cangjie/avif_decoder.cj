@@ -259,46 +259,46 @@ public class AvifDecoder {
         }
     }
 
-    public func nextFrameffi(address:Int64,color:Array<UInt8>,imageInfo:ImageInfo):Int32{
+    public func nextFrameffi(address:Int64,color:Array<UInt8>,imageWidth:Int32,imageHeight:Int32,format:PixelMapFormat):Int32{
         unsafe {
             //foreign func nextFrame(decoder:Int64,pixels:CPointer<UInt8>,picwidth:Int32,picheight:Int32,stride:Int32,formatvalue:Int32):Int32
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format:Int32 = match (imageInfo.pixelFormat) {
+            let format:Int32 = match (format) {
             	case PixelMapFormat.RGBA_F16 =>  0
                 case PixelMapFormat.RGB_565 =>  1
                 case _ => 2
             }
             Hilog.error(0,"avif nextFrameffi","----- 22222")
-            Hilog.error(0,"avif nextFrameffi stride","----- stride=${imageInfo.stride}  format=${format}")
-            return nextFrame(address,handle.pointer,imageInfo.size.width,imageInfo.size.height, imageInfo.stride,format)
+            Hilog.error(0,"avif nextFrameffi stride","format=${format}")
+            return nextFrame(address,handle.pointer,imageWidth,imageHeight,imageWidth*4,format)
         }
     }
 
-        public func nthFrameffi(address:Int64,index:Int32,color:Array<UInt8>,imageInfo:ImageInfo):Int32{
+        public func nthFrameffi(address:Int64,index:Int32,color:Array<UInt8>,imageWidth:Int32,imageHeight:Int32,format:PixelMapFormat):Int32{
         unsafe {
             //foreign func nextFrame(decoder:Int64,pixels:CPointer<UInt8>,picwidth:Int32,picheight:Int32,stride:Int32,formatvalue:Int32):Int32
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format:Int32 = match (imageInfo.pixelFormat) {
+            let format:Int32 = match (format) {
             	case PixelMapFormat.RGBA_F16 =>  0
                 case PixelMapFormat.RGB_565 =>  1
                 case _ => 2
             }
             Hilog.error(0,"avif nextFrameffi","----- 22222")
-            return nthFrame(address,index,handle.pointer,imageInfo.size.width,imageInfo.size.height,imageInfo.stride,format)
+            return nthFrame(address,index,handle.pointer,imageWidth,imageHeight,imageWidth*4,format)
         }
     }
 
-     public func decodeffi(encoded:Array<UInt8>,color:Array<UInt8>,imageInfo:ImageInfo):Bool{
+     public func decodeffi(encoded:Array<UInt8>,color:Array<UInt8>,imageWidth:Int32,imageHeight:Int32,format:PixelMapFormat):Bool{
         unsafe {
             let handlePic: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let handleColor: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format:Int32 = match (imageInfo.pixelFormat) {
+            let format:Int32 = match (format) {
             	case PixelMapFormat.RGBA_F16 =>  0
                 case PixelMapFormat.RGB_565 =>  1
                 case _ => 2
             }
             Hilog.error(0,"avif nextFrameffi","----- 22222")
-            return decode(handlePic.pointer,Int32(encoded.size),handleColor.pointer,imageInfo.size.width,imageInfo.size.height,imageInfo.stride,format)
+            return decode(handlePic.pointer,Int32(encoded.size),handleColor.pointer,imageWidth,imageHeight,imageWidth*4,format)
             return true
         }
     }

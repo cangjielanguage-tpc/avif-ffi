@@ -161,7 +161,7 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("a32.avif")
+                        let arr = getImageFromRawFile("a2.avif")
                         let avif:AvifDecoder = AvifDecoder()
                         unsafe {
                             if(let Some(i) <- arr){
@@ -173,7 +173,7 @@ class EntryView {
                                 Hilog.error(0,"colorvaluebefore",colors.toString())
                                 let pixelMap1 = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
                                 Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.nextFrameffi(address, colors, pixelMap.getImageInfo())
+                                avif.nextFrameffi(address, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
                                 //pixelMap1.writeBufferToPixels(colors)
                                  Hilog.error(0,"colorvalueafter",colors.toString())
 
@@ -212,7 +212,7 @@ class EntryView {
                                 let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                 let pixelMap = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
                                 Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.nthFrameffi(address,0, colors, pixelMap.getImageInfo())
+                                avif.nthFrameffi(address,0, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
                             }
                         }
                     }
@@ -231,7 +231,7 @@ class EntryView {
                                 let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                 let pixelMap = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
                                 Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.decodeffi(i, colors, pixelMap.getImageInfo())
+                                avif.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
                             }
                         }
                     }
