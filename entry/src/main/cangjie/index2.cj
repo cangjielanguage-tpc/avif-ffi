@@ -33,6 +33,7 @@ import std.fs.File
 import std.fs.remove
 import std.fs.OpenMode
 import ohos.base.Length
+import std.collection.ArrayList
 
 @Entry
 @Component
@@ -78,10 +79,8 @@ class EntryView2 {
                                     mmheight = Int64(mHeight).px
                                     let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
                                     Hilog.error(0, "colorvaluebefore", colors.toString())
-                                    let pixelMap1 = createPixelMap(colors,
-                                        InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                            size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                    avif.nextFrameffi(address, colors, Int32(mWidth), Int32(mHeight), PixelMapFormat.RGBA_8888)
+                                    avif.nextFrameffi(address, colors, Int32(mWidth), Int32(mHeight),
+                                        PixelMapFormat.RGBA_8888)
                                     Hilog.error(0, "colorvalueafter", colors.toString())
                                     let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,
@@ -92,12 +91,11 @@ class EntryView2 {
                             }
                     }
 
-
-                    Button("testmult")
+                Button("testmult")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                            let arr = getImageFromRawFile("a23.avif")
+                            let arr = getImageFromRawFile("a25.avif")
                             let avif: AvifDecoder = AvifDecoder()
                             unsafe {
                                 if (let Some(i) <- arr) {
@@ -109,21 +107,43 @@ class EntryView2 {
                                     Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
                                     mmwidth = Int64(mWidth).px
                                     mmheight = Int64(mHeight).px
-                                    let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
-                                    Hilog.error(0, "colorvaluebefore", colors.toString())
-                                    let pixelMap1 = createPixelMap(colors,
-                                        InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                            size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                    avif.nthFrameffi(address,6,colors, Int32(mWidth), Int32(mHeight), PixelMapFormat.RGBA_8888)
-                                    Hilog.error(0, "colorvalueafter", colors.toString())
-                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,
-                                        editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                        size: Size(width: Int32(mWidth), height: Int32(mHeight)))
-                                    pixelMap = createPixelMap(colors, opts)
+                                    let durationList: ArrayList<Float64> = ArrayList<Float64>()
+                                    let PixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+                                    let frameCount:Int64 = Int64(info.frameCount)
+                                    for (j in 0..frameCount) {
+                                        let duration: Float64 = info.frameDurations.read(j) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+                                        durationList.add(duration)
+                                        Hilog.error(0, "avif info", "-----info.duration = ${duration}")
+                                    }
+                                    spawn {
+                                        while (true) {
+                                            if (PixelMapList.size != frameCount) {
+                                                 for (k in 0..frameCount) {
+                                                    let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
+                                                    //Hilog.error(0, "colorvaluebefore", colors.toString())
+                                                    avif.nthFrameffi(address, Int32(k), colors, Int32(mWidth), Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                                    //Hilog.error(0, "colorvalueafter", colors.toString())
+                                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                                    launch{
+                                                         pixelMap = createPixelMap(colors, opts)
+                                                    }
+                                                    PixelMapList.add(pixelMap)
+                                                    sleep(durationList.get(Int64(k)).getOrThrow() * Duration.second)
+                                                }
+                                            }else{
+                                                for (k in 0..PixelMapList.size) {
+                                                    launch{
+                                                        pixelMap = PixelMapList.get(k).getOrThrow()
+                                                    }
+                                                    sleep(durationList.get(Int64(k)).getOrThrow() * Duration.second)
+                                               }
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                    }
+                        }
             }.width(100.percent)
         }.height(100.percent)
     }
