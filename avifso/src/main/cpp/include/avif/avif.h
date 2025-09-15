@@ -1662,6 +1662,9 @@ typedef struct {
     uint32_t height;
     uint32_t depth;
     bool alphaPresent;
+    int32_t frameCount;
+    int32_t repetitionCount;
+    double* frameDurations;
 }InfoCpp;
 
 //zidingyi
@@ -1672,7 +1675,6 @@ typedef struct {
     bool alphaPresent;
     int32_t frameCount;
     int32_t repetitionCount;
-    //double[] frameDurations;
     double* frameDurations;
 }AvifDecoderCpp;
 

@@ -1221,6 +1221,29 @@ avifBool isAvifImage(uint8_t *address, int length){
      }else{
          info->alphaPresent = true;
      }
+    
+     info -> frameCount = decoder.decoder->imageCount;
+     info -> repetitionCount = decoder.decoder->repetitionCount;
+
+    //给时间数组赋值---------------------------------------
+     double* native_durations = NULL;
+     // 分配内存
+     if (info ->frameCount > 0) {
+         native_durations = (double*)malloc(sizeof(double) * info ->frameCount);
+     }
+    if (native_durations == NULL) {
+        return 0;
+    }
+    for (int i = 0; i < info ->frameCount; ++i) {
+        avifImageTiming timing;
+        if (avifDecoderNthImageTiming(decoder.decoder, i, &timing) !=AVIF_RESULT_OK) {
+          return 0;
+        }
+        native_durations[i] = timing.duration;
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----a duration %{public}f ",native_durations[i]);
+    }
+    info ->frameDurations = native_durations;
+    //给时间数组赋值---------------------------------------
      //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- width %{public}d height %{public}d depth %{public}d",decoder.crop.width,decoder.crop.height,decoder.decoder->image->depth);
      //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- info width %{public}d height %{public}d depth %{public}d",info -> width ,info -> height, info -> depth);
     return info;

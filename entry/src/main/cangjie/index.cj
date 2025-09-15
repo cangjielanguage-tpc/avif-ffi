@@ -103,16 +103,28 @@ class EntryView {
 
                     }
 
+                  //a2可 a3可 a5可 a6可 a8可 a9可 a10可 a11可 a12可 a13可 a14可 a15可 a16可 a17可 a18可 a19可 a20可 a21可 a22黑 a23灰 a24黑
+                  //a25黑 a26可 a27可 a28可 a29可 a30可 a31可 a32可 a33白 a34可 a35可 a36白 a37白 a38白 a40白 a41白 a42可 a44可 a46可 a47可
+                  //a48可 a49可 a50可 a51可 a52可
+                  //23是个动画
+
+                  //23，25，26的repetitionCount 4294967295
                  Button("test3")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr5 = getImageFromRawFile("4.avif")
+                        let arr5 = getImageFromRawFile("a23.avif")
                         let avif:AvifDecoder = AvifDecoder()
                         unsafe {
                             if(let Some(i) <- arr5){
                                  let info:Info = avif.getInfoffi(i)
                                  Hilog.error(0,"avif info","-----info.width = ${info.width} info.height = ${info.height} info.depth = ${info.depth} info.alpha = ${info.alphaPresent}")
+                                 Hilog.error(0,"avif info","-----info.frameCount = ${info.frameCount} info.repetitionCount = ${info.repetitionCount} ")
+                                 for(i in 0..info.frameCount){
+                                    let duration:Float64 = info.frameDurations.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+                                    Hilog.error(0,"avif info","-----info.duration = ${duration}")
+                                 }
+
                             }
                         }
                     }

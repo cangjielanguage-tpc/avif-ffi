@@ -60,11 +60,11 @@ class EntryView2 {
                 //a25黑 a26可 a27可 a28可 a29可 a30可 a31可 a32可 a33白 a34可 a35可 a36白 a37白 a38白 a40白 a41白 a42可 a44可 a46可 a47可
                 //a48可 a49可 a50可 a51可 a52可
                 //23是个动画
-                Button("test6")
+                Button("testsingle")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                            let arr = getImageFromRawFile("a33.avif")
+                            let arr = getImageFromRawFile("a2.avif")
                             let avif: AvifDecoder = AvifDecoder()
                             unsafe {
                                 if (let Some(i) <- arr) {
@@ -82,6 +82,39 @@ class EntryView2 {
                                         InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
                                             size: Size(width: Int32(mWidth), height: Int32(mHeight))))
                                     avif.nextFrameffi(address, colors, Int32(mWidth), Int32(mHeight), PixelMapFormat.RGBA_8888)
+                                    Hilog.error(0, "colorvalueafter", colors.toString())
+                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,
+                                        editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
+                                        size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                    pixelMap = createPixelMap(colors, opts)
+                                }
+                            }
+                    }
+
+
+                    Button("testmult")
+                    .fontSize(20)
+                    .onClick {
+                        evt =>
+                            let arr = getImageFromRawFile("a23.avif")
+                            let avif: AvifDecoder = AvifDecoder()
+                            unsafe {
+                                if (let Some(i) <- arr) {
+                                    let info:Info = avif.getInfoffi(i)
+                                    let address: Int64 = avif.createDecoderffi(i, 1)
+                                    //创建pixelmap
+                                    let mWidth = info.width
+                                    let mHeight = info.height
+                                    Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
+                                    mmwidth = Int64(mWidth).px
+                                    mmheight = Int64(mHeight).px
+                                    let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
+                                    Hilog.error(0, "colorvaluebefore", colors.toString())
+                                    let pixelMap1 = createPixelMap(colors,
+                                        InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
+                                            size: Size(width: Int32(mWidth), height: Int32(mHeight))))
+                                    avif.nthFrameffi(address,6,colors, Int32(mWidth), Int32(mHeight), PixelMapFormat.RGBA_8888)
                                     Hilog.error(0, "colorvalueafter", colors.toString())
                                     let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,

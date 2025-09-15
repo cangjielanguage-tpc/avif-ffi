@@ -231,8 +231,11 @@ public class AvifDecoder {
             var picHeight: UInt32 = res.height
             var picDepth: UInt32 = res.depth
             var picalphaPresent: Bool = res.alphaPresent
+            var frameCount: Int32 = res.frameCount
+            var repetitionCount: Int32 = res.repetitionCount
+            var frameDurations:CPointer<Float64> = res.frameDurations
             encodedFree(result)
-            return Info(picWidth,picHeight,picDepth,picalphaPresent)
+            return Info(picWidth,picHeight,picDepth,picalphaPresent,frameCount,repetitionCount,frameDurations)
         }
     }
 
