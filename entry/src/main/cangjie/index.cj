@@ -53,51 +53,70 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let avif:AvifDecoder = AvifDecoder()
-                        let version = avif.versionStringffi()
-                        let result = avif.resultToStringffi(2)
-                        Hilog.error(0,"error","-----version2=${version.toString()}")
-                        Hilog.error(0,"error","-----version2=${result.toString()}")
+                        let arr5 = getImageFromRawFile("5.avif")
+                        if(let Some(i) <- arr5){
+                            let avif:?AvifDecoder = AvifDecoder.create(i)
+                            if(let Some(j) <- avif){
+                                let version = j.versionStringffi()
+                                let result = j.resultToStringffi(2)
+                                Hilog.error(0,"error","-----version2=${version.toString()}")
+                                Hilog.error(0,"error","-----version2=${result.toString()}")
+                            }
+                        }
                     }
 
                 Button("test2")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let avif:AvifDecoder = AvifDecoder()
                         let arr1 = getImageFromRawFile("cat.png")
                         unsafe {
                              if(let Some(i) <- arr1){
-                                let isavif:Int32 = avif.isAvifImageffi(i)
-                                Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                    let isavif:Int32 = j.isAvifImageffi(i)
+                                    Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                }
                              }
                         }
                         let arr2 = getImageFromRawFile("1.png")
                         unsafe {
                              if(let Some(i) <- arr2){
-                                let isavif:Int32 = avif.isAvifImageffi(i)
-                                Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                    let isavif:Int32 = j.isAvifImageffi(i)
+                                    Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                }
                              }
                         }
                         let arr3 = getImageFromRawFile("2.jpg")
                         unsafe {
                              if(let Some(i) <- arr3){
-                                let isavif:Int32 = avif.isAvifImageffi(i)
-                                Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                    let isavif:Int32 = j.isAvifImageffi(i)
+                                    Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                }
                              }
                         }
                         let arr4 = getImageFromRawFile("3.jpg")
                         unsafe {
                              if(let Some(i) <- arr4){
-                                let isavif:Int32 = avif.isAvifImageffi(i)
-                                Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                               let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                    let isavif:Int32 = j.isAvifImageffi(i)
+                                    Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                }
                              }
                         }
                         let arr5 = getImageFromRawFile("4.avif")
                         unsafe {
                              if(let Some(i) <- arr5){
-                                let isavif:Int32 = avif.isAvifImageffi(i)
-                                Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                    let isavif:Int32 = j.isAvifImageffi(i)
+                                    Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                }
                              }
                         }
 
@@ -113,37 +132,19 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr5 = getImageFromRawFile("a23.avif")
-                        let avif:AvifDecoder = AvifDecoder()
+                        let arr5 = getImageFromRawFile("a27.avif")
                         unsafe {
                             if(let Some(i) <- arr5){
-                                 let info:Info = avif.getInfoffi(i)
-                                 Hilog.error(0,"avif info","-----info.width = ${info.width} info.height = ${info.height} info.depth = ${info.depth} info.alpha = ${info.alphaPresent}")
-                                 Hilog.error(0,"avif info","-----info.frameCount = ${info.frameCount} info.repetitionCount = ${info.repetitionCount} ")
-                                 for(i in 0..info.frameCount){
-                                    let duration:Float64 = info.frameDurations.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-                                    Hilog.error(0,"avif info","-----info.duration = ${duration}")
+                                 let avif:?AvifDecoder = AvifDecoder.create(i)
+                                 if(let Some(j) <- avif){
+                                    let info:Info = j.getInfoffi(i)
+                                     Hilog.error(0,"avif info","-----info.width = ${info.width} info.height = ${info.height} info.depth = ${info.depth} info.alpha = ${info.alphaPresent}")
+                                     Hilog.error(0,"avif info","-----info.frameCount = ${info.frameCount} info.repetitionCount = ${info.repetitionCount} ")
+                                     for(i in 0..info.frameCount){
+                                        let duration:Float64 = info.frameDurations.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+                                        Hilog.error(0,"avif info","-----info.duration = ${duration}")
+                                     }
                                  }
-
-                            }
-                        }
-                    }
-
-
-                Button("test4")
-                    .fontSize(20)
-                    .onClick {
-                        evt =>
-                        let arr5 = getImageFromRawFile("4.avif")
-                        let avif:AvifDecoder = AvifDecoder()
-                        unsafe {
-                            if(let Some(i) <- arr5){
-                                 let address:Int64 = avif.createDecoderffi(i,1)
-                                 Hilog.error(0,"avif createdecoder","----- address=${address}")
-                                 let index = avif.nextFrameIndexffi(address)
-                                 Hilog.error(0,"avif createdecoder","----- nextIndex=${index}")
-                                 avif.destroyDecoderffi(address)
-                                 Hilog.error(0,"avif destroydecoder","----- address=${address}")
                             }
                         }
                     }
@@ -153,15 +154,14 @@ class EntryView {
                     .onClick {
                         evt =>
                         let arr = getImageFromRawFile("5.avif")
-                        let avif:AvifDecoder = AvifDecoder()
                         unsafe {
                             if(let Some(i) <- arr){
-                                 let address:Int64 = avif.createDecoderffi(i,1)
-                                 Hilog.error(0,"avif createdecoder","----- address=${address}")
-                                 let index = avif.nextFrameIndexffi(address)
-                                 Hilog.error(0,"avif createdecoder","----- nextIndex=${index}")
-                                 avif.destroyDecoderffi(address)
-                                 Hilog.error(0,"avif destroydecoder","----- address=${address}")
+                                 let avif:?AvifDecoder = AvifDecoder.create(i)
+                                 if(let Some(j) <- avif){
+                                    let index = j.nextFrameIndexffi()
+                                    Hilog.error(0,"avif createdecoder","----- nextIndex=${index}")
+                                    j.release()
+                                 }
                             }
                         }
                     }
@@ -174,21 +174,17 @@ class EntryView {
                     .onClick {
                         evt =>
                         let arr = getImageFromRawFile("a2.avif")
-                        let avif:AvifDecoder = AvifDecoder()
                         unsafe {
                             if(let Some(i) <- arr){
-                                let address:Int64 = avif.createDecoderffi(i,1)
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
                                  //创建pixelmap
                                 let mWidth = 600
                                 let mHeight = 400
                                 let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                Hilog.error(0,"colorvaluebefore",colors.toString())
-                                let pixelMap1 = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.nextFrameffi(address, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
-                                //pixelMap1.writeBufferToPixels(colors)
-                                 Hilog.error(0,"colorvalueafter",colors.toString())
-
+                                //Hilog.error(0,"colorvaluebefore",colors.toString())
+                                j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                // Hilog.error(0,"colorvalueafter",colors.toString())
 //https://www.sojson.com/web/panel.html
 //                                var path:Path = Path("/data/storage/el2/base/haps/entry/test.txt")
 //                                var file: File = File(path,ReadWrite)
@@ -196,15 +192,10 @@ class EntryView {
 //                                    file.write(colors[i].toString().toArray())
 //                                }
 //                                file.close()
-
-
-            //   public init(srcPixelFormat: PixelMapFormat, alphaType!: AlphaType = AlphaType.PREMUL, editable!: Bool = false,
-            //        pixelFormat!: PixelMapFormat = PixelMapFormat.BGRA_8888, scaleMode!: ScaleMode = ScaleMode.FIT_TARGET_SIZE,
-            //        size!: Size)
                                  let size: Size = Size(width: 600, height: 400)
                                  let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                  pixelMap = createPixelMap(colors, opts)
-
+                                }
                             }
                         }
                     }
@@ -214,17 +205,19 @@ class EntryView {
                     .onClick {
                         evt =>
                         let arr = getImageFromRawFile("4.avif")
-                        let avif:AvifDecoder = AvifDecoder()
                         unsafe {
                             if(let Some(i) <- arr){
-                                let address:Int64 = avif.createDecoderffi(i,1)
-                                 //创建pixelmap
-                                let mWidth = 600
-                                let mHeight = 400
-                                let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                let pixelMap = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.nthFrameffi(address,0, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                     //创建pixelmap
+                                    let mWidth = 600
+                                    let mHeight = 400
+                                    let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
+                                    j.nthFrameffi(0, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                    let size: Size = Size(width: 600, height: 400)
+                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                    pixelMap = createPixelMap(colors, opts)
+                                }
                             }
                         }
                     }
@@ -233,17 +226,20 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("4.avif")
-                        let avif:AvifDecoder = AvifDecoder()
+                        let arr = getImageFromRawFile("a3.avif")
                         unsafe {
                             if(let Some(i) <- arr){
-                                 //创建pixelmap
-                                let mWidth = 600
-                                let mHeight = 400
-                                let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                let pixelMap = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                Hilog.error(0,"avif nextFrameffi","----- 111111")
-                                avif.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                      //创建pixelmap
+                                    let mWidth = 600
+                                    let mHeight = 400
+                                    let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
+                                    j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888,1)
+                                    let size: Size = Size(width: 600, height: 400)
+                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                    pixelMap = createPixelMap(colors, opts)
+                                }
                             }
                         }
                     }

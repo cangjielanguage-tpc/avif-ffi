@@ -1713,7 +1713,7 @@ AVIF_API void destroyDecoder(int64_t decoder);
 AVIF_API int32_t nextFrameIndex(int64_t decoder);
 AVIF_API int32_t nextFrame(int64_t decoder,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue);
 AVIF_API int32_t nthFrame(int64_t decoder, uint32_t n,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue);
-AVIF_API bool decode(uint8_t *address,int length,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue);
+AVIF_API bool decode(uint8_t *address,int length,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue,int threads);
 
 
 AVIF_API avifResult avifEncoderAddImage(avifEncoder * encoder, const avifImage * image, uint64_t durationInTimescales, avifAddImageFlags addImageFlags);
