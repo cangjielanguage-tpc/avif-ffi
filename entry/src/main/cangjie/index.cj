@@ -61,6 +61,7 @@ class EntryView {
                                 let result = j.resultToStringffi(2)
                                 Hilog.error(0,"error","-----version2=${version.toString()}")
                                 Hilog.error(0,"error","-----version2=${result.toString()}")
+                                j.release()
                             }
                         }
                     }
@@ -76,6 +77,7 @@ class EntryView {
                                 if(let Some(j) <- avif){
                                     let isavif:Int32 = j.isAvifImageffi(i)
                                     Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                    j.release()
                                 }
                              }
                         }
@@ -86,6 +88,7 @@ class EntryView {
                                 if(let Some(j) <- avif){
                                     let isavif:Int32 = j.isAvifImageffi(i)
                                     Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                    j.release()
                                 }
                              }
                         }
@@ -96,6 +99,7 @@ class EntryView {
                                 if(let Some(j) <- avif){
                                     let isavif:Int32 = j.isAvifImageffi(i)
                                     Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                    j.release()
                                 }
                              }
                         }
@@ -106,6 +110,7 @@ class EntryView {
                                 if(let Some(j) <- avif){
                                     let isavif:Int32 = j.isAvifImageffi(i)
                                     Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                    j.release()
                                 }
                              }
                         }
@@ -116,6 +121,7 @@ class EntryView {
                                 if(let Some(j) <- avif){
                                     let isavif:Int32 = j.isAvifImageffi(i)
                                     Hilog.error(0,"isAvifImage 1 true 0 false cat.png","-----"+isavif.toString())
+                                    j.release()
                                 }
                              }
                         }
@@ -144,6 +150,7 @@ class EntryView {
                                         let duration:Float64 = info.frameDurations.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
                                         Hilog.error(0,"avif info","-----info.duration = ${duration}")
                                      }
+                                     j.release()
                                  }
                             }
                         }
@@ -195,6 +202,7 @@ class EntryView {
                                  let size: Size = Size(width: 600, height: 400)
                                  let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                  pixelMap = createPixelMap(colors, opts)
+                                 j.release()
                                 }
                             }
                         }
@@ -217,6 +225,7 @@ class EntryView {
                                     let size: Size = Size(width: 600, height: 400)
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
+                                    j.release()
                                 }
                             }
                         }
@@ -235,10 +244,11 @@ class EntryView {
                                     let mWidth = 600
                                     let mHeight = 400
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                    j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888,1)
+                                    j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
                                     let size: Size = Size(width: 600, height: 400)
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
+                                    j.release()
                                 }
                             }
                         }

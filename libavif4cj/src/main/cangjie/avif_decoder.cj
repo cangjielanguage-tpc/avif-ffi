@@ -207,7 +207,7 @@ public class AvifDecoder {
     }
 
     public func decodeffi(encoded: Array<UInt8>, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
-        format: PixelMapFormat, threads: Int32): Bool {
+        format: PixelMapFormat): Bool {
         unsafe {
             let handlePic: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let handleColor: CPointerHandle<UInt8> = acquireArrayRawData(color)
@@ -218,7 +218,7 @@ public class AvifDecoder {
             }
             Hilog.error(0, "avif nextFrameffi", "----- 22222")
             return decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,
-                imageWidth * 4, format, threads)
+                imageWidth * 4, format, 0)
             return true
         }
     }

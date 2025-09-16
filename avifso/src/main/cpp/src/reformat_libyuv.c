@@ -1182,6 +1182,23 @@ int getCpuCoreCount() {
     return coreCount;
 }
 
+int getThreadCount(int threads) {
+  int cpuCount = getCpuCoreCount(); 
+  if (threads < 0) {
+    return cpuCount;
+  }
+  if (threads == 0) {
+    // Empirically, on Android devices with more than 1 core, decoding with 2
+    // threads is almost always better than using as many threads as CPU cores.
+    if(cpuCount > 2){
+       return 2;     
+    }else{
+       return cpuCount;     
+    }    
+  }
+  return threads;
+}
+
 char * versionString(){
       char codec_versions[256];
       avifCodecVersions(codec_versions);
@@ -1267,11 +1284,18 @@ void encodedFree(InfoCpp* encode) {
 
 int64_t createDecoder(uint8_t *address,int length, int threads){
      //std::unique_ptr<AvifDecoderWrapper> decoder(new (std::nothrow)AvifDecoderWrapper());
+    
+
+    
      AvifDecoderWrapper *decoder = (AvifDecoderWrapper*)malloc(sizeof(AvifDecoderWrapper));
      if (decoder == NULL) {
         return 0;
      }
-     if (!CreateDecoderAndParse(decoder, address, length,threads)) {
+    
+     int finalThread = getThreadCount(threads);
+     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- cpucount1 %{public}d ",finalThread);
+
+     if (!CreateDecoderAndParse(decoder, address, length,finalThread)) {
         return 0;
      }
      AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
@@ -1301,7 +1325,6 @@ int64_t createDecoder(uint8_t *address,int length, int threads){
           return 0;
         }
         //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- duration %{public}f ",timing.duration);
-        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- cpucount %{public}f ",getCpuCoreCount());
         native_durations[i] = timing.duration;
     }
     decoderCpp ->frameDurations = native_durations;
@@ -1348,7 +1371,11 @@ int32_t nthFrame(int64_t decoder, uint32_t n,uint8_t *pixels,uint32_t picwidth,u
 bool decode(uint8_t *address,int length,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue, int threads){
       AvifDecoderWrapper decoder;
 
-     if (!CreateDecoderAndParse(&decoder, address, length, /*threads=*/threads)) {
+     int finalThread = getThreadCount(threads);
+     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- cpucount2 %{public}d ",finalThread);
+
+    
+     if (!CreateDecoderAndParse(&decoder, address, length, /*threads=*/finalThread)) {
         return false;
      }
       return DecodeNextImage(&decoder,pixels,picwidth,picheight,stride,formatvalue) == AVIF_RESULT_OK;
