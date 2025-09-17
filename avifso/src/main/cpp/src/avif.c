@@ -1218,7 +1218,7 @@ static const int availableCodecsCount = (sizeof(availableCodecs) / sizeof(availa
 
 static struct AvailableCodec * findAvailableCodec(avifCodecChoice choice, avifCodecFlags requiredFlags)
 {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  fffff1_%{public}d  fffff2_%{public}d  fffff3_%{public}d fffff4_%{public}d",availableCodecsCount,choice,requiredFlags,availableCodecs);
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  fffff1_%{public}d  fffff2_%{public}d  fffff3_%{public}d fffff4_%{public}d",availableCodecsCount,choice,requiredFlags,availableCodecs);
     for (int i = 0; i < availableCodecsCount; ++i) {
         if ((choice != AVIF_CODEC_CHOICE_AUTO) && (availableCodecs[i].choice != choice)) {
             continue;

@@ -34,6 +34,7 @@ import std.fs.remove
 import std.fs.OpenMode
 import ohos.base.Length
 import std.collection.ArrayList
+import ohos.system_date_time.SystemDateTime
 
 @Entry
 @Component
@@ -65,25 +66,26 @@ class EntryView2 {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                            let arr = getImageFromRawFile("a21.avif")
+                            let startTime = SystemDateTime.getRealTime(isNano: true);
+                            let arr = getImageFromRawFile("a52.avif")
                             unsafe {
                                 if (let Some(i) <- arr) {
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(j) <- avif){
-                                        let info:Info = j.getInfoffi(i)
+                                        //let info:Info = j.getInfoffi(i)
                                         //创建pixelmap
-                                        let mWidth = info.width
-                                        let mHeight = info.height
-                                        Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
+                                        let mWidth = j.getWidth()
+                                        let mHeight = j.getHeight()
+                                        //Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
                                         mmwidth = Int64(mWidth).px
                                         mmheight = Int64(mHeight).px
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
-                                        Hilog.error(0, "colorvaluebefore", colors.toString())
+                                        //Hilog.error(0, "colorvaluebefore", colors.toString())
     //                                  let index = avif.nextFrameIndexffi(address)
     //                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight),
                                             PixelMapFormat.RGBA_8888)
-                                        Hilog.error(0, "colorvalueafter", colors.toString())
+                                        //Hilog.error(0, "colorvalueafter", colors.toString())
     //                                  let index2 = avif.nextFrameIndexffi(address)
     //                                  Hilog.error(0, "nextFrameIndexffi", index2.toString())
                                         let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
@@ -91,6 +93,8 @@ class EntryView2 {
                                             editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
                                             size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                         pixelMap = createPixelMap(colors, opts)
+                                        let endTime = SystemDateTime.getRealTime(isNano: true)
+                                        Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                         j.release()
                                     }
                                 }
@@ -110,21 +114,29 @@ class EntryView2 {
                                 if (let Some(i) <- arr) {
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(p) <- avif){
-                                        let info:Info = p.getInfoffi(i)
+                                        //let info:Info = p.getInfoffi(i)
                                         //创建pixelmap
-                                        let mWidth = info.width
-                                        let mHeight = info.height
+                                        let mWidth = p.getWidth()
+                                        let mHeight = p.getHeight()
                                         Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
                                         mmwidth = Int64(mWidth).px
                                         mmheight = Int64(mHeight).px
-                                        let durationList: ArrayList<Float64> = ArrayList<Float64>()
-                                        let PixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
-                                        let frameCount:Int64 = Int64(info.frameCount)
-                                        for (j in 0..frameCount) {
-                                            let duration: Float64 = info.frameDurations.read(j) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-                                            durationList.add(duration)
-                                            Hilog.error(0, "avif info", "-----info.duration = ${duration}")
+                                        let frameCount:Int64 = p.getFrameCount()
+                                        if(p.getFrameDurations().isNone()){
+                                            Hilog.error(0, "aviflog", "数据有误")
+                                            return
                                         }
+                                        if(p.getFrameDurations().getOrThrow().size != frameCount){
+                                            Hilog.error(0, "aviflog", "数据有误")
+                                            return
+                                        }
+                                        let durationList: Array<Float64> = p.getFrameDurations().getOrThrow()
+                                        let PixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+//                                        for (j in 0..frameCount) {
+//                                            let duration: Float64 = info.frameDurations.read(j) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+//                                            durationList.add(duration)
+//                                            Hilog.error(0, "avif info", "-----info.duration = ${duration}")
+//                                        }
     //                                    let index = avif.nextFrameIndexffi(address)
     //                                    Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         spawn {
@@ -142,7 +154,7 @@ class EntryView2 {
                                                              pixelMap = createPixelMap(colors, opts)
                                                         }
                                                         PixelMapList.add(pixelMap)
-                                                        sleep(durationList.get(Int64(k)).getOrThrow() * Duration.second)
+                                                        sleep(durationList[Int64(k)] * Duration.second)
                                                     }
                                                 }else{
                                                     p.release()
@@ -152,7 +164,7 @@ class EntryView2 {
                                                         launch{
                                                             pixelMap = PixelMapList.get(k).getOrThrow()
                                                         }
-                                                        sleep(durationList.get(Int64(k)).getOrThrow() * Duration.second)
+                                                        sleep(durationList[Int64(k)] * Duration.second)
                                                    }
                                                 }
                                             }

@@ -5243,18 +5243,18 @@ static avifResult avifCodecCreateInternal(avifCodecChoice choice, const avifTile
         choice = AVIF_CODEC_CHOICE_AVM;
     }
 #endif
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee1");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee1");
     const avifCodecType codecTypeFromChoice = avifCodecTypeFromChoice(choice, AVIF_CODEC_FLAG_CAN_DECODE);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee2");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee2");
     if (codecTypeFromChoice == AVIF_CODEC_TYPE_UNKNOWN) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee3");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee3");
         avifDiagnosticsPrintf(diag,
                               "Tile type is %s but there is no compatible codec available to decode it",
                               avifGetConfigurationPropertyName(tile->codecType));
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee4");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee4");
         return AVIF_RESULT_NO_CODEC_AVAILABLE;
     } else if (choice != AVIF_CODEC_CHOICE_AUTO && codecTypeFromChoice != tile->codecType) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee7");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee7");
         avifDiagnosticsPrintf(diag,
                               "Tile type is %s but incompatible %s codec was explicitly set as decoding implementation",
                               avifGetConfigurationPropertyName(tile->codecType),
@@ -5262,9 +5262,9 @@ static avifResult avifCodecCreateInternal(avifCodecChoice choice, const avifTile
         return AVIF_RESULT_DECODE_COLOR_FAILED;
     }
     
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee5");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee5");
     AVIF_CHECKRES(avifCodecCreate(choice, AVIF_CODEC_FLAG_CAN_DECODE, codec));
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee6");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  eeeeeeee6");
     AVIF_CHECKERR(*codec, AVIF_RESULT_OUT_OF_MEMORY);
     (*codec)->diag = diag;
     (*codec)->operatingPoint = tile->operatingPoint;
@@ -5312,17 +5312,17 @@ static avifBool avifTilesCanBeDecodedWithSameCodecInstance(const avifDecoderData
 static avifResult avifDecoderCreateCodecs(avifDecoder * decoder)
 {
     avifDecoderData * data = decoder->data;
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd1");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd1");
     avifDecoderDataResetCodec(data);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd2");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd2");
     if (data->source == AVIF_DECODER_SOURCE_TRACKS) {
         // In this case, we will use at most two codec instances (one for the color planes and one for the alpha plane).
         // Gain maps are not supported.
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd3");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd3");
         AVIF_CHECKRES(avifCodecCreateInternal(decoder->codecChoice, &decoder->data->tiles.tile[0], &decoder->diag, &data->codec));
         data->tiles.tile[0].codec = data->codec;
         if (data->tiles.count > 1) {
-            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd4");
+            //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd4");
             AVIF_CHECKRES(avifCodecCreateInternal(decoder->codecChoice, &decoder->data->tiles.tile[1], &decoder->diag, &data->codecAlpha));
             data->tiles.tile[1].codec = data->codecAlpha;
         }
@@ -5341,21 +5341,21 @@ static avifResult avifDecoderCreateCodecs(avifDecoder * decoder)
         avifBool canUseSingleCodecInstance = (data->tiles.count == 1) ||
                                              (decoder->imageCount == 1 && avifTilesCanBeDecodedWithSameCodecInstance(data));
         if (canUseSingleCodecInstance) {
-            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd5");
+            //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd5");
             AVIF_CHECKRES(avifCodecCreateInternal(decoder->codecChoice, &decoder->data->tiles.tile[0], &decoder->diag, &data->codec));
-            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd8");
+            //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd8");
             for (unsigned int i = 0; i < decoder->data->tiles.count; ++i) {
                 decoder->data->tiles.tile[i].codec = data->codec;
             }
         } else {
-            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd6");
+            //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd6");
             for (unsigned int i = 0; i < decoder->data->tiles.count; ++i) {
                 avifTile * tile = &decoder->data->tiles.tile[i];
                 AVIF_CHECKRES(avifCodecCreateInternal(decoder->codecChoice, tile, &decoder->diag, &tile->codec));
             }
         }
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd7");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  ddddddd7");
     return AVIF_RESULT_OK;
 }
 
@@ -6761,20 +6761,20 @@ static avifResult avifDecoderApplySampleTransform(const avifDecoder * decoder, a
 avifResult avifDecoderNextImage(avifDecoder * decoder)
 {
     avifDiagnosticsClearError(&decoder->diag);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc1 ");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc1 ");
 
     if (!decoder->data || decoder->data->tiles.count == 0) {
         // Nothing has been parsed yet
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc2 ");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc2 ");
         return AVIF_RESULT_NO_CONTENT;
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc7");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc7");
 
     if (!decoder->io || !decoder->io->read) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc3 ");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc3 ");
         return AVIF_RESULT_IO_NOT_SET;
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc8");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc8");
 
     if (avifDecoderDataFrameFullyDecoded(decoder->data)) {
         // A frame was decoded during the last avifDecoderNextImage() call.
@@ -6782,22 +6782,22 @@ avifResult avifDecoderNextImage(avifDecoder * decoder)
             decoder->data->tileInfos[c].decodedTileCount = 0;
         }
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc9");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc9");
 
     AVIF_ASSERT_OR_RETURN(decoder->data->tiles.count == (decoder->data->tileInfos[AVIF_ITEM_CATEGORY_COUNT - 1].firstTileIndex +
                                                          decoder->data->tileInfos[AVIF_ITEM_CATEGORY_COUNT - 1].tileCount));
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc11");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc11");
 
     const uint32_t nextImageIndex = (uint32_t)(decoder->imageIndex + 1);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc12");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc12");
 
     // Ensure that we have created the codecs before proceeding with the decoding.
     if (!decoder->data->tiles.tile[0].codec) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc13");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc13");
         AVIF_CHECKRES(avifDecoderCreateCodecs(decoder));
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc14");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc14");
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc10");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc10");
 
     // Acquire all sample data for the current image first, allowing for any read call to bail out
     // with AVIF_RESULT_WAITING_ON_IO harmlessly / idempotently, unless decoder->allowIncremental.
@@ -6808,7 +6808,7 @@ avifResult avifDecoderNextImage(avifDecoder * decoder)
             AVIF_CHECKRES(prepareTileResult[c]);
         }
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc11");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc11");
 
     // Decode all available color tiles now, then all available alpha tiles, then all available bit
     // depth extension tiles. The order of appearance of the tiles in the bitstream is left to the
@@ -6818,7 +6818,7 @@ avifResult avifDecoderNextImage(avifDecoder * decoder)
     for (int c = 0; c < AVIF_ITEM_CATEGORY_COUNT; ++c) {
         AVIF_CHECKRES(avifDecoderDecodeTiles(decoder, nextImageIndex, &decoder->data->tileInfos[c]));
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc12");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc12");
 
     if (!avifDecoderDataFrameFullyDecoded(decoder->data)) {
         AVIF_ASSERT_OR_RETURN(decoder->allowIncremental);
@@ -6832,14 +6832,14 @@ avifResult avifDecoderNextImage(avifDecoder * decoder)
             }
         }
         AVIF_ASSERT_OR_RETURN(firstNonOkResult != AVIF_RESULT_OK);
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc4 ");
+        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc4 ");
         // Return the "not enough bytes" status now instead of moving on to the next frame.
         return AVIF_RESULT_WAITING_ON_IO;
     }
     for (int c = 0; c < AVIF_ITEM_CATEGORY_COUNT; ++c) {
         AVIF_ASSERT_OR_RETURN(prepareTileResult[c] == AVIF_RESULT_OK);
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc13");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc13");
 
 #if defined(AVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM)
     if (decoder->data->meta->sampleTransformExpression.count > 0) {
@@ -6859,11 +6859,11 @@ avifResult avifDecoderNextImage(avifDecoder * decoder)
 
         avifResult timingResult = avifDecoderNthImageTiming(decoder, decoder->imageIndex, &decoder->imageTiming);
         if (timingResult != AVIF_RESULT_OK) {
-            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc5 ");
+            //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc5 ");
             return timingResult;
         }
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc6");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccccc6");
     return AVIF_RESULT_OK;
 }
 

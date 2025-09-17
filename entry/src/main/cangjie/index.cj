@@ -32,6 +32,7 @@ import std.fs.exists
 import std.fs.File
 import std.fs.remove
 import std.fs.OpenMode
+import ohos.component.ImageFit
 @Entry
 @Component
 class EntryView {
@@ -47,7 +48,7 @@ class EntryView {
         Row {
             Column {
 
-                Image(pixelMap).width(600.px).height(400.px)
+                Image(pixelMap).width(600.px).height(400.px).objectFit(ImageFit.Fill)
 
                 Button("test1")
                     .fontSize(20)
@@ -156,6 +157,31 @@ class EntryView {
                         }
                     }
 
+                 Button("test4")
+                    .fontSize(20)
+                    .onClick {
+                        evt =>
+                        let arr5 = getImageFromRawFile("a36.avif")
+                        unsafe {
+                            if(let Some(i) <- arr5){
+                                 let avif:?AvifDecoder = AvifDecoder.create(i)
+                                 if(let Some(j) <- avif){
+                                    let width =  j.getWidth()
+                                    let height = j.getHeight()
+                                    let depth = j.getDepth()
+                                    let alphapresent = j.getAlphaPresent()
+                                    let framecount = j.getFrameCount()
+                                    let repetitionCount = j.getRepetitionCount()
+                                    let duretionlist = j.getFrameDurations()
+                                    Hilog.error(0,"avif info","-----width = ${width} height = ${height} depth = ${depth} alpha = ${alphapresent}")
+                                    Hilog.error(0,"avif info","-----framecount = ${framecount} repetitionCount = ${repetitionCount}")
+                                    Hilog.error(0,"avif info","-----duretionlist = ${duretionlist}")
+                                 }
+                            }
+                        }
+                    }
+
+
                 Button("test5")
                     .fontSize(20)
                     .onClick {
@@ -180,14 +206,14 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("a2.avif")
+                        let arr = getImageFromRawFile("a52.avif")
                         unsafe {
                             if(let Some(i) <- arr){
                                 let avif:?AvifDecoder = AvifDecoder.create(i)
                                 if(let Some(j) <- avif){
                                  //创建pixelmap
-                                let mWidth = 600
-                                let mHeight = 400
+                                let mWidth = j.getWidth()
+                                let mHeight = j.getHeight()
                                 let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                 //Hilog.error(0,"colorvaluebefore",colors.toString())
                                 j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
@@ -199,7 +225,7 @@ class EntryView {
 //                                    file.write(colors[i].toString().toArray())
 //                                }
 //                                file.close()
-                                 let size: Size = Size(width: 600, height: 400)
+                                 let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                  let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                  pixelMap = createPixelMap(colors, opts)
                                  j.release()
@@ -212,17 +238,17 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("4.avif")
+                        let arr = getImageFromRawFile("a50.avif")
                         unsafe {
                             if(let Some(i) <- arr){
                                 let avif:?AvifDecoder = AvifDecoder.create(i)
                                 if(let Some(j) <- avif){
                                      //创建pixelmap
-                                    let mWidth = 600
-                                    let mHeight = 400
+                                    let mWidth = j.getWidth()
+                                    let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                     j.nthFrameffi(0, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
-                                    let size: Size = Size(width: 600, height: 400)
+                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
                                     j.release()
@@ -235,17 +261,17 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("a3.avif")
+                        let arr = getImageFromRawFile("a51.avif")
                         unsafe {
                             if(let Some(i) <- arr){
                                 let avif:?AvifDecoder = AvifDecoder.create(i)
                                 if(let Some(j) <- avif){
                                       //创建pixelmap
-                                    let mWidth = 600
-                                    let mHeight = 400
+                                    let mWidth = j.getWidth()
+                                    let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                     j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
-                                    let size: Size = Size(width: 600, height: 400)
+                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
                                     j.release()

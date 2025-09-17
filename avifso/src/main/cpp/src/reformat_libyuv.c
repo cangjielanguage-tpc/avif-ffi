@@ -1277,63 +1277,74 @@ avifBool isAvifImage(uint8_t *address, int length){
     return info;
 }
 
-void encodedFree(InfoCpp* encode) {
-    free(encode);
+void encodedFree(InfoCpp* info) {
+    free(info);
+}
+
+void encoded2Free(AvifDecoderCpp* decoderinfo) {
+    free(decoderinfo);
+}
+
+void encoded3Free(double* doubleinfo) {
+    free(doubleinfo);
 }
 
 
-int64_t createDecoder(uint8_t *address,int length, int threads){
+AvifDecoderCpp* createDecoder(uint8_t *address,int length, int threads){
      //std::unique_ptr<AvifDecoderWrapper> decoder(new (std::nothrow)AvifDecoderWrapper());
-    
-
-    
      AvifDecoderWrapper *decoder = (AvifDecoderWrapper*)malloc(sizeof(AvifDecoderWrapper));
      if (decoder == NULL) {
-        return 0;
+        return NULL;
      }
     
      int finalThread = getThreadCount(threads);
      //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- cpucount1 %{public}d ",finalThread);
 
      if (!CreateDecoderAndParse(decoder, address, length,finalThread)) {
-        return 0;
+        return NULL;
      }
-     AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
-     decoderCpp -> width = decoder->crop.width;
-     decoderCpp -> height = decoder->crop.height;
-     decoderCpp -> depth = decoder->decoder->image->depth;
+     //AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
+     InfoCpp *info = malloc(sizeof(InfoCpp));
+
+     info -> width = decoder->crop.width;
+     info -> height = decoder->crop.height;
+     info -> depth = decoder->decoder->image->depth;
      if(decoder->decoder->alphaPresent == 0){
-         decoderCpp->alphaPresent = false;
+         info->alphaPresent = false;
      }else{
-         decoderCpp->alphaPresent = true;
+         info->alphaPresent = true;
      }
-     decoderCpp ->frameCount = decoder->decoder->imageCount;
-     decoderCpp ->repetitionCount = decoder->decoder->repetitionCount;
+     info ->frameCount = decoder->decoder->imageCount;
+     info ->repetitionCount = decoder->decoder->repetitionCount;
      
     //给时间数组赋值---------------------------------------
      double* native_durations = NULL;
      // 分配内存
-     if (decoderCpp ->frameCount > 0) {
-         native_durations = (double*)malloc(sizeof(double) * decoderCpp ->frameCount);
+     if (info ->frameCount > 0) {
+         native_durations = (double*)malloc(sizeof(double) * info ->frameCount);
      }
     if (native_durations == NULL) {
-        return 0;
+        return NULL;
     }
-    for (int i = 0; i < decoderCpp ->frameCount; ++i) {
+    for (int i = 0; i < info ->frameCount; ++i) {
         avifImageTiming timing;
         if (avifDecoderNthImageTiming(decoder->decoder, i, &timing) !=AVIF_RESULT_OK) {
-          return 0;
+          return NULL;
         }
         //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- duration %{public}f ",timing.duration);
         native_durations[i] = timing.duration;
     }
-    decoderCpp ->frameDurations = native_durations;
+    info ->frameDurations = native_durations;
     //给时间数组赋值---------------------------------------
 
     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- width %{public}d height %{public}d depth %{public}d",decoderCpp -> width,decoderCpp -> height,decoderCpp -> depth);
     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- alphaPresent %{public}d frameCount %{public}d repetitionCount %{public}d",decoder->decoder->alphaPresent,decoderCpp ->frameCount,decoderCpp ->repetitionCount);
     //TODO DURATION[]
-    return (int64_t)decoder;
+
+     AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
+     decoderCpp->address = (int64_t)decoder;
+     decoderCpp->info = info;
+    return decoderCpp;
 }
 
 void destroyDecoder(int64_t decoder){
@@ -1355,7 +1366,7 @@ int32_t nextFrameIndex(int64_t decoder){
 
 
 int32_t nextFrame(int64_t decoder,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue){
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  aaaaaaa ");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  aaaaaaa ");
     AvifDecoderWrapper* const decoderWrapper = (AvifDecoderWrapper*)decoder;
     return DecodeNextImage(decoderWrapper,pixels,picwidth,picheight,stride,formatvalue);
 }

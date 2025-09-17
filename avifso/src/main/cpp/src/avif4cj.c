@@ -110,7 +110,7 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
 //    LOGE("Failed to lock Bitmap.");
 //    return AVIF_RESULT_UNKNOWN_ERROR;
 //  }
-  OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 1");
+  //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 1");
   avifImage* image;
   //std::unique_ptr<avifImage, decltype(&avifImageDestroy)> cropped_image(nullptr, avifImageDestroy);
   avifImage* cropped_image = NULL;
@@ -118,7 +118,7 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
   if (decoder->decoder->image->width == decoder->crop.width &&
       decoder->decoder->image->height == decoder->crop.height &&
       decoder->crop.x == 0 && decoder->crop.y == 0) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 2");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 2");
     image = decoder->decoder->image;
   } else {
     cropped_image = avifImageCreateEmpty();
@@ -132,7 +132,7 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
       //LOGE("Failed to set crop rectangle. Status: %d", res);
       return res;
     }
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 3");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 3");
     image = cropped_image;
   }
   //std::unique_ptr<avifImage, decltype(&avifImageDestroy)> image_copy(nullptr, avifImageDestroy);
@@ -142,7 +142,7 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
     // If the avifImage does not own the planes, then create a copy for safe
     // scaling.
     if (!image->imageOwnsYUVPlanes || !image->imageOwnsAlphaPlane) {
-      OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 4");
+      //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 4");
       image_copy = avifImageCreateEmpty();
       if (image_copy == NULL) {
         //LOGE("Failed to allocate image for scaling.");
@@ -156,7 +156,7 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
       image = image_copy;
     }
     avifDiagnostics diag;
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 5");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 5");
     res = avifImageScale(image, picwidth, picheight, &diag);
     if (res != AVIF_RESULT_OK) {
       //LOGE("Failed to scale image. Status: %d", res);
@@ -168,15 +168,15 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
   avifRGBImageSetDefaults(&rgb_image, image);
   //RGBA_F16 0  //RGB_565 1 //else 2  
   if (formatvalue == 0) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 6");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 6");
     rgb_image.depth = 16;
     rgb_image.isFloat = AVIF_TRUE;
   } else if (formatvalue == 1) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 7");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 7");
     rgb_image.format = AVIF_RGB_FORMAT_RGB_565;
     rgb_image.depth = 8;
   } else {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 8");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 8");
     rgb_image.depth = 8;
   }
   rgb_image.pixels = bitmap_pixels;
@@ -186,27 +186,27 @@ avifResult AvifImageToBitmap(AvifDecoderWrapper* const decoder,uint8_t* bitmap_p
   // https://developer.android.com/reference/android/graphics/Bitmap#setPremultiplied(boolean)
   rgb_image.alphaPremultiplied = AVIF_TRUE;
   res = avifImageYUVToRGB(image, &rgb_image);
-  OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 9");
+  //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 9");
   //AndroidBitmap_unlockPixels(env, bitmap);
   if (res != AVIF_RESULT_OK) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 10");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 10");
     //LOGE("Failed to convert YUV Pixels to RGB. Status: %d", res);
     return res;
   }
-  OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 11");
+  //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- AvifImageToBitmap 11");
   return AVIF_RESULT_OK;
 }
 
 
 avifResult DecodeNextImage(AvifDecoderWrapper* const decoder,uint8_t* pixelmap,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  bbbbbb ");
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  bbbbbb ");
     avifResult res = avifDecoderNextImage(decoder->decoder);
     if (res != AVIF_RESULT_OK) {
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  bbbbbbbbb11_%{public}d",res);
+    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  bbbbbbbbb11_%{public}d",res);
     //LOGE("Failed to decode AVIF image. Status: %d", res);
     return res;
   }
-  OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccc ");
+  //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  cccccc ");
   return AvifImageToBitmap(decoder, pixelmap,picwidth,picheight,stride,formatvalue);
 }
 

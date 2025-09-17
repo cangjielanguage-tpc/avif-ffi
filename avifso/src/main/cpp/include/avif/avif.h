@@ -1669,13 +1669,8 @@ typedef struct {
 
 //zidingyi
 typedef struct {
-    uint32_t width;
-    uint32_t height;
-    uint32_t depth;
-    bool alphaPresent;
-    int32_t frameCount;
-    int32_t repetitionCount;
-    double* frameDurations;
+    int64_t address;
+    InfoCpp* info;
 }AvifDecoderCpp;
 
  //RAII wrapper class that properly frees the decoder related objects on
@@ -1706,9 +1701,11 @@ AVIF_API avifResult DecodeNthImage(AvifDecoderWrapper* const decoder,uint32_t n,
 AVIF_API InfoCpp *getInfo(uint8_t *address, int length);
 
 AVIF_API void encodedFree(InfoCpp* encode);
+AVIF_API void encoded2Free(AvifDecoderCpp* encode);
+AVIF_API void encoded3Free(double* encode);
 
 
-AVIF_API int64_t createDecoder(uint8_t *address,int length, int threads);
+AVIF_API AvifDecoderCpp* createDecoder(uint8_t *address,int length, int threads);
 AVIF_API void destroyDecoder(int64_t decoder);
 AVIF_API int32_t nextFrameIndex(int64_t decoder);
 AVIF_API int32_t nextFrame(int64_t decoder,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue);
