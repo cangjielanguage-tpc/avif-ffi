@@ -1,5 +1,4 @@
-#set(AVIF_LIBYUV_TAG "4db2af62dab48895226be6b52737247e898ebe36")
-set(AVIF_LIBYUV_TAG "fbd43499fd7b7b5a92076cc14e299a4004895cca")
+set(AVIF_LIBYUV_TAG "4db2af62dab48895226be6b52737247e898ebe36")
 
 set(AVIF_LIBYUV_BUILD_DIR "${AVIF_SOURCE_DIR}/ext/libyuv/build")
 # If ${ANDROID_ABI} is set, look for the library under that subdirectory.
@@ -38,8 +37,7 @@ else()
 
     FetchContent_Declare(
         libyuv
-#       GIT_REPOSITORY "https://chromium.googlesource.com/libyuv/libyuv"
-        GIT_REPOSITORY "https://gitcode.com/huanghaoshuai/libyuv"
+        GIT_REPOSITORY "https://chromium.googlesource.com/libyuv/libyuv"
         BINARY_DIR "${LIBYUV_BINARY_DIR}"
         GIT_TAG "${AVIF_LIBYUV_TAG}"
         UPDATE_COMMAND ""
