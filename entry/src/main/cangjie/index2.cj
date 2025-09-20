@@ -54,6 +54,7 @@ class EntryView2 {
     func build() {
         Row {
             Column {
+
                 Image(pixelMap)
                     .width(mmwidth)
                     .height(mmheight)
@@ -66,10 +67,10 @@ class EntryView2 {
                     .fontSize(20)
                     .onClick {
                         evt =>
-                            let startTime = SystemDateTime.getRealTime(isNano: true);
                             let arr = getImageFromRawFile("a52.avif")
                             unsafe {
                                 if (let Some(i) <- arr) {
+                                    let startTime = SystemDateTime.getRealTime(isNano: true);
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(j) <- avif){
                                         //let info:Info = j.getInfoffi(i)
@@ -85,6 +86,7 @@ class EntryView2 {
     //                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight),
                                             PixelMapFormat.RGBA_8888)
+                                        let endTime = SystemDateTime.getRealTime(isNano: true)
                                         //Hilog.error(0, "colorvalueafter", colors.toString())
     //                                  let index2 = avif.nextFrameIndexffi(address)
     //                                  Hilog.error(0, "nextFrameIndexffi", index2.toString())
@@ -93,7 +95,6 @@ class EntryView2 {
                                             editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
                                             size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                         pixelMap = createPixelMap(colors, opts)
-                                        let endTime = SystemDateTime.getRealTime(isNano: true)
                                         Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                         j.release()
                                     }

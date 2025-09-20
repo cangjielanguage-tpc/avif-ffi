@@ -23,6 +23,6 @@ class MainAbility <: UIAbility {
 
     public override func onWindowStageCreate(windowStage: WindowStage): Unit {
         AppLog.info("MainAbility onWindowStageCreate.")
-        windowStage.loadContent("EntryView2")
+        windowStage.loadContent("EntryView8")
     }
 }

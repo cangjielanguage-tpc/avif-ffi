@@ -33,6 +33,7 @@ import std.fs.File
 import std.fs.remove
 import std.fs.OpenMode
 import ohos.component.ImageFit
+import ohos.system_date_time.SystemDateTime
 @Entry
 @Component
 class EntryView {
@@ -234,11 +235,16 @@ class EntryView {
                         }
                     }
 
+                 //22 黑 蓝 绿 红 黄
+                 //23 灰 浅蓝 浅绿 浅红 浅黄
+                 //24 黑 蓝 绿 红 黄
+                 //25 黑 蓝 绿 红 黄
+                 //26 粉 绿 浅绿 绿粉 绿粉
                  Button("test7")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                        let arr = getImageFromRawFile("a50.avif")
+                        let arr = getImageFromRawFile("a24.avif")
                         unsafe {
                             if(let Some(i) <- arr){
                                 let avif:?AvifDecoder = AvifDecoder.create(i)
@@ -247,7 +253,7 @@ class EntryView {
                                     let mWidth = j.getWidth()
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                    j.nthFrameffi(0, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                    j.nthFrameffi(4, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
                                     let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
@@ -270,10 +276,13 @@ class EntryView {
                                     let mWidth = j.getWidth()
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
+                                    let startTime = SystemDateTime.getRealTime(isNano: true)
                                     j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                    let endTime = SystemDateTime.getRealTime(isNano: true)
                                     let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
+                                    Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                     j.release()
                                 }
                             }
