@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v0.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v0.0.2-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
@@ -12,14 +12,16 @@
 
 ## 介绍
 
-avif4cj是一个对avif图片进行解码的仓颉库，解码后图片可以显示在控件上
+avif4cj是一个对avif图片进行解码显示的仓颉库，解码后静态avif图片和动态avif图片都可以显示在控件上
 
 
 ### 特性
 
 本项目参考开源库libavif开发
 
-- 🚀 支持avif图片解码。
+- 🚀 支持avif静态图片解码显示。
+- 🚀 支持avif动态图片解码显示。
+- 🚀 提供了自定义组件方式，方便用户使用。
 
 
 
@@ -84,15 +86,15 @@ avif4cj是一个对avif图片进行解码的仓颉库，解码后图片可以显
 
 
 #### 2. 在项目中显示avif图片
-功能示例描述: 加载一个本地的rawfile下的avif图片。
+
+##### 2.1 用提供的api加载一个本地的rawfile下的avif图片。
 
 示例代码如下：
 ```cangjie
 package ohos_app_cangjie_entry
 
-internal import ohos.base.*
-internal import ohos.component.*
-internal import ohos.state_manage.*
+import ohos.component.*
+import ohos.state_manage.*
 import ohos.state_macro_manage.*
 import libavif4cj.*
 import ohos.resource_manager.ResourceManager
@@ -101,46 +103,51 @@ import ohos.image.InitializationOptions
 import ohos.image.createPixelMap
 import ohos.image.PixelMapFormat
 import ohos.image.Size
-
-
+import ohos.concurrency.launch
 
 @Entry
 @Component
-class EntryView {
-    let size: Size = Size(width: 600, height: 400)
+class EntryView9 {
+    let size: Size = Size(width: 1, height: 1)
     let opts: InitializationOptions = InitializationOptions(size: size)
-    let color: Array<UInt8> = Array<UInt8>(600 * 400 * 4, repeat: 0)
+    let color: Array<UInt8> = Array<UInt8>(4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
 
     func build() {
         Row {
             Column {
-                Image(pixelMap).width(600.px).height(400.px)
+                Image(pixelMap)
+                    .width(600.px)
+                    .height(400.px)
+                    .objectFit(ImageFit.Contain)
 
                 Button("showpic")
                     .fontSize(20)
                     .onClick {
                         evt =>
-                            let arr = getImageFromRawFile("a32.avif") //改avif图放在entry的src/main/resources/rawfile里面
-                            let avif: AvifDecoder = AvifDecoder()
-                            unsafe {
-                                if (let Some(i) <- arr) {
-                                    let address: Int64 = avif.createDecoderffi(i, 1)
+                            let arr = getImageFromRawFile("a52.avif")
+                            if (let Some(i) <- arr) {
+                                let avif: ?AvifDecoder = AvifDecoder.create(i)
+                                if (let Some(j) <- avif) {
                                     //创建pixelmap
-                                    let mWidth = 600
-                                    let mHeight = 400
-                                    let colors: Array<UInt8> = Array<UInt8>(mWidth * mHeight * 4, repeat: 0)
-                                    let pixelMap1 = createPixelMap(colors,InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                    size: Size(width: Int32(mWidth), height: Int32(mHeight))))
-                                    avif.nextFrameffi(address, colors, pixelMap.getImageInfo())
-                                    let size: Size = Size(width: 600, height: 400)
-                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                        size: Size(width: Int32(mWidth), height: Int32(mHeight)))
-                                    pixelMap = createPixelMap(colors, opts)
+                                    spawn {
+                                        let mWidth = j.getWidth()
+                                        let mHeight = j.getHeight()
+                                        let colors: Array<UInt8> = Array<UInt8>(mWidth * mHeight * 4, repeat: 0)
+                                        j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                        let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,
+                                            pixelFormat: PixelMapFormat.RGBA_8888,size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                        let tempPixelMap = createPixelMap(colors, opts)
+                                        launch {
+                                            pixelMap = tempPixelMap
+                                        }
+                                        j.release()
+                                    }
                                 }
                             }
-                    }
+                        }
             }.width(100.percent)
         }.height(100.percent)
     }
@@ -155,6 +162,71 @@ class EntryView {
         }
     }
 }
+
+```
+
+执行结果如下：
+图片在手机上成功展示。
+
+```shell
+正常显示图片
+```
+
+
+##### 2.2 用提供的自定义组件加载两个本地的rawfile下的avif图片,一个是静态图 一个是动态图
+
+示例代码如下：
+```cangjie
+
+package ohos_app_cangjie_entry
+
+import ohos.state_manage.*
+import ohos.state_macro_manage.*
+import ohos.component.*
+import ohos.base.*
+import ohos.resource_manager.ResourceManager
+import libavif4cj.*
+
+@Entry
+@Component
+class EntryView10 {
+
+    var imageValue51:?Array<UInt8> = None
+    var imageValue25:?Array<UInt8> = None
+
+    protected override func aboutToAppear() {
+        imageValue51 = getImageFromRawFile("a51.avif") //静态图
+        imageValue25 = getImageFromRawFile("a25.avif") //动态图
+    }
+
+    let scroller = Scroller()
+
+    func build() {
+        Scroll(this.scroller){
+            Column(){
+                //imageBuffer 必填 avif图片的字节数组形式  
+                //imageViewWidth 选填, 不填的话控件的宽度默认为100.percent
+                //imageViewHeight 选填, 不填的话控件的高度默认为100.percent
+                //imagePicWidth 选填,不填的话图片的宽度默认为 原图的宽度 
+                //imagePicHeight 选填,不填的话图片的高度默认为 原图的高度
+                //imageFit 选填,默认为ImageFit.Contain
+                AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
+                AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
+            }
+        }
+    }
+
+    private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
+        try {
+            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
+            return arr
+        } catch (e: Exception) {
+            return None
+        }
+    }
+}
+
 
 ```
 

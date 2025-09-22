@@ -1,10 +1,10 @@
-/**
- * Created on 2025/8/14
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
  */
 package libavif4cj
 
 @C
-public struct DecoderInfo {
+ struct DecoderInfo {
     public var address: Int64 = 0
     public var info: CPointer<Info> = CPointer<Info>()
 

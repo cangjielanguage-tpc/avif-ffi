@@ -1,5 +1,5 @@
-/**
- * Created on 2025/9/18
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
  */
 package libavif4cj
 

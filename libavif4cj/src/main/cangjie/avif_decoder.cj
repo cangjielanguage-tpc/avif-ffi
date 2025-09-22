@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ */
 package libavif4cj
 
 internal import ohos.base.nativeLog
@@ -61,78 +64,50 @@ public class AvifDecoder {
     private var repetitionCount: Int64 = 0
     private var frameDurations: ?Array<Float64> = None
 
-    private init(encoded: Array<UInt8>, threads: Int32) {
-       let decoderInfo:DecoderInfo = createDecoderffi(encoded, threads)
-       decoder = decoderInfo.address
-       //Hilog.error(0, "avif decoder=", "----- ${decoder}")
-       unsafe{
-           if(decoder != 0){
-               let cpointInfo : CPointer<Info> = decoderInfo.info
-               let info:Info  = cpointInfo.read()
-               width = Int64(info.width)
-               height = Int64(info.height)
-               depth = Int64(info.depth)
-               alphaPresent = info.alphaPresent
-               frameCount = Int64(info.frameCount)
-               repetitionCount = Int64(info.repetitionCount)
-               let durationsPoint: CPointer<Float64> = info.frameDurations
-               frameDurations = Array<Float64>(frameCount, repeat: 0.0)
-               if(let Some(j) <- frameDurations){
-                    for(i in 0..frameCount){
-                     let duration:Float64 = durationsPoint.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-                     j[i] = duration
-                   }
-               }
-               encodedFree(cpointInfo)
-               encoded3Free(durationsPoint)
-           }
-       }
+    private func createDecoderffi(encoded: Array<UInt8>, threads: Int32): DecoderInfo {
+        unsafe {
+            let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
+            var result: CPointer<DecoderInfo> = createDecoder(handle.pointer, Int32(encoded.size), threads)
+            if (result.isNull()) {
+                return DecoderInfo(0, CPointer<Info>())
+            }
+            let res: DecoderInfo = result.read()
+            encoded2Free(result)
+            return res
+        }
     }
 
-
-        /** Get the width of the image. */
-        public func getWidth():Int64 {
-            return width
+    private func destroyDecoderffi(address: Int64): Unit {
+        unsafe {
+            destroyDecoder(address)
         }
+    }
 
-      /** Get the height of the image. */
-        public func getHeight():Int64 {
-            return height
+    private init(encoded: Array<UInt8>, threads: Int32) {
+        let decoderInfo: DecoderInfo = createDecoderffi(encoded, threads)
+        decoder = decoderInfo.address
+        unsafe {
+            if (decoder != 0) {
+                let cpointInfo: CPointer<Info> = decoderInfo.info
+                let info: Info = cpointInfo.read()
+                width = Int64(info.width)
+                height = Int64(info.height)
+                depth = Int64(info.depth)
+                alphaPresent = info.alphaPresent
+                frameCount = Int64(info.frameCount)
+                repetitionCount = Int64(info.repetitionCount)
+                let durationsPoint: CPointer<Float64> = info.frameDurations
+                frameDurations = Array<Float64>(frameCount, repeat: 0.0)
+                if (let Some(j) <- frameDurations) {
+                    for (i in 0..frameCount) {
+                        let duration: Float64 = durationsPoint.read(Int64(i)) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+                        j[i] = duration
+                    }
+                }
+                encodedFree(cpointInfo)
+                encoded3Free(durationsPoint)
+            }
         }
-
-      /** Get the depth (bit depth) of the image. */
-      public func getDepth():Int64 {
-            return depth
-      }
-
-      /** Returns true if the image contains a transparency/alpha channel, false otherwise. */
-      public func getAlphaPresent():Bool {
-        return alphaPresent
-      }
-
-      /** Get the number of frames in the image. */
-      public func getFrameCount():Int64 {
-        return frameCount
-      }
-
-      /**
-       * Get the number of repetitions for an animated image (see repetitionCount in avif.h for
-       * details).
-       */
-      public func getRepetitionCount():Int64 {
-        return repetitionCount
-      }
-
-      /** Get the duration for each frame in the image. */
-      public func getFrameDurations():?Array<Float64> {
-        return frameDurations
-      }
-
-    public func release(): Unit {
-        if (decoder != 0) {
-            destroyDecoderffi(decoder)
-        }
-        decoder = 0
     }
 
     public static func create(encoded: Array<UInt8>): ?AvifDecoder {
@@ -147,18 +122,42 @@ public class AvifDecoder {
         return decoder
     }
 
-    public func versionStringffi(): String {
-        unsafe {
-            let cstr: CString = versionString()
-            return cstr.toString()
-        }
+    /** Get the width of the image. */
+    public func getWidth(): Int64 {
+        return width
     }
 
-    public func resultToStringffi(result: Int32): String {
-        unsafe {
-            let cstr: CString = resultToString(result)
-            return cstr.toString()
-        }
+    /** Get the height of the image. */
+    public func getHeight(): Int64 {
+        return height
+    }
+
+    /** Get the depth (bit depth) of the image. */
+    public func getDepth(): Int64 {
+        return depth
+    }
+
+    /** Returns true if the image contains a transparency/alpha channel, false otherwise. */
+    public func getAlphaPresent(): Bool {
+        return alphaPresent
+    }
+
+    /** Get the number of frames in the image. */
+    public func getFrameCount(): Int64 {
+        return frameCount
+    }
+
+    /**
+     * Get the number of repetitions for an animated image (see repetitionCount in avif.h for
+     * details).
+     */
+    public func getRepetitionCount(): Int64 {
+        return repetitionCount
+    }
+
+    /** Get the duration for each frame in the image. */
+    public func getFrameDurations(): ?Array<Float64> {
+        return frameDurations
     }
 
     public func isAvifImageffi(encoded: Array<UInt8>): Int32 {
@@ -179,25 +178,6 @@ public class AvifDecoder {
         }
     }
 
-    private func createDecoderffi(encoded: Array<UInt8>, threads: Int32): DecoderInfo {
-        unsafe {
-            let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
-            var result:CPointer<DecoderInfo> = createDecoder(handle.pointer, Int32(encoded.size), threads)
-            if(result.isNull()){
-                return DecoderInfo(0,CPointer<Info>())
-            }
-            let res:DecoderInfo = result.read()
-            encoded2Free(result)
-            return res
-        }
-    }
-
-    private func destroyDecoderffi(address: Int64): Unit {
-        unsafe {
-            destroyDecoder(address)
-        }
-    }
-
     public func nextFrameIndexffi(): Int32 {
         unsafe {
             return nextFrameIndex(decoder);
@@ -206,15 +186,12 @@ public class AvifDecoder {
 
     public func nextFrameffi(color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32, format: PixelMapFormat): Int32 {
         unsafe {
-            //foreign func nextFrame(decoder:Int64,pixels:CPointer<UInt8>,picwidth:Int32,picheight:Int32,stride:Int32,formatvalue:Int32):Int32
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
             let format: Int32 = match (format) {
                 case PixelMapFormat.RGBA_F16 => 0
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            //Hilog.error(0, "avif nextFrameffi", "----- 22222")
-            //Hilog.error(0, "avif nextFrameffi stride", "format=${format}")
             return nextFrame(decoder, handle.pointer, imageWidth, imageHeight, imageWidth * 4, format)
         }
     }
@@ -222,14 +199,12 @@ public class AvifDecoder {
     public func nthFrameffi(index: Int32, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
         format: PixelMapFormat): Int32 {
         unsafe {
-            //foreign func nextFrame(decoder:Int64,pixels:CPointer<UInt8>,picwidth:Int32,picheight:Int32,stride:Int32,formatvalue:Int32):Int32
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
             let format: Int32 = match (format) {
                 case PixelMapFormat.RGBA_F16 => 0
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            //Hilog.error(0, "avif nextFrameffi", "----- 22222")
             return nthFrame(decoder, index, handle.pointer, imageWidth, imageHeight, imageWidth * 4, format)
         }
     }
@@ -244,10 +219,30 @@ public class AvifDecoder {
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            //Hilog.error(0, "avif nextFrameffi", "----- 22222")
             return decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,
                 imageWidth * 4, format, 0)
             return true
+        }
+    }
+
+    public func release(): Unit {
+        if (decoder != 0) {
+            destroyDecoderffi(decoder)
+        }
+        decoder = 0
+    }
+
+    func versionStringffi(): String {
+        unsafe {
+            let cstr: CString = versionString()
+            return cstr.toString()
+        }
+    }
+
+    func resultToStringffi(result: Int32): String {
+        unsafe {
+            let cstr: CString = resultToString(result)
+            return cstr.toString()
         }
     }
 }

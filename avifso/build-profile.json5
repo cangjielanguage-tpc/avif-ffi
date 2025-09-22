@@ -6,7 +6,7 @@
       "arguments": "-DOHOS_STL=c++_shared",
       "abiFilters": [
         "x86_64",
-        //"arm64-v8a"
+        "arm64-v8a"
       ],
       "cppFlags": ""
     }

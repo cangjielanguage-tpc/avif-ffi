@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ */
+
 package ohos_app_cangjie_entry
 
 internal import ohos.base.LengthProp
@@ -68,7 +72,6 @@ class EntryView2 {
                     .onClick {
                         evt =>
                             let arr = getImageFromRawFile("a52.avif")
-                            unsafe {
                                 if (let Some(i) <- arr) {
                                     let startTime = SystemDateTime.getRealTime(isNano: true);
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
@@ -99,7 +102,7 @@ class EntryView2 {
                                         j.release()
                                     }
                                 }
-                            }
+
                     }
 
                //a2可 a3可 a5可 a6可 a8可 a9可 a10可 a11可 a12可 a13可 a14可 a15可 a16可 a17可 a18可 a19可 a20可 a21可 a22黑 a23灰 a24黑
@@ -111,7 +114,6 @@ class EntryView2 {
                     .onClick {
                         evt =>
                             let arr = getImageFromRawFile("a25.avif")
-                            unsafe {
                                 if (let Some(i) <- arr) {
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(p) <- avif){
@@ -132,7 +134,7 @@ class EntryView2 {
                                             return
                                         }
                                         let durationList: Array<Float64> = p.getFrameDurations().getOrThrow()
-                                        let PixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+                                        let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
 //                                        for (j in 0..frameCount) {
 //                                            let duration: Float64 = info.frameDurations.read(j) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
 //                                            durationList.add(duration)
@@ -142,28 +144,30 @@ class EntryView2 {
     //                                    Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         spawn {
                                             while (true) {
-                                                if (PixelMapList.size != frameCount) {
+                                                if (pixelMapList.size != frameCount) {
                                                      for (k in 0..frameCount) {
                                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
                                                         //Hilog.error(0, "colorvaluebefore", colors.toString())
                                                         p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight),PixelMapFormat.RGBA_8888)
     //                                                  let index = avif.nextFrameIndexffi(address)
     //                                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
-                                                        let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                                        let size2: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
+                                                        let tempPixelMap = createPixelMap(colors, opts)
                                                         launch{
-                                                             pixelMap = createPixelMap(colors, opts)
+                                                             pixelMap = tempPixelMap
                                                         }
-                                                        PixelMapList.add(pixelMap)
                                                         sleep(durationList[Int64(k)] * Duration.second)
+                                                        pixelMapList.add(pixelMap)
                                                     }
                                                 }else{
                                                     p.release()
-                                                    for (k in 0..PixelMapList.size) {
+                                                    for (k in 0..pixelMapList.size) {
     //                                                  let index = avif.nextFrameIndexffi(address)
-    //                                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
+                                                        Hilog.error(0, "listsize", pixelMapList.size.toString())
+                                                        let tempPixelMap = pixelMapList.get(k).getOrThrow()
                                                         launch{
-                                                            pixelMap = PixelMapList.get(k).getOrThrow()
+                                                            pixelMap = tempPixelMap
                                                         }
                                                         sleep(durationList[Int64(k)] * Duration.second)
                                                    }
@@ -172,7 +176,6 @@ class EntryView2 {
                                         }
                                     }
                                 }
-                            }
                         }
             }.width(100.percent)
         }.height(100.percent)

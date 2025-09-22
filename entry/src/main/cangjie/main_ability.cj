@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ */
 package ohos_app_cangjie_entry
 
 internal import ohos.base.AppLog
@@ -23,6 +26,6 @@ class MainAbility <: UIAbility {
 
     public override func onWindowStageCreate(windowStage: WindowStage): Unit {
         AppLog.info("MainAbility onWindowStageCreate.")
-        windowStage.loadContent("EntryView8")
+        windowStage.loadContent("EntryView")
     }
 }
