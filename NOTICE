@@ -2,9 +2,9 @@
 
 本项目基于多个开源组件：
 
-- 主要代码: BSD-3-Clause License
+- 主要代码: BSD-2-Clause License
 - iccjpeg: IJG License  
-- libyuv: 3-Clause BSD License
+- libyuv: BSD-2-Clause License
 - Android相关: Apache-2.0 License
 
 注:使用了"Independent JPEG Group"的代码

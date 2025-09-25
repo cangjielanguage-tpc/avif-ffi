@@ -245,7 +245,7 @@ Cangjie Compiler: 1.0.1
 
 ## 开源协议
 
-本项目基于 [BSD-3-Clause License](./LICENSE),[IJG License](./LICENSE),[Apache-2.0 License](./LICENSE),[LibYUV License](./LICENSE)，请自由的享受和参与开源。
+本项目基于 [Apache-2.0 License](./LICENSE)，请自由的享受和参与开源。
 
 ## 参与贡献
 
