@@ -39,12 +39,12 @@
       ]
     },
     {
-      "name": "avifso",
-      "srcPath": "./avifso"
+      "name": "libavif",
+      "srcPath": "./libavif"
     },
     {
-      "name": "libavif4cj",
-      "srcPath": "./libavif4cj"
+      "name": "avif4cj",
+      "srcPath": "./avif4cj"
     }
   ]
 }

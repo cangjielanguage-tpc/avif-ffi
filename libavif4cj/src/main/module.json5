@@ -1,9 +1,0 @@
-{
-  "module": {
-    "name": "libavif4cj",
-    "type": "har",
-    "deviceTypes": [
-      "default"
-    ]
-  }
-}

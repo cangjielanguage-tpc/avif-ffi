@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "avif4cj",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

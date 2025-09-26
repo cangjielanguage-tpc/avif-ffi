@@ -20,7 +20,7 @@ import ohos.state_macro_manage.Entry
 import ohos.state_macro_manage.Component
 import ohos.state_macro_manage.State
 import ohos.state_macro_manage.r
-import libavif4cj.*
+import avif4cj.*
 import ohos.hilog.Hilog
 import ohos.resource_manager.ResourceManager
 import ohos.image.PixelMap

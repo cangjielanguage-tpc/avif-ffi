@@ -1,12 +1,12 @@
 {
-  "name": "entry",
+  "name": "avif4cj",
   "version": "1.0.0",
   "description": "Please describe the basic information.",
   "main": "",
   "author": "",
-  "license": "",
+  "types": "./Index.d.ets",
+  "license": "Apache-2.0",
   "dependencies": {
-    "avif4cj": "file:../avif4cj"
+    "libavif": "file:../libavif"
   }
 }
-

@@ -7,7 +7,7 @@ package ohos_app_cangjie_entry
 import ohos.component.*
 import ohos.state_manage.*
 import ohos.state_macro_manage.*
-import libavif4cj.*
+import avif4cj.*
 import ohos.resource_manager.ResourceManager
 import ohos.image.PixelMap
 import ohos.image.InitializationOptions
