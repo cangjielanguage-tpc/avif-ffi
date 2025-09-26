@@ -3,7 +3,7 @@
   compile-option = "--dy-std"
   description = "CangjieUI Application"
   link-option = ""
-  name = "ohos_app_cangjie_entry"
+  name = "avif4cj"
   output-type = "dynamic"
   src-dir = "./src/main/cangjie"
   target-dir = ""
@@ -35,6 +35,11 @@
       path-option = [ "${X86_64_LIBS}", "${X86_64_MACRO_LIBS}" ]
       [target.x86_64-unknown-windows-gnu.bin-dependencies.package-option]
 
+[ffi]
+  [ffi.c]
+    [ffi.c.avif]
+      path = "../libavif/build/default/intermediates/libs/default/${ABI}"
+
 [dependencies]
-  [dependencies.avif4cj]
-    path = "${avif4cj}"
+  [dependencies.ohos_app_cangjie_libavif]
+    path = "${libavif}"

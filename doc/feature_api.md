@@ -1,12 +1,12 @@
 
-## libavif4cj
+## avif4cj
 
 
 ### 介绍
-libavif4cj是一款仓颉显示avif图片的库,包括静态图和动态图
+avif4cj是一款仓颉显示avif图片的库,包括静态图和动态图
 
 
-### 1 libavif4cj 图片解码库
+### 1 avif4cj 图片解码库
 
 
 #### 1.1 AvifDecoder avif文件解码类

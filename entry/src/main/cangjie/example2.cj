@@ -9,7 +9,7 @@ import ohos.state_macro_manage.*
 import ohos.component.*
 import ohos.base.*
 import ohos.resource_manager.ResourceManager
-import libavif4cj.*
+import avif4cj.*
 
 @Entry
 @Component
