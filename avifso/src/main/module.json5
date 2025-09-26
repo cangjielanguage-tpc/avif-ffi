@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "avifso",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}
