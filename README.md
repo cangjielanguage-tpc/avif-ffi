@@ -1,5 +1,5 @@
 <div align="center">
-<h1>avif4cj</h1>
+<h1>avif-ffi</h1>
 </div>
 
 <p align="center">
@@ -12,7 +12,7 @@
 
 ## 介绍
 
-avif4cj是一个对avif图片进行解码显示的仓颉库，解码后静态avif图片和动态avif图片都可以显示在控件上
+avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态avif图片和动态avif图片都可以显示在控件上
 
 
 ### 特性
@@ -31,8 +31,8 @@ avif4cj是一个对avif图片进行解码显示的仓颉库，解码后静态avi
 ├── README.md                                 #整体介绍
 ├── doc                                       #文档目录
 │   └── feature_api.md                        #API接口文档
-├── libavif                                    #C源码目录 
-├── avif4cj                                #仓颉源码目录 
+├── libavif                                   #C源码目录 
+├── avif4cj                                   #仓颉源码目录 
 ├── entry                                     #示例目录
 └── hvigor                                    #构建工具目录
 ```
@@ -50,7 +50,7 @@ avif4cj是一个对avif图片进行解码显示的仓颉库，解码后静态avi
 
 ```shell
     1.先通过命令把代码下载下来,
-      git clone -b 具体分支名 https://gitcode.com/Cangjie-TPC/avif4cj.git
+      git clone -b 具体分支名 https://gitcode.com/Cangjie-TPC/avif-ffi.git
               
     2.选择avif4cj模块,点击Build菜单,然后点击 Make Module 'avif4cj' 等待编译完成,项目则编译成功
     
@@ -58,26 +58,26 @@ avif4cj是一个对avif图片进行解码显示的仓颉库，解码后静态avi
 
 ### 功能示例
 
-#### 1. 把avif4cj作为三方库依赖引入
+#### 1. 把avif-ffi作为三方库依赖引入
 
 ```cj
-用户如何在自己项目里引入avif4cj，具体步骤如下：
+用户如何在自己项目里引入avif-ffi，具体步骤如下：
 1. 在自己项目的根目录下,建一个thirdparty目录,然后通过git命令,把自己需要的ijk分支拉下来,比如
-   git clone -b 分支名  https://gitcode.com/Cangjie-TPC/avif4cj.git
-2. 把 thirdparty文件下的avif4cj项目用deveco编译通过，方法如上面的编译构建
+   git clone -b 分支名  https://gitcode.com/Cangjie-TPC/avif-ffi.git
+2. 把 thirdparty文件下的avif-ffi项目用deveco编译通过，方法如上面的编译构建
 3. 在自己项目的根目录的build-profile.json5文件里的modules节点下添加
     {
       "name": "avif4cj",
-      "srcPath": "./thirdparty/avif4cj/avif4cj"
+      "srcPath": "./thirdparty/avif-ffi/avif4cj"
     },
     {
       "name": "libavif",
-      "srcPath": "./thirdparty/avif4cj/libavif"
+      "srcPath": "./thirdparty/avif-ffi/libavif"
     }
-   把avif4cj库的两个依赖变为modeule依赖形式.然后同步项目
-4. 在自己项目的enrty里的oh-package.json5里的dependencies里加上 "avif4cj": "file:../thirdparty/avif4cj/avif4cj",然后同步项目
+   把avif-ffi库的两个依赖变为modeule依赖形式.然后同步项目
+4. 在自己项目的enrty里的oh-package.json5里的dependencies里加上 "avif4cj": "file:../thirdparty/avif-ffi/avif4cj",然后同步项目
     "dependencies": {
-    "avif4cj": "file:../thirdparty/avif4cj/avif4cj"
+    "avif4cj": "file:../thirdparty/avif-ffi/avif4cj"
   }
    项目即依赖成功
 ```
