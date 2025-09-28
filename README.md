@@ -88,10 +88,11 @@ import ohos.image.createPixelMap
 import ohos.image.PixelMapFormat
 import ohos.image.Size
 import ohos.concurrency.launch
+import ohos.base.*
 
 @Entry
 @Component
-class EntryView9 {
+class EntryView {
     let size: Size = Size(width: 1, height: 1)
     let opts: InitializationOptions = InitializationOptions(size: size)
     let color: Array<UInt8> = Array<UInt8>(4, repeat: 0)
@@ -173,7 +174,7 @@ import avif4cj.*
 
 @Entry
 @Component
-class EntryView10 {
+class EntryView {
 
     var imageValue51:?Array<UInt8> = None
     var imageValue25:?Array<UInt8> = None
