@@ -7,6 +7,5 @@
   "types": "./Index.d.ets",
   "license": "Apache-2.0",
   "dependencies": {
-    "libavif": "file:../libavif"
   }
 }

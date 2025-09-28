@@ -10,8 +10,8 @@ import std.fs.*
 
 func stagePreBuild(): Int64 {
     // process before "cjpm build"
-    let sourcePathArm64 = "../libavif/build/default/intermediates/libs/default/arm64-v8a/libavif.so"
-    let sourcePathX86 = "../libavif/build/default/intermediates/libs/default/x86_64/libavif.so"
+    let sourcePathArm64 = "./build/default/intermediates/libs/default/arm64-v8a/libavif.so"
+    let sourcePathX86 = "./build/default/intermediates/libs/default/x86_64/libavif.so"
     while (!exists(sourcePathArm64) || !exists(sourcePathX86)) {
     }
     0

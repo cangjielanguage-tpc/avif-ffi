@@ -31,8 +31,7 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 ├── README.md                                 #整体介绍
 ├── doc                                       #文档目录
 │   └── feature_api.md                        #API接口文档
-├── libavif                                   #C源码目录 
-├── avif4cj                                   #仓颉源码目录 
+├── avif4cj                                   #源码目录 
 ├── entry                                     #示例目录
 └── hvigor                                    #构建工具目录
 ```
@@ -62,24 +61,11 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 
 ```cj
 用户如何在自己项目里引入avif-ffi，具体步骤如下：
-1. 在自己项目的根目录下,建一个thirdparty目录,然后通过git命令,把自己需要的ijk分支拉下来,比如
+1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如
    git clone -b 分支名  https://gitcode.com/Cangjie-TPC/avif-ffi.git
-2. 把 thirdparty文件下的avif-ffi项目用deveco编译通过，方法如上面的编译构建
-3. 在自己项目的根目录的build-profile.json5文件里的modules节点下添加
-    {
-      "name": "avif4cj",
-      "srcPath": "./thirdparty/avif-ffi/avif4cj"
-    },
-    {
-      "name": "libavif",
-      "srcPath": "./thirdparty/avif-ffi/libavif"
-    }
-   把avif-ffi库的两个依赖变为modeule依赖形式.然后同步项目
-4. 在自己项目的enrty里的oh-package.json5里的dependencies里加上 "avif4cj": "file:../thirdparty/avif-ffi/avif4cj",然后同步项目
-    "dependencies": {
-    "avif4cj": "file:../thirdparty/avif-ffi/avif4cj"
-  }
-   项目即依赖成功
+2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
+3. 然后在avif4cj模块下的build/default/outputs/default/下有个avif4cj.har
+   用户直接把这个har包引用到自己项目即可(已验证可行)
 ```
 
 
