@@ -38,8 +38,6 @@
 [ffi]
   [ffi.c]
     [ffi.c.avif]
-      path = "../libavif/build/default/intermediates/libs/default/${ABI}"
+      path = "./build/default/intermediates/libs/default/${ABI}"
 
 [dependencies]
-  [dependencies.ohos_app_cangjie_libavif]
-    path = "${libavif}"
