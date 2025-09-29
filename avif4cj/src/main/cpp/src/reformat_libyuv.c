@@ -1196,6 +1196,9 @@ int getThreadCount(int threads) {
        return cpuCount;     
     }    
   }
+  if(threads >= cpuCount){
+      return cpuCount;
+  }
   return threads;
 }
 
