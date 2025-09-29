@@ -206,6 +206,10 @@ public class AvifDecoder {
     }
 
     public func nextFrameffi(color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32, format: PixelMapFormat): Int32 {
+        if(color.size == 0){
+            Hilog.error(0,"aviflog","the size of color array must > 0")
+            return -1
+        }
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
             let format: Int32 = match (format) {
@@ -221,6 +225,10 @@ public class AvifDecoder {
 
     public func nthFrameffi(index: Int32, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
         format: PixelMapFormat): Int32 {
+        if(color.size == 0){
+            Hilog.error(0,"aviflog","the size of color array must > 0")
+            return -1
+        }
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
             let format: Int32 = match (format) {
@@ -236,6 +244,10 @@ public class AvifDecoder {
 
     public func decodeffi(encoded: Array<UInt8>, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
         format: PixelMapFormat): Bool {
+        if(color.size == 0){
+            Hilog.error(0,"aviflog","the size of color array must > 0")
+            return false
+        }
         unsafe {
             let handlePic: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let handleColor: CPointerHandle<UInt8> = acquireArrayRawData(color)

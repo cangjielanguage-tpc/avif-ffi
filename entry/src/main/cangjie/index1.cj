@@ -188,27 +188,17 @@ class EntryView1 {
                             if(let Some(i) <- arr){
                                 let avif:?AvifDecoder = AvifDecoder.create(i)
                                 if(let Some(j) <- avif){
-                                 //创建pixelmap
-                                let mWidth = j.getWidth()
-                                let mHeight = j.getHeight()
-                                let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                //Hilog.error(0,"colorvaluebefore",colors.toString())
-                                j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
-                                // Hilog.error(0,"colorvalueafter",colors.toString())
-//https://www.sojson.com/web/panel.html
-//                                var path:Path = Path("/data/storage/el2/base/haps/entry/test.txt")
-//                                var file: File = File(path,ReadWrite)
-//                                for(i in 0..colors.size){
-//                                    file.write(colors[i].toString().toArray())
-//                                }
-//                                file.close()
-                                 let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                 let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
-                                 pixelMap = createPixelMap(colors, opts)
-                                 j.release()
+                                    //创建pixelmap
+                                    let mWidth = j.getWidth()
+                                    let mHeight = j.getHeight()
+                                    let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
+                                    j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                    pixelMap = createPixelMap(colors, opts)
+                                    j.release()
                                 }
                             }
-
                     }
 
                  //22 黑 蓝 绿 红 黄
@@ -258,6 +248,30 @@ class EntryView1 {
                                     pixelMap = createPixelMap(colors, opts)
                                     Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                     j.release()
+                                }
+                            }
+                    }
+
+
+                 Button("test9")
+                    .fontSize(20)
+                    .onClick {
+                        evt =>
+                        let arr = getImageFromRawFile("a52.avif")
+                            if(let Some(i) <- arr){
+                                let avif:?AvifDecoder = AvifDecoder.create(i)
+                                if(let Some(j) <- avif){
+                                 //创建pixelmap
+                                let mWidth = j.getWidth()
+                                let mHeight = j.getHeight()
+                                let colors: Array<UInt8> = Array<UInt8>()
+                                let res = j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                if(res == 0){
+                                    let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                    pixelMap = createPixelMap(colors, opts)
+                                 }
+                                 j.release()
                                 }
                             }
 

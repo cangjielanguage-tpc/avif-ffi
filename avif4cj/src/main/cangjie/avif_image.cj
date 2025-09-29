@@ -47,7 +47,7 @@ public class AvifImage {
     var imageFit: ImageFit = ImageFit.Contain
 
 
-    //一开始的原始占位图
+    //一开始的原始初值
     let size: Size = Size(width: 1, height: 1)
     let opts: InitializationOptions = InitializationOptions(size: size)
     let color: Array<UInt8> = Array<UInt8>(1*1*4, repeat: 0)
@@ -134,7 +134,7 @@ public class AvifImage {
                      }
                   }
               }else{
-                 throw Exception("AvifDecoder can not be none")
+                 Hilog.error(0,"aviflog","AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
               }
         }else{
             throw Exception("imageBuffer can not be none")
