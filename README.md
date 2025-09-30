@@ -3,9 +3,10 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v0.0.2-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.0-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
 </p>
 
@@ -28,12 +29,13 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 ### 源码目录
 
 ```shell
-├── README.md                                 #整体介绍
+├── avif4cj                                   #源码目录 
 ├── doc                                       #文档目录
 │   └── feature_api.md                        #API接口文档
-├── avif4cj                                   #源码目录 
 ├── entry                                     #示例目录
-└── hvigor                                    #构建工具目录
+├── hvigor                                    #构建工具目录
+├── CHANGELOG                                 #CHANGELOG文件
+└── README.md                                 #整体介绍
 ```
 
 ### 接口说明
@@ -65,7 +67,7 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
    git clone -b 分支名  https://gitcode.com/Cangjie-TPC/avif-ffi.git
 2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
 3. 然后在avif4cj模块下的build/default/outputs/default/下有个avif4cj.har
-   用户直接把这个har包引用到自己项目即可(已验证可行)
+   用户直接把这个har包引用到自己项目即可
 ```
 
 
@@ -189,12 +191,14 @@ class EntryView {
     func build() {
         Scroll(this.scroller){
             Column(){
-                //imageBuffer 必填 avif图片的字节数组形式  
-                //imageViewWidth 选填, 不填的话控件的宽度默认为100.percent
-                //imageViewHeight 选填, 不填的话控件的高度默认为100.percent
-                //imagePicWidth 选填,不填的话图片的宽度默认为 原图的宽度 
-                //imagePicHeight 选填,不填的话图片的高度默认为 原图的高度
-                //imageFit 选填,默认为ImageFit.Contain
+               /*
+                * 参数 imageBuffer - avif文件的字节数组信息 必填
+                * 参数 imageViewWidth - 图片显示控件的宽度 可缺省 默认值是 100.percent
+                * 参数 imageViewHeight - 图片显示控件的高度 可缺省 默认值是 100.percent
+                * 参数 imagePicWidth - 要显示的图片的宽度 单位是像素px 可缺省 默认值是图片原始宽度 
+                * 参数 imagePicHeight - 要显示的图片的高度 单位是像素px 可缺省 默认值是图片原始高度 
+                * 参数 imageFit - 图片和控件的对齐方式 可缺省 默认值是 ImageFit.Contain
+                */
                 AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
                 AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
             }
