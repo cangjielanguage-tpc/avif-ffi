@@ -15,6 +15,7 @@ import ohos.image.createPixelMap
 import ohos.image.PixelMapFormat
 import ohos.image.Size
 import ohos.concurrency.launch
+import ohos.hilog.Hilog
 
 @Entry
 @Component
@@ -70,6 +71,14 @@ class EntryView9 {
             return arr
         } catch (e: Exception) {
             return None
+        }
+    }
+
+    protected override func aboutToDisappear() {
+        try{
+            this.pixelMap.release()
+        }catch (e:Exception){
+           Hilog.error(0,"aviflog",e.toString())
         }
     }
 }

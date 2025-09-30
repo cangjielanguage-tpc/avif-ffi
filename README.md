@@ -92,6 +92,7 @@ import ohos.image.Size
 import ohos.concurrency.launch
 import ohos.base.*
 import ohos.ability.getStageContext
+import ohos.hilog.Hilog
 
 @Entry
 @Component
@@ -149,6 +150,14 @@ class EntryView {
             return arr
         } catch (e: Exception) {
             return None
+        }
+    }
+    
+    protected override func aboutToDisappear() {
+        try{
+            this.pixelMap.release()
+        }catch (e:Exception){
+           Hilog.error(0,"aviflog",e.toString())
         }
     }
 }

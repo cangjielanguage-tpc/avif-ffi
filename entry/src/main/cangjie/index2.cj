@@ -55,6 +55,10 @@ class EntryView2 {
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
 
+    let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+
+    var isLoop:Bool = true
+
     func build() {
         Row {
             Column {
@@ -76,23 +80,14 @@ class EntryView2 {
                                     let startTime = SystemDateTime.getRealTime(isNano: true);
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(j) <- avif){
-                                        //let info:Info = j.getInfoffi(i)
-                                        //创建pixelmap
                                         let mWidth = j.getWidth()
                                         let mHeight = j.getHeight()
-                                        //Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
                                         mmwidth = Int64(mWidth).px
                                         mmheight = Int64(mHeight).px
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
-                                        //Hilog.error(0, "colorvaluebefore", colors.toString())
-    //                                  let index = avif.nextFrameIndexffi(address)
-    //                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight),
                                             PixelMapFormat.RGBA_8888)
                                         let endTime = SystemDateTime.getRealTime(isNano: true)
-                                        //Hilog.error(0, "colorvalueafter", colors.toString())
-    //                                  let index2 = avif.nextFrameIndexffi(address)
-    //                                  Hilog.error(0, "nextFrameIndexffi", index2.toString())
                                         let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                         let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,
                                             editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
@@ -117,8 +112,6 @@ class EntryView2 {
                                 if (let Some(i) <- arr) {
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(p) <- avif){
-                                        //let info:Info = p.getInfoffi(i)
-                                        //创建pixelmap
                                         let mWidth = p.getWidth()
                                         let mHeight = p.getHeight()
                                         Hilog.error(0, "colorvalueWH", "mWidth=${mWidth} mHeight=${mHeight}")
@@ -134,23 +127,12 @@ class EntryView2 {
                                             return
                                         }
                                         let durationList: Array<Float64> = p.getFrameDurations().getOrThrow()
-                                        let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
-//                                        for (j in 0..frameCount) {
-//                                            let duration: Float64 = info.frameDurations.read(j) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-//                                            durationList.add(duration)
-//                                            Hilog.error(0, "avif info", "-----info.duration = ${duration}")
-//                                        }
-    //                                    let index = avif.nextFrameIndexffi(address)
-    //                                    Hilog.error(0, "nextFrameIndexffi", index.toString())
                                         spawn {
-                                            while (true) {
+                                            while (isLoop) {
                                                 if (pixelMapList.size != frameCount) {
                                                      for (k in 0..frameCount) {
                                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
-                                                        //Hilog.error(0, "colorvaluebefore", colors.toString())
                                                         p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight),PixelMapFormat.RGBA_8888)
-    //                                                  let index = avif.nextFrameIndexffi(address)
-    //                                                  Hilog.error(0, "nextFrameIndexffi", index.toString())
                                                         let size2: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                                         let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
                                                         let tempPixelMap = createPixelMap(colors, opts)
@@ -163,8 +145,6 @@ class EntryView2 {
                                                 }else{
                                                     p.release()
                                                     for (k in 0..pixelMapList.size) {
-    //                                                  let index = avif.nextFrameIndexffi(address)
-                                                        Hilog.error(0, "listsize", pixelMapList.size.toString())
                                                         let tempPixelMap = pixelMapList.get(k).getOrThrow()
                                                         launch{
                                                             pixelMap = tempPixelMap
@@ -190,4 +170,17 @@ class EntryView2 {
             return None
         }
     }
+
+    protected override func aboutToDisappear() {
+        isLoop = false
+        try{
+            for(i in 0..pixelMapList.size){
+                pixelMapList.get(i).getOrThrow().release()
+            }
+            this.pixelMap.release()
+        }catch (e:Exception){
+           Hilog.error(0,"aviflog",e.toString())
+        }
+    }
+
 }

@@ -58,6 +58,8 @@ public class AvifImage {
     let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
     //判断是否是单帧 对后面释放pixelmap有用
     var isSinglePic:Bool = true
+    //判断是否结束循环显示
+    var isLoop:Bool = true
 
     protected override func aboutToAppear() {
         if(let Some(i) <- imageBuffer){
@@ -104,7 +106,7 @@ public class AvifImage {
                         }
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
                         spawn {
-                            while (true) {
+                            while (isLoop) {
                                 if (pixelMapList.size != frameCount) {
                                      for (k in 0..frameCount) {
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
@@ -151,6 +153,7 @@ public class AvifImage {
                 for(i in 0..pixelMapList.size){
                     pixelMapList.get(i).getOrThrow().release()
                 }
+                isLoop = false
             }
         }catch(e:Exception){
             Hilog.error(0,"releasepixelmap","error=${e.toString()}")

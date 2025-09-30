@@ -291,4 +291,12 @@ class EntryView1 {
             return None
         }
     }
+
+     protected override func aboutToDisappear() {
+        try{
+            this.pixelMap.release()
+        }catch (e:Exception){
+           Hilog.error(0,"aviflog",e.toString())
+        }
+    }
 }
