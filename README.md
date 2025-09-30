@@ -91,6 +91,7 @@ import ohos.image.PixelMapFormat
 import ohos.image.Size
 import ohos.concurrency.launch
 import ohos.base.*
+import ohos.ability.getStageContext
 
 @Entry
 @Component
@@ -113,6 +114,7 @@ class EntryView {
                     .fontSize(20)
                     .onClick {
                         evt =>
+                            //需确保自己项目的raw下面有对应的文件
                             let arr = getImageFromRawFile("a52.avif")
                             if (let Some(i) <- arr) {
                                 let avif: ?AvifDecoder = AvifDecoder.create(i)
@@ -141,6 +143,7 @@ class EntryView {
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
+            //globalAbilityContext为?AblityContext类型，自行提供
             let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
@@ -173,6 +176,7 @@ import ohos.component.*
 import ohos.base.*
 import ohos.resource_manager.ResourceManager
 import avif4cj.*
+import ohos.ability.getStageContext
 
 @Entry
 @Component
@@ -182,6 +186,7 @@ class EntryView {
     var imageValue25:?Array<UInt8> = None
 
     protected override func aboutToAppear() {
+        //需确保自己项目的raw下面有对应的文件
         imageValue51 = getImageFromRawFile("a51.avif") //静态图
         imageValue25 = getImageFromRawFile("a25.avif") //动态图
     }
@@ -207,7 +212,8 @@ class EntryView {
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            //globalAbilityContext为?AblityContext类型，自行提供
+            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow())) 
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {
