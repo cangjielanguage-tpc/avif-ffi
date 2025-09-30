@@ -64,23 +64,31 @@ public class AvifDecoder {
     private var repetitionCount: Int64 = 0
     private var frameDurations: ?Array<Float64> = None
 
+    private var handle: ?CPointerHandle<UInt8> = None
+
     private func createDecoderffi(encoded: Array<UInt8>, threads: Int32): DecoderInfo {
         unsafe {
-            let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
-            var result: CPointer<DecoderInfo> = createDecoder(handle.pointer, Int32(encoded.size), threads)
-            if (result.isNull()) {
-                releaseArrayRawData<UInt8>(handle)
+            handle = acquireArrayRawData(encoded)
+            if(let Some(i) <- handle){
+                var result: CPointer<DecoderInfo> = createDecoder(i.pointer, Int32(encoded.size), threads)
+                if (result.isNull()) {
+                    releaseArrayRawData<UInt8>(i)
+                    return DecoderInfo(0, CPointer<Info>())
+                }
+                let res: DecoderInfo = result.read()
+                encoded2Free(result)
+                return res
+            }else{
                 return DecoderInfo(0, CPointer<Info>())
             }
-            let res: DecoderInfo = result.read()
-            encoded2Free(result)
-            releaseArrayRawData<UInt8>(handle)
-            return res
         }
     }
 
     private func destroyDecoderffi(address: Int64): Unit {
         unsafe {
+            if(let Some(i) <- handle){
+                releaseArrayRawData<UInt8>(i)
+            }
             destroyDecoder(address)
         }
     }
@@ -168,7 +176,6 @@ public class AvifDecoder {
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let res: Int32 = isAvifImage(handle.pointer, Int32(encoded.size))
-            releaseArrayRawData<UInt8>(handle)
             return res
         }
     }
@@ -194,7 +201,6 @@ public class AvifDecoder {
             cjinfo.frameDurations = array
             encoded3Free(durationsPoint)
             encodedFree(result)
-            releaseArrayRawData<UInt8>(handle)
             return cjinfo
         }
     }
@@ -257,7 +263,6 @@ public class AvifDecoder {
                 case _ => 2
             }
             let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * 4, format, 0)
-            releaseArrayRawData<UInt8>(handlePic)
             releaseArrayRawData<UInt8>(handleColor)
             return res
         }
