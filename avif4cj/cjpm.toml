@@ -38,6 +38,6 @@
 [ffi]
   [ffi.c]
     [ffi.c.avif]
-      path = "./build/default/intermediates/libs/default/${ABI}"
+      path = "./libs/${ABI}"
 
 [dependencies]

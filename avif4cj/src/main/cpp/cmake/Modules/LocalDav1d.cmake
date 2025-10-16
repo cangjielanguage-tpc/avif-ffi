@@ -58,6 +58,12 @@ function(avif_build_local_dav1d)
             set(CROSS_FILE "${PROJECT_BINARY_DIR}/crossfile-apple.meson")
             configure_file("cmake/Meson/crossfile-apple.meson.in" "${CROSS_FILE}")
         endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "OHOS")
+        if(OHOS_ARCH STREQUAL "x86_64")
+            set(CROSS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Meson/crossfile-x86_64-linux-ohos.meson")
+        else()
+            set(CROSS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Meson/crossfile-aarch64-linux-ohos.meson")
+        endif()
     endif()
 
     if(CROSS_FILE)
@@ -86,11 +92,11 @@ function(avif_build_local_dav1d)
         LIST_SEPARATOR |
         UPDATE_COMMAND ""
         CONFIGURE_COMMAND
-            ${CMAKE_COMMAND} -E env "PATH=${PATH}" ${MESON_EXECUTABLE} setup --buildtype=release --default-library=static
+            ${MESON_EXECUTABLE} setup --buildtype=release --default-library=static
             --prefix=<INSTALL_DIR> --libdir=lib -Denable_asm=true -Denable_tools=false -Denable_examples=false
             -Denable_tests=false ${EXTRA_ARGS} <SOURCE_DIR>
-        BUILD_COMMAND ${CMAKE_COMMAND} -E env "PATH=${PATH}" ${MESON_EXECUTABLE} compile -C <BINARY_DIR>
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E env "PATH=${PATH}" ${MESON_EXECUTABLE} install -C <BINARY_DIR>
+        BUILD_COMMAND  ${MESON_EXECUTABLE} compile -C <BINARY_DIR>
+        INSTALL_COMMAND  ${MESON_EXECUTABLE} install -C <BINARY_DIR>
         BUILD_BYPRODUCTS <INSTALL_DIR>/lib/libdav1d.a
     )
 

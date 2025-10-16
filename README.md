@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.0-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
@@ -50,8 +50,8 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 描述具体的编译过程：
 
 ```shell
-    1.先通过命令把代码下载下来,
-      git clone -b 具体分支名 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+    1.先通过命令把代码下载下来,比如下载develop分支
+      git clone -b develop https://gitcode.com/Cangjie-TPC/avif-ffi.git
               
     2.选择avif4cj模块,点击Build菜单,然后点击 Make Module 'avif4cj' 等待编译完成,项目则编译成功
     
@@ -63,8 +63,8 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 
 ```cj
 用户如何在自己项目里引入avif-ffi，具体步骤如下：
-1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如
-   git clone -b 分支名  https://gitcode.com/Cangjie-TPC/avif-ffi.git
+1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如下载develop分支
+   git clone -b develop  https://gitcode.com/Cangjie-TPC/avif-ffi.git
 2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
 3. 然后在avif4cj模块下的build/default/outputs/default/下有个avif4cj.har
    用户直接把这个har包引用到自己项目即可
