@@ -14,7 +14,6 @@ if(POLICY CMP0114)
 endif()
 
 # Prevent warnings in CMake>=3.24 for ExternalProject_Add()
-# see https://cmake.org/cmake/help/latest/policy/CMP0135.html
 if(POLICY CMP0135)
     cmake_policy(SET CMP0135 NEW) # valid for DOWNLOAD_EXTRACT_TIMESTAMP option in CMake 3.24 and later
 endif()

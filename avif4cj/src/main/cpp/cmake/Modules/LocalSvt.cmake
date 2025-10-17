@@ -22,7 +22,6 @@ else()
         set(SVT_BINARY_DIR "${SVT_BINARY_DIR}/${ANDROID_ABI}")
     endif()
 
-    # Workaround https://gitlab.kitware.com/cmake/cmake/-/issues/25042 by enabling ASM before ASM_NASM
     if(NOT CMAKE_ASM_COMPILER)
         include(CheckLanguage)
         check_language(ASM)
