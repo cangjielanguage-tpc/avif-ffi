@@ -29,8 +29,7 @@ FetchContent_Declare(
 )
 
 # Put the value of ZLIB_INCLUDE_DIR in the cache. This works around cmake behavior that has been updated by
-# cmake policy CMP0102 in cmake 3.17. Remove the CACHE workaround when we require cmake 3.17 or later. See
-# https://gitlab.kitware.com/cmake/cmake/-/issues/21343.
+# cmake policy CMP0102 in cmake 3.17. Remove the CACHE workaround when we require cmake 3.17 or later.
 set(ZLIB_INCLUDE_DIR "${ZLIB_SOURCE_DIR}" CACHE PATH "zlib include dir")
 set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "")
 
