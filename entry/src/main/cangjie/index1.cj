@@ -37,7 +37,6 @@ import std.fs.File
 import std.fs.remove
 import std.fs.OpenMode
 import ohos.component.ImageFit
-import ohos.system_date_time.SystemDateTime
 @Entry
 @Component
 class EntryView1 {
@@ -240,13 +239,10 @@ class EntryView1 {
                                     let mWidth = j.getWidth()
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
-                                    let startTime = SystemDateTime.getRealTime(isNano: true)
                                     j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight),PixelMapFormat.RGBA_8888)
-                                    let endTime = SystemDateTime.getRealTime(isNano: true)
                                     let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
                                     let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                     pixelMap = createPixelMap(colors, opts)
-                                    Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                     j.release()
                                 }
                             }

@@ -130,7 +130,7 @@ public class AvifDecoder {
      * 参数 color - 要接收的图像的像素的字节数组
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
-     * 参数 format - 解码生成的图片的像素格式 值为PixelMapFormat.RGBA_8888
+     * 参数 format - 解码生成的图片的像素格式 只支持RGBA_8888,RGB_565,RGBA_F16,其中RGB_565没有透明度通道,建议使用RGBA_8888
      *
      * 返回值 Int32 - 返回0表示成功 其他错误码表示失败
      */
@@ -143,7 +143,7 @@ public class AvifDecoder {
      * 参数 color - 要接收的图像的像素的字节数组
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
-     * 参数 format - 解码生成的图片的像素格式 值为PixelMapFormat.RGBA_8888
+     * 参数 format - 解码生成的图片的像素格式 只支持RGBA_8888,RGB_565,RGBA_F16,其中RGB_565没有透明度通道,建议使用RGBA_8888
      * 
      * 返回值 Int32 - 返回0表示成功 其他错误码表示失败
      */
@@ -156,7 +156,7 @@ public class AvifDecoder {
      * 参数 color - 要接收的图像的像素的字节数组
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
-     * 参数 format - 解码生成的图片的像素格式 值为PixelMapFormat.RGBA_8888
+     * 参数 format - 解码生成的图片的像素格式 只支持RGBA_8888,RGB_565,RGBA_F16,其中RGB_565没有透明度通道,建议使用RGBA_8888
      * 
      * 返回值 Bool - 返回true表示成功 false表示失败
      */

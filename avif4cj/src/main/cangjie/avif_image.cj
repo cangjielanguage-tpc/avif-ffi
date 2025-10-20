@@ -49,7 +49,7 @@ public class AvifImage {
 
     //一开始的原始初值
     let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(size: size)
+    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size)
     let color: Array<UInt8> = Array<UInt8>(1*1*4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
