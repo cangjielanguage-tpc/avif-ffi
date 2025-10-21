@@ -13,7 +13,7 @@ import avif4cj.*
 
 @Entry
 @Component
-class EntryView10 {
+class EntryView12 {
 
     var imageValue51:?Array<UInt8> = None
     var imageValue25:?Array<UInt8> = None

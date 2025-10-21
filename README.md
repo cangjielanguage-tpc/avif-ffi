@@ -51,29 +51,49 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 
 ```shell
     1.先通过命令把代码下载下来,比如下载develop分支
-      git clone -b develop https://gitcode.com/Cangjie-TPC/avif-ffi.git
+      git clone -b develop --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
               
     2.选择avif4cj模块,点击Build菜单,然后点击 Make Module 'avif4cj' 等待编译完成,项目则编译成功
     
 ```
 
-### 功能示例
+### 三方库导入使用
 
 #### 1. 把avif-ffi作为三方库依赖引入
 
 ```cj
 用户如何在自己项目里引入avif-ffi，具体步骤如下：
+
 1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如下载develop分支
-   git clone -b develop  https://gitcode.com/Cangjie-TPC/avif-ffi.git
+   git clone -b develop --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+   
 2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
-3. 然后在avif4cj模块下的build/default/outputs/default/下有个avif4cj.har
-   用户直接把这个har包引用到自己项目即可
+
+3. 然后在avif4cj模块下的build/default/outputs/default/下找到avif4cj.har
+
+4. 用户在自己应用的module下新建一个文件夹名为har,然后把avif4cj.har文件放入其中
+
+5. 然后在用户module下的oh-package.json5下面添加依赖
+   "dependencies": {
+        "avif4cj": "file:./har/avif4cj.har"
+   }
+   
+   或者在Terminal终端使用命令
+   ohpm install  (指定到对应的har包路径) 回车执行 也会生成上面的依赖
+   
+   添加完后点击自动弹出的sync now同步
+    
+6. 同步完成后就可以在自己的代码文件里引用avif4cj里的类了
+   import avif4cj.*
+   
 ```
 
 
-#### 2. 在项目中显示avif图片
+### 功能示例
 
-##### 2.1 用提供的api加载一个本地的rawfile下的avif图片。
+#### 1. 在项目中显示avif图片
+
+##### 1.1 用提供的api加载一个本地的rawfile下的avif图片。
 
 示例代码如下：
 ```cangjie
@@ -172,7 +192,7 @@ class EntryView {
 ```
 
 
-##### 2.2 用提供的自定义组件加载两个本地的rawfile下的avif图片,一个是静态图 一个是动态图
+##### 1.2 用提供的自定义组件加载两个本地的rawfile下的avif图片,一个是静态图 一个是动态图
 
 示例代码如下：
 ```cangjie

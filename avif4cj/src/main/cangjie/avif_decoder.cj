@@ -223,7 +223,15 @@ public class AvifDecoder {
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            let res = nextFrame(decoder, handle.pointer, imageWidth, imageHeight, imageWidth * 4, format)
+            var perPixelByte:Int32 = 0
+            if(format == 0){
+                perPixelByte = 8
+            }else if(format == 1){
+                perPixelByte = 2
+            }else{
+                perPixelByte = 4
+            }
+            let res = nextFrame(decoder, handle.pointer, imageWidth, imageHeight, imageWidth * perPixelByte, format)
             releaseArrayRawData<UInt8>(handle)
             return res
         }
@@ -242,7 +250,15 @@ public class AvifDecoder {
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            let res =  nthFrame(decoder, index, handle.pointer, imageWidth, imageHeight, imageWidth * 4, format)
+            var perPixelByte:Int32 = 0
+            if(format == 0){
+                perPixelByte = 8
+            }else if(format == 1){
+                perPixelByte = 2
+            }else{
+                perPixelByte = 4
+            }
+            let res =  nthFrame(decoder, index, handle.pointer, imageWidth, imageHeight, imageWidth * perPixelByte, format)
             releaseArrayRawData<UInt8>(handle)
             return res
         }
@@ -262,7 +278,15 @@ public class AvifDecoder {
                 case PixelMapFormat.RGB_565 => 1
                 case _ => 2
             }
-            let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * 4, format, 0)
+            var perPixelByte:Int32 = 0
+            if(format == 0){
+                perPixelByte = 8
+            }else if(format == 1){
+                perPixelByte = 2
+            }else{
+                perPixelByte = 4
+            }
+            let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * perPixelByte, format, 0)
             releaseArrayRawData<UInt8>(handleColor)
             return res
         }
