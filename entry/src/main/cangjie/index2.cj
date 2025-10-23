@@ -85,11 +85,10 @@ class EntryView2 {
                                         mmwidth = Int64(mWidth).px
                                         mmheight = Int64(mHeight).px
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
-                                        j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight),
-                                            PixelMapFormat.RGBA_8888)
+                                        j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
                                         let endTime = SystemDateTime.getRealTime(isNano: true)
                                         let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,
+                                        let opts: InitializationOptions = InitializationOptions(
                                             editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
                                             size: Size(width: Int32(mWidth), height: Int32(mHeight)))
                                         pixelMap = createPixelMap(colors, opts)
@@ -132,9 +131,9 @@ class EntryView2 {
                                                 if (pixelMapList.size != frameCount) {
                                                      for (k in 0..frameCount) {
                                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
-                                                        p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight),PixelMapFormat.RGBA_8888)
+                                                        p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight))
                                                         let size2: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
+                                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
                                                         let tempPixelMap = createPixelMap(colors, opts)
                                                         launch{
                                                              pixelMap = tempPixelMap

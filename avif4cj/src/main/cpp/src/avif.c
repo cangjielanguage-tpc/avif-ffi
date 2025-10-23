@@ -705,7 +705,7 @@ void avifRGBImageSetDefaults(avifRGBImage * rgb, const avifImage * image)
     rgb->width = image->width;
     rgb->height = image->height;
     rgb->depth = image->depth;
-    rgb->format = AVIF_RGB_FORMAT_RGBA;
+    rgb->format = AVIF_RGB_FORMAT_BGRA;
     rgb->chromaUpsampling = AVIF_CHROMA_UPSAMPLING_AUTOMATIC;
     rgb->chromaDownsampling = AVIF_CHROMA_DOWNSAMPLING_AUTOMATIC;
     rgb->avoidLibYUV = AVIF_FALSE;

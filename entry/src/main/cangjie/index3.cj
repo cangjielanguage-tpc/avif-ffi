@@ -57,6 +57,12 @@ class EntryView3 {
     var imageValue50:?Array<UInt8> = None
     var imageValue51:?Array<UInt8> = None
     var imageValue52:?Array<UInt8> = None
+    var imageValue53:?Array<UInt8> = None
+    var imageValue54:?Array<UInt8> = None
+    var imageValue55:?Array<UInt8> = None
+    var imageValue56:?Array<UInt8> = None
+    var imageValue57:?Array<UInt8> = None
+
 
 
     protected override func aboutToAppear() {
@@ -101,6 +107,13 @@ class EntryView3 {
         imageValue50 = getImageFromRawFile("a50.avif")
         imageValue51 = getImageFromRawFile("a51.avif")
         imageValue52 = getImageFromRawFile("a52.avif")
+
+        imageValue53 = getImageFromRawFile("b1.avif")
+        imageValue54 = getImageFromRawFile("b2.avif")
+        imageValue55 = getImageFromRawFile("b3.avif")
+        imageValue56 = getImageFromRawFile("b4.avif")
+        imageValue57 = getImageFromRawFile("b5.avif")
+
     }
 
     let scroller = Scroller()
@@ -151,6 +164,12 @@ class EntryView3 {
                 AvifImage(imageBuffer:imageValue50,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue52,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue53,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue54,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue55,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue56,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue57,imageViewWidth:600.px,imageViewHeight:400.px)
+
             }
         }
     }
