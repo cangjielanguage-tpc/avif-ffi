@@ -49,7 +49,7 @@ public class AvifImage {
 
     //一开始的原始初值
     let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size)
+    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size)
     let color: Array<UInt8> = Array<UInt8>(1*1*4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
@@ -84,10 +84,10 @@ public class AvifImage {
                         //单帧图
                           spawn{
                               let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
-                              j.nextFrameffi(colors, Int32(imageWidth),Int32(imageHeight),PixelMapFormat.RGBA_8888)
+                              j.nextFrameffi(colors, Int32(imageWidth),Int32(imageHeight))
                               //根据生成胡color重新生成pixelmap
                               let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                              let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888,editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                              let opts: InitializationOptions = InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
                               let tempPixelMap = createPixelMap(colors, opts)
                               launch{
                                  pixelMap = tempPixelMap
@@ -110,9 +110,9 @@ public class AvifImage {
                                 if (pixelMapList.size != frameCount) {
                                      for (k in 0..frameCount) {
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
-                                        j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight),PixelMapFormat.RGBA_8888)
+                                        j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
                                         let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                                        let opts: InitializationOptions = InitializationOptions(PixelMapFormat.RGBA_8888, editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
+                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch{
                                              pixelMap = tempPixelMap

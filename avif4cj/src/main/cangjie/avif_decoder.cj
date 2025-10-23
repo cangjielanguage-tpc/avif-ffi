@@ -211,61 +211,37 @@ public class AvifDecoder {
         }
     }
 
-    public func nextFrameffi(color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32, format: PixelMapFormat): Int32 {
+    public func nextFrameffi(color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
         if(color.size == 0){
             Hilog.error(0,"aviflog","the size of color array must > 0")
             return -1
         }
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format: Int32 = match (format) {
-                case PixelMapFormat.RGBA_F16 => 0
-                case PixelMapFormat.RGB_565 => 1
-                case _ => 2
-            }
-            var perPixelByte:Int32 = 0
-            if(format == 0){
-                perPixelByte = 8
-            }else if(format == 1){
-                perPixelByte = 2
-            }else{
-                perPixelByte = 4
-            }
+            let format: Int32 = 2
+            var perPixelByte:Int32 = 4
             let res = nextFrame(decoder, handle.pointer, imageWidth, imageHeight, imageWidth * perPixelByte, format)
             releaseArrayRawData<UInt8>(handle)
             return res
         }
     }
 
-    public func nthFrameffi(index: Int32, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
-        format: PixelMapFormat): Int32 {
+    public func nthFrameffi(index: Int32, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
         if(color.size == 0){
             Hilog.error(0,"aviflog","the size of color array must > 0")
             return -1
         }
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format: Int32 = match (format) {
-                case PixelMapFormat.RGBA_F16 => 0
-                case PixelMapFormat.RGB_565 => 1
-                case _ => 2
-            }
-            var perPixelByte:Int32 = 0
-            if(format == 0){
-                perPixelByte = 8
-            }else if(format == 1){
-                perPixelByte = 2
-            }else{
-                perPixelByte = 4
-            }
+            let format: Int32 = 2
+            var perPixelByte:Int32 = 4
             let res =  nthFrame(decoder, index, handle.pointer, imageWidth, imageHeight, imageWidth * perPixelByte, format)
             releaseArrayRawData<UInt8>(handle)
             return res
         }
     }
 
-    public func decodeffi(encoded: Array<UInt8>, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32,
-        format: PixelMapFormat): Bool {
+    public func decodeffi(encoded: Array<UInt8>, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Bool {
         if(color.size == 0){
             Hilog.error(0,"aviflog","the size of color array must > 0")
             return false
@@ -273,19 +249,8 @@ public class AvifDecoder {
         unsafe {
             let handlePic: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let handleColor: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format: Int32 = match (format) {
-                case PixelMapFormat.RGBA_F16 => 0
-                case PixelMapFormat.RGB_565 => 1
-                case _ => 2
-            }
-            var perPixelByte:Int32 = 0
-            if(format == 0){
-                perPixelByte = 8
-            }else if(format == 1){
-                perPixelByte = 2
-            }else{
-                perPixelByte = 4
-            }
+            let format: Int32 = 2
+            var perPixelByte:Int32 = 4
             let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * perPixelByte, format, 0)
             releaseArrayRawData<UInt8>(handleColor)
             return res

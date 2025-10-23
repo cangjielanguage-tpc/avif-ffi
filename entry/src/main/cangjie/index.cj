@@ -26,8 +26,6 @@ class EntryView {
                     Button("index6").onClick {Router.push(url: "EntryView6")}
                     Button("index7").onClick {Router.push(url: "EntryView7")}
                     Button("index8").onClick {Router.push(url: "EntryView8")}
-                    Button("index9").onClick {Router.push(url: "EntryView9")}
-                    Button("index10").onClick {Router.push(url: "EntryView10")}
                     Button("example1").onClick {Router.push(url: "EntryView11")}
                     Button("example2").onClick {Router.push(url: "EntryView12")}
                 }.width(100.percent)
