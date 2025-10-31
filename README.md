@@ -232,9 +232,19 @@ class EntryView {
                 * 参数 imagePicWidth - 要显示的图片的宽度 单位是像素px 可缺省 默认值是图片原始宽度 
                 * 参数 imagePicHeight - 要显示的图片的高度 单位是像素px 可缺省 默认值是图片原始高度 
                 * 参数 imageFit - 图片和控件的对齐方式 可缺省 默认值是 ImageFit.Contain
+                * 参数 isDraggable - 图片是否可拖拽 可缺省 默认值是 false
+                * 参数 topleftBorderRadius - 图片的左上角的圆角弧度 可缺省 默认值是 0.vp
+                * 参数 toprightBorderRadius - 图片的右上角的圆角弧度 可缺省 默认值是 0.vp
+                * 参数 bottomleftBorderRadius - 图片的左下角的圆角弧度 可缺省 默认值是 0.vp
+                * 参数 bottomrightBorderRadius - 图片的右下角的圆角弧度 可缺省 默认值是 0.vp
+                * 参数 completeCallBack - 参数类型是 Option<(CJImageComplete)->Unit> 图片加载成功后的回调 可缺省 
                 */
-                AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
-                AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
+                AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None,
+                topleftBorderRadius:20.vp,toprightBorderRadius:20.vp,bottomleftBorderRadius:20.vp,bottomrightBorderRadius:20.vp,
+                completeCallBack:Option<(CJImageComplete)->Unit>.None,isDraggable:true)
+                AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None,
+                topleftBorderRadius:20.vp,toprightBorderRadius:20.vp,bottomleftBorderRadius:20.vp,bottomrightBorderRadius:20.vp,
+                completeCallBack:Option<(CJImageComplete)->Unit>.None,isDraggable:true)
             }
         }
     }

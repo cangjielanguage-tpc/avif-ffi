@@ -21,6 +21,8 @@ class EntryView4 {
     var imageValue24:?Array<UInt8> = None
     var imageValue25:?Array<UInt8> = None
     var imageValue26:?Array<UInt8> = None
+    var imageValue56:?Array<UInt8> = None
+    var imageValue57:?Array<UInt8> = None
 
     protected override func aboutToAppear() {
         imageValue22 = getImageFromRawFile("a22.avif")
@@ -28,6 +30,8 @@ class EntryView4 {
         imageValue24 = getImageFromRawFile("a24.avif")
         imageValue25 = getImageFromRawFile("a25.avif")
         imageValue26 = getImageFromRawFile("a26.avif")
+        imageValue56 = getImageFromRawFile("b4.avif")
+        imageValue57 = getImageFromRawFile("b5.avif")
     }
 
     let scroller = Scroller()
@@ -40,6 +44,8 @@ class EntryView4 {
                 AvifImage(imageBuffer:imageValue24,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue26,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue56,imageViewWidth:600.px,imageViewHeight:400.px)
+                AvifImage(imageBuffer:imageValue57,imageViewWidth:600.px,imageViewHeight:400.px)
             }
         }
     }

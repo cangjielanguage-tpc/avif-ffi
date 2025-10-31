@@ -3,13 +3,6 @@
  */
 package avif4cj
 
-internal import ohos.base.nativeLog
-import std.io.ByteBuffer
-import ohos.image.PixelMap
-import ohos.base.AppLog
-import ohos.image.ImageInfo
-import ohos.image.PixelMapFormat
-import ohos.hilog.Hilog
 
 @FastNative
 foreign func versionString(): CString

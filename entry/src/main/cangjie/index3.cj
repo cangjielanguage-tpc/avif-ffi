@@ -60,8 +60,7 @@ class EntryView3 {
     var imageValue53:?Array<UInt8> = None
     var imageValue54:?Array<UInt8> = None
     var imageValue55:?Array<UInt8> = None
-    var imageValue56:?Array<UInt8> = None
-    var imageValue57:?Array<UInt8> = None
+
 
 
 
@@ -111,9 +110,6 @@ class EntryView3 {
         imageValue53 = getImageFromRawFile("b1.avif")
         imageValue54 = getImageFromRawFile("b2.avif")
         imageValue55 = getImageFromRawFile("b3.avif")
-        imageValue56 = getImageFromRawFile("b4.avif")
-        imageValue57 = getImageFromRawFile("b5.avif")
-
     }
 
     let scroller = Scroller()
@@ -167,9 +163,6 @@ class EntryView3 {
                 AvifImage(imageBuffer:imageValue53,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue54,imageViewWidth:600.px,imageViewHeight:400.px)
                 AvifImage(imageBuffer:imageValue55,imageViewWidth:600.px,imageViewHeight:400.px)
-                AvifImage(imageBuffer:imageValue56,imageViewWidth:600.px,imageViewHeight:400.px)
-                AvifImage(imageBuffer:imageValue57,imageViewWidth:600.px,imageViewHeight:400.px)
-
             }
         }
     }

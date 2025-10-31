@@ -8,6 +8,14 @@
         "x86_64"
       ]
     },
+    "arkOptions": {
+      "byteCodeHar": false
+    },
+    "nativeLib": {
+       "debugSymbol": {
+          "strip": false
+       }
+    }
   },
   "buildOptionSet": [
   ],
