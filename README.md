@@ -275,11 +275,7 @@ class EntryView {
 
 ## 约束与限制
 
-DevEco Studio (5.1.1.823)
-
-Cangjie Support Plugin 5.1.1.823
-
-Cangjie Compiler: 1.0.1
+DevEco Studio 6.0.0 Release(6.0.0.875)
 
 ## 开源协议
 
