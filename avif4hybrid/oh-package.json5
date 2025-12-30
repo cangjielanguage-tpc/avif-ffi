@@ -1,0 +1,14 @@
+{
+  "name": "@cangjie-tpc/avifhybrid",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "libohos_app_cangjie_avif4hybrid.so": "file:src/main/cangjie/types/libohos_app_cangjie_avif4hybrid",
+    "@cangjie/cjhybridview": "1.0.5",
+    "libark_interop_loader.so": "file:./src/main/cangjie/loader",
+    "libark_interop_api.so": "file:src/main/cangjie/ark_interop_api"
+  }
+}
