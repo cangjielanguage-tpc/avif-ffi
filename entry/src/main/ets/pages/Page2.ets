@@ -3,7 +3,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
 @Component
-struct page1Test {
+struct page2Test {
   @State avifImageModel2: AvifImageModel = new AvifImageModel()
   @State avifImageModel3: AvifImageModel = new AvifImageModel()
   @State avifImageModel5: AvifImageModel = new AvifImageModel()
@@ -27,18 +27,28 @@ struct page1Test {
 
     if (array2) {
       this.avifImageModel2.setImageBuffer(array2)
+      this.avifImageModel2.setImageViewWidth('600px')
+      this.avifImageModel2.setImageViewHeight('400px')
     }
     if (array3) {
       this.avifImageModel3.setImageBuffer(array3)
+      this.avifImageModel3.setImageViewWidth('600px')
+      this.avifImageModel3.setImageViewHeight('400px')
     }
     if (array5) {
       this.avifImageModel5.setImageBuffer(array5)
+      this.avifImageModel5.setImageViewWidth('600px')
+      this.avifImageModel5.setImageViewHeight('400px')
     }
     if (array6) {
       this.avifImageModel6.setImageBuffer(array6)
+      this.avifImageModel6.setImageViewWidth('600px')
+      this.avifImageModel6.setImageViewHeight('400px')
     }
     if (array8) {
       this.avifImageModel8.setImageBuffer(array8)
+      this.avifImageModel8.setImageViewWidth('600px')
+      this.avifImageModel8.setImageViewHeight('400px')
     }
     this.ready = true
   }

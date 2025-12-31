@@ -2,6 +2,7 @@
  * Created on 2025/12/29
  */
 package ohos_app_cangjie_avif4hybrid
+
 import ohos.ark_interop_macro.Interop
 import ohos.component.Column
 import ohos.ark_interop.JSCurrentJSContext
@@ -15,24 +16,23 @@ internal import ohos.ark_interop_helper.*
 
 @Interop[ArkTS]
 public class CJAvifImageModel {
-
-    var imageBuffer:?Array<Byte> = None
+    var imageBuffer: ?Array<Byte> = None
     var imagePicWidth: Int64 = 0
     var imagePicHeight: Int64 = 0
     var imageViewWidth: String = "0.vp"
     var imageViewHeight: String = "0.vp"
     var imageFit: String = ""
     var isDraggable: Bool = false
-    var topleftBorderRadius:String = "0.vp"
-    var toprightBorderRadius:String = "0.vp"
-    var bottomleftBorderRadius:String = "0.vp"
-    var bottomrightBorderRadius:String = "0.vp"
-    var completeCallBack:?(Int32) -> Unit = None
+    var topleftBorderRadius: String = "0.vp"
+    var toprightBorderRadius: String = "0.vp"
+    var bottomleftBorderRadius: String = "0.vp"
+    var bottomrightBorderRadius: String = "0.vp"
+    var completeCallBack: ?(Int32) -> Unit = None
 
     public init() {
     }
 
-    public func setImageBuffer(imageBuffer:Array<Byte>): Unit {
+    public func setImageBuffer(imageBuffer: Array<Byte>): Unit {
         this.imageBuffer = imageBuffer
     }
     public func setImagePicWidth(imagePicWidth: Int64): Unit {
@@ -44,7 +44,7 @@ public class CJAvifImageModel {
     public func setImageViewWidth(imageViewWidth: String): Unit {
         this.imageViewWidth = imageViewWidth
     }
-    public func setimageViewHeight(imageViewHeight: String): Unit {
+    public func setImageViewHeight(imageViewHeight: String): Unit {
         this.imageViewHeight = imageViewHeight
     }
 
@@ -64,11 +64,11 @@ public class CJAvifImageModel {
         this.toprightBorderRadius = toprightBorderRadius
     }
 
-     public func setBottomleftBorderRadius(bottomleftBorderRadius: String): Unit {
+    public func setBottomleftBorderRadius(bottomleftBorderRadius: String): Unit {
         this.bottomleftBorderRadius = bottomleftBorderRadius
     }
 
-     public func setBottomrightBorderRadius(bottomrightBorderRadius: String): Unit {
+    public func setBottomrightBorderRadius(bottomrightBorderRadius: String): Unit {
         this.bottomrightBorderRadius = bottomrightBorderRadius
     }
 
@@ -77,49 +77,45 @@ public class CJAvifImageModel {
     }
 }
 
-
 @Component
 class CJAvifView {
-
     var cjmodel: ?CJAvifImageModel
 
     func checkImageFit(imageFit: String): ImageFit {
         let fit = imageFit.toAsciiLower()
         if (!fit.isEmpty()) {
-        	if (fit == "fill") {
+            if (fit == "fill") {
                 return ImageFit.Fill
-        	} else if (fit == "contain") {
+            } else if (fit == "contain") {
                 return ImageFit.Contain
-        	} else if (fit == "cover") {
+            } else if (fit == "cover") {
                 return ImageFit.Cover
-        	} else {
+            } else {
                 return ImageFit.Contain
-        	}
+            }
         }
         return ImageFit.Contain
     }
-  //  imageBuffer:?Array<UInt8>,imageViewWidth:Length,imageViewHeight:Length,imagePicWidth:Int64,imagePicHeight:Int64,imageFit:ImageFit,isDraggable:Bool,
-  //  topleftBorderRadius:Length,toprightBorderRadius:Length,bottomleftBorderRadius:Length,bottomrightBorderRadius:Length,completefunc:completeCallBack
+
+    let a:Float64= 100.0
+    let b:Float64= 100.0
+    //LengthType.percent(100.0),
     func build() {
         Column() {
             if (let Some(v) <- this.cjmodel) {
                 AvifImage(imageBuffer: v.imageBuffer,
-                imageViewWidth:string2Length(v.imageViewWidth),
-                imageViewHeight:string2Length(v.imageViewHeight),
-                imagePicWidth:v.imagePicWidth,
-                imagePicHeight:v.imagePicHeight,
-                imageFit:checkImageFit(v.imageFit),
-                isDraggable:v.isDraggable,
-                topleftBorderRadius:string2Length(v.topleftBorderRadius),
-                toprightBorderRadius:string2Length(v.toprightBorderRadius),
-                bottomleftBorderRadius:string2Length(v.bottomleftBorderRadius),
-                bottomrightBorderRadius:string2Length(v.bottomrightBorderRadius),
-                completeCallBack:v.completeCallBack)
+                    imageViewWidth:string2Length(v.imageViewWidth),
+                    imageViewHeight: string2Length(v.imageViewHeight),
+                    imagePicWidth: v.imagePicWidth,
+                    imagePicHeight: v.imagePicHeight,
+                    imageFit: checkImageFit(v.imageFit),
+                    isDraggable: v.isDraggable,
+                    topleftBorderRadius: string2Length(v.topleftBorderRadius),
+                    toprightBorderRadius: string2Length(v.toprightBorderRadius),
+                    bottomleftBorderRadius: string2Length(v.bottomleftBorderRadius),
+                    bottomrightBorderRadius: string2Length(v.bottomrightBorderRadius),
+                    completeCallBack: v.completeCallBack)
             }
         }
     }
 }
-
-
-
-

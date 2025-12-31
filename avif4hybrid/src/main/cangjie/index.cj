@@ -12,4 +12,5 @@ func testCJ(runtime: JSContext, callInfo: JSCallInfo): JSValue {
 
 let EXPORT_MODULE = JSModule.registerModule {
     runtime, exports => exports["testCJ"] = runtime.function(testCJ).toJSValue()
+    exports["getLoadCJPage"] = runtime.function(getLoadCJPage).toJSValue()
 }

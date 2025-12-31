@@ -171,7 +171,7 @@ public func convertJSValueToLength(context: JSContext, input: JSValue): Length {
     return 0.vp
 }
 
-//100.percent
+//100.percent 100%
 func string2Length(value: String): Length {
     var str = ""
     for (r in value.runes()) {
@@ -182,13 +182,20 @@ func string2Length(value: String): Length {
         }
     }
     var number = Float64.tryParse(str) ?? 0.0
+    Hilog.error(0, "tag", "value=${value} number=${number.toString()}")
     return match {
-        case value.endsWith("vp") => LengthType.vp(number)
-        case value.endsWith("px") => LengthType.px(number)
-        case value.endsWith("%") => LengthType.percent(number)
-        case value.endsWith("lpx") => LengthType.lpx(number)
-        case value.endsWith("fp") => LengthType.fp(number)
-        case _ => LengthType.vp(number)
+        case value.endsWith("vp") =>
+            LengthType.vp(number)
+        case value.endsWith("px") =>
+            LengthType.px(number)
+        case value.endsWith("%") =>
+            LengthType.percent(number/100.0)
+        case value.endsWith("lpx") =>
+            LengthType.lpx(number)
+        case value.endsWith("fp") =>
+            LengthType.fp(number)
+        case _ =>
+            LengthType.vp(number)
     }
 }
 

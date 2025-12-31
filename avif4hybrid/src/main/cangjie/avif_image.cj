@@ -203,7 +203,7 @@ public class AvifImage {
 
     @Builder
     func Image19() {
-    Image(this.pixelMap)
+        Image(this.pixelMap)
             .width(imageViewWidth)
             .height(imageViewHeight)
             .objectFit(imageFit)

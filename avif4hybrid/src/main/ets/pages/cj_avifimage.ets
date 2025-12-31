@@ -53,7 +53,7 @@ export struct AvifViewTS {
         cjAvifImageModel.setImageViewWidth(this.model.imageViewWidth)
       }
       if (this.model.imageViewHeight != '' ) {
-        cjAvifImageModel.setimageViewHeight(this.model.imageViewHeight)
+        cjAvifImageModel.setImageViewHeight(this.model.imageViewHeight)
       }
       if (this.model.imageFit != '') {
         cjAvifImageModel.setImageFit(this.model.imageFit)
@@ -116,7 +116,7 @@ export class AvifImageModel {
     return this
 
   }
-  public  setimageViewHeight(imageViewHeight: string): AvifImageModel {
+  public setImageViewHeight(imageViewHeight: string): AvifImageModel {
     this.imageViewHeight = imageViewHeight
     return this
   }

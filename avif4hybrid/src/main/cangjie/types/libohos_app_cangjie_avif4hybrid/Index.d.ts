@@ -3,7 +3,7 @@ export declare class CJAvifImageModel {
     setImagePicWidth(imagePicWidth: number): void
     setImagePicHeight(imagePicHeight: number): void
     setImageViewWidth(imageViewWidth: string): void
-    setimageViewHeight(imageViewHeight: string): void
+    setImageViewHeight(imageViewHeight: string): void
     setImageFit(imageFit: string): void
     setDraggable(draggable: boolean): void
     setTopleftBorderRadius(topleftBorderRadius: string): void
