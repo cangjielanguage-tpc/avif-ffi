@@ -26,39 +26,19 @@ struct page4Test {
     let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
 
     if (array2) {
-      this.avifImageModel2.setImageBuffer(array2)
-      this.avifImageModel2.setImageViewWidth('600px')
-      this.avifImageModel2.setImageViewHeight('400px')
-      this.avifImageModel2.setImagePicWidth(600)
-      this.avifImageModel2.setImagePicHeight(400)
+      this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(600).setImagePicHeight(400)
     }
     if (array3) {
-      this.avifImageModel3.setImageBuffer(array3)
-      this.avifImageModel3.setImageViewWidth('600px')
-      this.avifImageModel3.setImageViewHeight('400px')
-      this.avifImageModel3.setImagePicWidth(600)
-      this.avifImageModel3.setImagePicHeight(400)
+      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(600).setImagePicHeight(400)
     }
     if (array5) {
-      this.avifImageModel5.setImageBuffer(array5)
-      this.avifImageModel5.setImageViewWidth('600px')
-      this.avifImageModel5.setImageViewHeight('400px')
-      this.avifImageModel5.setImagePicWidth(600)
-      this.avifImageModel5.setImagePicHeight(400)
+      this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(600).setImagePicHeight(400)
     }
     if (array6) {
-      this.avifImageModel6.setImageBuffer(array6)
-      this.avifImageModel6.setImageViewWidth('600px')
-      this.avifImageModel6.setImageViewHeight('400px')
-      this.avifImageModel6.setImagePicWidth(600)
-      this.avifImageModel6.setImagePicHeight(400)
+      this.avifImageModel6.setImageBuffer(array6).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(600).setImagePicHeight(400)
     }
     if (array8) {
-      this.avifImageModel8.setImageBuffer(array8)
-      this.avifImageModel8.setImageViewWidth('600px')
-      this.avifImageModel8.setImageViewHeight('400px')
-      this.avifImageModel8.setImagePicWidth(600)
-      this.avifImageModel8.setImagePicHeight(400)
+      this.avifImageModel8.setImageBuffer(array8).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(600).setImagePicHeight(400)
     }
     this.ready = true
   }

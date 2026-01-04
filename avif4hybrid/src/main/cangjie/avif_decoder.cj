@@ -47,7 +47,7 @@ foreign func decode(result: CPointer<UInt8>, length: Int32, pixels: CPointer<UIn
     stride: Int32, formatvalue: Int32, threads: Int32): Bool
 
 public class AvifDecoder {
-    private var decoder: Int64 = 0
+    var decoder: Int64 = 0
 
     private var width: Int64 = 0
     private var height: Int64 = 0
@@ -86,7 +86,7 @@ public class AvifDecoder {
         }
     }
 
-    private init(encoded: Array<UInt8>, threads: Int32) {
+    init(encoded: Array<UInt8>, threads: Int32) {
         let decoderInfo: DecoderInfo = createDecoderffi(encoded, threads)
         decoder = decoderInfo.address
         let cpointInfo: CPointer<Info> = decoderInfo.info

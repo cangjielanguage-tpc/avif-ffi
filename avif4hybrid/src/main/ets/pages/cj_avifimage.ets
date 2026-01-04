@@ -1,6 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib, CJAvifImageModel } from 'libohos_app_cangjie_avif4hybrid.so';
+import { CustomLib, CJAvifImageModel,CJCjinfo,CJAvifDecoder } from 'libohos_app_cangjie_avif4hybrid.so';
 
 export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 
@@ -155,5 +155,113 @@ export class AvifImageModel {
     this.onCompleteCallback = callback
     return this
   }
+}
+
+export class AvifDecoderTS{
+
+  cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
+
+  public create(encoded:Uint8Array):CJAvifDecoder|undefined{
+      return this.cjAvifDecoder.create(encoded)
+    }
+
+  public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined{
+      return this.cjAvifDecoder.createWithThread(encoded,threads)
+  }
+
+  public getWidth():number{
+    return this.cjAvifDecoder.getWidth()
+  }
+
+  public getHeight():number{
+    return this.cjAvifDecoder.getHeight()
+  }
+
+  public getDepth():number{
+    return this.cjAvifDecoder.getDepth()
+  }
+
+  public getAlphaPresent():boolean{
+    return this.cjAvifDecoder.getAlphaPresent()
+  }
+
+  public getFrameCount():number{
+    return this.cjAvifDecoder.getFrameCount()
+  }
+
+  public getRepetitionCount():number{
+    return this.cjAvifDecoder.getRepetitionCount()
+  }
+
+  public getFrameDurations(): Array<number> | undefined{
+    return this.cjAvifDecoder.getFrameDurations()
+  }
+
+  public isAvifImageffi(encoded: Uint8Array): number{
+    return this.cjAvifDecoder.isAvifImageffi(encoded)
+  }
+
+  public getInfoffi(encoded: Uint8Array): CJCjinfo | undefined{
+    return this.cjAvifDecoder.getInfoffi(encoded)
+  }
+
+  public nextFrameIndexffi(): number{
+    return this.cjAvifDecoder.nextFrameIndexffi()
+  }
+
+  public nextFrameffi(color: Uint8Array, imageWidth: number, imageHeight: number): number{
+    return this.cjAvifDecoder.nextFrameffi(color,imageWidth,imageHeight)
+  }
+
+  public nthFrameffi(index: number, color: Uint8Array, imageWidth: number, imageHeight: number): number{
+    return this.cjAvifDecoder.nthFrameffi(index,color,imageWidth,imageHeight)
+  }
+
+  public decodeffi(encoded: Uint8Array, color: Uint8Array, imageWidth: number, imageHeight: number): boolean{
+    return this.cjAvifDecoder.decodeffi(encoded,color,imageWidth,imageHeight)
+  }
+
+  public release(): void{
+    this.cjAvifDecoder.release()
+  }
+
+}
+
+export class CJInfoTS {
+
+  cjInfo: CJCjinfo = new CJCjinfo()
+
+  constructor(cjInfo:CJCjinfo) {
+    this.cjInfo = cjInfo
+  }
+
+  public getWidth(): number{
+    return this.cjInfo.width
+  }
+
+  public getHeight(): number{
+    return this.cjInfo.height
+  }
+
+  public getDepth(): number{
+    return this.cjInfo.depth
+  }
+
+  public getAlphaPresent(): boolean{
+    return this.cjInfo.alphaPresent
+  }
+
+  public getFrameCount(): number{
+    return this.cjInfo.frameCount
+  }
+
+  public getRepetitionCount(): number{
+    return this.cjInfo.repetitionCount
+  }
+
+  public getFrameDurations():  Array<number>{
+    return this.cjInfo.frameDurations
+  }
+
 }
 

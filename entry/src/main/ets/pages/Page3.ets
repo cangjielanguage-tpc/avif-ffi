@@ -32,39 +32,25 @@ struct page3Test {
     let arrayb5 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(resb5.id)
 
     if (array22) {
-      this.avifImageModel22.setImageBuffer(array22)
-      this.avifImageModel22.setImageViewWidth('600px')
-      this.avifImageModel22.setImageViewHeight('400px')
+      this.avifImageModel22.setImageBuffer(array22).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (array23) {
-      this.avifImageModel23.setImageBuffer(array23)
-      this.avifImageModel23.setImageViewWidth('600px')
-      this.avifImageModel23.setImageViewHeight('400px')
+      this.avifImageModel23.setImageBuffer(array23).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (array24) {
-      this.avifImageModel24.setImageBuffer(array24)
-      this.avifImageModel24.setImageViewWidth('600px')
-      this.avifImageModel24.setImageViewHeight('400px')
+      this.avifImageModel24.setImageBuffer(array24).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (array25) {
-      this.avifImageModel25.setImageBuffer(array25)
-      this.avifImageModel25.setImageViewWidth('600px')
-      this.avifImageModel25.setImageViewHeight('400px')
+      this.avifImageModel25.setImageBuffer(array25).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (array26) {
-      this.avifImageModel26.setImageBuffer(array26)
-      this.avifImageModel26.setImageViewWidth('600px')
-      this.avifImageModel26.setImageViewHeight('400px')
+      this.avifImageModel26.setImageBuffer(array26).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (arrayb4) {
-      this.avifImageModelb4.setImageBuffer(arrayb4)
-      this.avifImageModelb4.setImageViewWidth('600px')
-      this.avifImageModelb4.setImageViewHeight('400px')
+      this.avifImageModelb4.setImageBuffer(arrayb4).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     if (arrayb5) {
-      this.avifImageModelb5.setImageBuffer(arrayb5)
-      this.avifImageModelb5.setImageViewWidth('600px')
-      this.avifImageModelb5.setImageViewHeight('400px')
+      this.avifImageModelb5.setImageBuffer(arrayb5).setImageViewWidth('600px').setImageViewHeight('400px')
     }
     this.ready = true
   }

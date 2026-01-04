@@ -26,49 +26,19 @@ struct page6Test {
     let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
 
     if (array2) {
-      this.avifImageModel2.setImageBuffer(array2)
-      this.avifImageModel2.setImageViewWidth('600px')
-      this.avifImageModel2.setImageViewHeight('400px')
-      this.avifImageModel2.setTopleftBorderRadius('20vp')
-      this.avifImageModel2.setToprightBorderRadius('20vp')
-      this.avifImageModel2.setBottomleftBorderRadius('20vp')
-      this.avifImageModel2.setBottomrightBorderRadius('20vp')
+      this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
     }
     if (array3) {
-      this.avifImageModel3.setImageBuffer(array3)
-      this.avifImageModel3.setImageViewWidth('600px')
-      this.avifImageModel3.setImageViewHeight('400px')
-      this.avifImageModel3.setTopleftBorderRadius('20vp')
-      this.avifImageModel3.setToprightBorderRadius('20vp')
-      this.avifImageModel3.setBottomleftBorderRadius('20vp')
-      this.avifImageModel3.setBottomrightBorderRadius('20vp')
+      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
     }
     if (array5) {
-      this.avifImageModel5.setImageBuffer(array5)
-      this.avifImageModel5.setImageViewWidth('600px')
-      this.avifImageModel5.setImageViewHeight('400px')
-      this.avifImageModel5.setTopleftBorderRadius('20vp')
-      this.avifImageModel5.setToprightBorderRadius('20vp')
-      this.avifImageModel5.setBottomleftBorderRadius('20vp')
-      this.avifImageModel5.setBottomrightBorderRadius('20vp')
+      this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
     }
     if (array6) {
-      this.avifImageModel6.setImageBuffer(array6)
-      this.avifImageModel6.setImageViewWidth('600px')
-      this.avifImageModel6.setImageViewHeight('400px')
-      this.avifImageModel6.setTopleftBorderRadius('20vp')
-      this.avifImageModel6.setToprightBorderRadius('20vp')
-      this.avifImageModel6.setBottomleftBorderRadius('20vp')
-      this.avifImageModel6.setBottomrightBorderRadius('20vp')
+      this.avifImageModel6.setImageBuffer(array6).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
     }
     if (array8) {
-      this.avifImageModel8.setImageBuffer(array8)
-      this.avifImageModel8.setImageViewWidth('600px')
-      this.avifImageModel8.setImageViewHeight('400px')
-      this.avifImageModel8.setTopleftBorderRadius('20vp')
-      this.avifImageModel8.setToprightBorderRadius('20vp')
-      this.avifImageModel8.setBottomleftBorderRadius('20vp')
-      this.avifImageModel8.setBottomrightBorderRadius('20vp')
+      this.avifImageModel8.setImageBuffer(array8).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
     }
     this.ready = true
   }
