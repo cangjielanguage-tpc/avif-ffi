@@ -1,6 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib, CJAvifImageModel,CJCjinfo,CJAvifDecoder } from 'libohos_app_cangjie_avif4hybrid.so';
+import { CustomLib, CJAvifImageModel,CJCjinfo,CJAvifDecoder,CJReturnValue } from 'libohos_app_cangjie_avif4hybrid.so';
 
 export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 
@@ -209,16 +209,16 @@ export class AvifDecoderTS{
     return this.cjAvifDecoder.nextFrameIndexffi()
   }
 
-  public nextFrameffi(color: Uint8Array, imageWidth: number, imageHeight: number): number{
-    return this.cjAvifDecoder.nextFrameffi(color,imageWidth,imageHeight)
+  public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue{
+    return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
   }
 
-  public nthFrameffi(index: number, color: Uint8Array, imageWidth: number, imageHeight: number): number{
-    return this.cjAvifDecoder.nthFrameffi(index,color,imageWidth,imageHeight)
+  public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
+    return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
   }
 
-  public decodeffi(encoded: Uint8Array, color: Uint8Array, imageWidth: number, imageHeight: number): boolean{
-    return this.cjAvifDecoder.decodeffi(encoded,color,imageWidth,imageHeight)
+  public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
+    return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
   }
 
   public release(): void{
@@ -261,6 +261,28 @@ export class CJInfoTS {
 
   public getFrameDurations():  Array<number>{
     return this.cjInfo.frameDurations
+  }
+
+}
+
+export class CJReturnValueTS {
+
+  cjReturnValue: CJReturnValue = new CJReturnValue()
+
+  constructor(cjReturnValue:CJReturnValue) {
+    this.cjReturnValue = cjReturnValue
+  }
+
+  public getCode(): number{
+    return this.cjReturnValue.code
+  }
+
+  public isSuccess(): boolean{
+    return this.cjReturnValue.issuccess
+  }
+
+  public getColor(): ArrayBuffer|undefined{
+    return this.cjReturnValue.color
   }
 
 }

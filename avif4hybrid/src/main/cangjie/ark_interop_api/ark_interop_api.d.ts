@@ -1,3 +1,9 @@
+export declare class CJReturnValue {
+    code: number
+    color: ArrayBuffer | undefined
+    issuccess: boolean
+}
+
 export declare class CJCjinfo {
     width: number
     height: number
@@ -43,9 +49,9 @@ export declare class CJAvifDecoder {
     isAvifImageffi(encoded: ArrayBuffer): number
     getInfoffi(encoded: ArrayBuffer): CJCjinfo | undefined
     nextFrameIndexffi(): number
-    nextFrameffi(color: ArrayBuffer, imageWidth: number, imageHeight: number): number
-    nthFrameffi(index: number, color: ArrayBuffer, imageWidth: number, imageHeight: number): number
-    decodeffi(encoded: ArrayBuffer, color: ArrayBuffer, imageWidth: number, imageHeight: number): boolean
+    nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
+    nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+    decodeffi(encoded: ArrayBuffer, imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
 }
 
@@ -53,4 +59,5 @@ export declare interface CustomLib {
     CJAvifDecoder: {new (): CJAvifDecoder}
     CJAvifImageModel: {new (): CJAvifImageModel}
     CJCjinfo: {new (): CJCjinfo}
+    CJReturnValue: {new (): CJReturnValue}
 }

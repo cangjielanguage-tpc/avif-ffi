@@ -111,25 +111,40 @@ public class CJAvifDecoder {
         return 0
     }
 
-    public func nextFrameffi(color: Array<Byte>, imageWidth: Int32, imageHeight: Int32): Int32 {
+    public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue {
+        let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
+        let value:CJReturnValue = CJReturnValue()
         if (let Some(i) <- decoder) {
-            return i.nextFrameffi(color, imageWidth, imageHeight)
+            value.code =  i.nextFrameffi(color, imageWidth, imageHeight)
+            value.color = color
+            return value
         }
-        return 0
+        value.code = -1
+        return value
     }
 
-    public func nthFrameffi(index: Int32, color: Array<Byte>, imageWidth: Int32, imageHeight: Int32): Int32 {
+    public func nthFrameffi(index: Int32,imageWidth: Int32, imageHeight: Int32): CJReturnValue {
+        let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
+        let value:CJReturnValue = CJReturnValue()
         if (let Some(i) <- decoder) {
-            return i.nthFrameffi(index, color, imageWidth, imageHeight)
+            value.code = i.nthFrameffi(index, color, imageWidth, imageHeight)
+            value.color = color
+            return value
         }
-        return 0
+        value.code = -1
+        return value
     }
 
-    public func decodeffi(encoded: Array<Byte>, color: Array<Byte>, imageWidth: Int32, imageHeight: Int32): Bool {
+    public func decodeffi(encoded: Array<Byte>, imageWidth: Int32, imageHeight: Int32): CJReturnValue {
+        let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
+        let value:CJReturnValue = CJReturnValue()
         if (let Some(i) <- decoder) {
-            return i.decodeffi(encoded, color, imageWidth, imageHeight)
+            value.issuccess = i.decodeffi(encoded, color, imageWidth, imageHeight)
+            value.color = color
+            return value
         }
-        return false
+        value.issuccess = false
+        return value
     }
 
     public func release(): Unit {
