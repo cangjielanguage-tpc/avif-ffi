@@ -29,7 +29,7 @@ struct page5Test {
       this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(150).setImagePicHeight(100).setImageFit("fill")
     }
     if (array3) {
-      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(150).setImagePicHeight(100).setImageFit("fill")
+      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(150).setImagePicHeight(100).setImageFit("auto")
     }
     if (array5) {
       this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px').setImagePicWidth(150).setImagePicHeight(100).setImageFit("fill")

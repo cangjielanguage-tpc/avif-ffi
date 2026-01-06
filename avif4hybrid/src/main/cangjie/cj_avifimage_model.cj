@@ -90,7 +90,29 @@ class CJAvifView {
                 return ImageFit.Contain
             } else if (fit == "cover") {
                 return ImageFit.Cover
-            } else {
+            }else if (fit == "auto") {
+                return ImageFit.Auto
+            } else if (fit == "scaledown") {
+                return ImageFit.ScaleDown
+            } else if (fit == "top_start") {
+                return ImageFit.TOP_START
+            } else if (fit == "top") {
+                return ImageFit.TOP
+            } else if (fit == "top_end") {
+                return ImageFit.TOP_END
+            } else if (fit == "start") {
+                return ImageFit.START
+            } else if (fit == "center") {
+                return ImageFit.CENTER
+            } else if (fit == "end") {
+                return ImageFit.END
+            } else if (fit == "bottom_start") {
+                return ImageFit.BOTTOM_START
+            } else if (fit == "bottom") {
+                return ImageFit.BOTTOM
+            } else if (fit == "bottom_end") {
+                return ImageFit.BOTTOM_END
+            }else {
                 return ImageFit.Contain
             }
         }

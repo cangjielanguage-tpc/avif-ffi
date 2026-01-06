@@ -11,6 +11,9 @@ avif-ffi是一款仓颉显示avif图片的库,包括静态图和动态图
 component AvifViewTS 图片显示组件
 ```ets
 export struct AvifViewTS {
+
+    model?: AvifImageModel  //avif自定义组件绑定对象
+}
 ```
 
 class AvifImageModel 图片数据封装类
@@ -62,7 +65,8 @@ export class AvifImageModel {
 
     /*
      * 设置图片和控件的对齐方式
-     * @param 参数 imageFit - 图片和控件的对齐方式 
+     * @param 参数 imageFit - 图片和控件的对齐方式 ，String可填"fill","contain","cover","auto","scaledown"
+     * "top_start","top","top_end","start","center","end","bottom_start","bottom","bottom_end"
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
