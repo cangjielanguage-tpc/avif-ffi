@@ -13,7 +13,7 @@ struct page7Test {
   @State ready: boolean = false
 
   completeCallback(status: number): void {
-    hilog.error(1, "1", 'complete')
+    hilog.error(1, "1", 'status='+status)
   }
 
   async aboutToAppear(): Promise<void> {
