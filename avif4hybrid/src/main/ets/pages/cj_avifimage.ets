@@ -227,63 +227,63 @@ export class AvifDecoderTS{
 
 }
 
-export class CJInfoTS {
+// export class CJInfoTS {
+//
+//   cjInfo: CJCjinfo = new CJCjinfo()
+//
+//   constructor(cjInfo:CJCjinfo) {
+//     this.cjInfo = cjInfo
+//   }
+//
+//   public getWidth(): number{
+//     return this.cjInfo.width
+//   }
+//
+//   public getHeight(): number{
+//     return this.cjInfo.height
+//   }
+//
+//   public getDepth(): number{
+//     return this.cjInfo.depth
+//   }
+//
+//   public getAlphaPresent(): boolean{
+//     return this.cjInfo.alphaPresent
+//   }
+//
+//   public getFrameCount(): number{
+//     return this.cjInfo.frameCount
+//   }
+//
+//   public getRepetitionCount(): number{
+//     return this.cjInfo.repetitionCount
+//   }
+//
+//   public getFrameDurations():  Array<number>{
+//     return this.cjInfo.frameDurations
+//   }
+//
+// }
 
-  cjInfo: CJCjinfo = new CJCjinfo()
-
-  constructor(cjInfo:CJCjinfo) {
-    this.cjInfo = cjInfo
-  }
-
-  public getWidth(): number{
-    return this.cjInfo.width
-  }
-
-  public getHeight(): number{
-    return this.cjInfo.height
-  }
-
-  public getDepth(): number{
-    return this.cjInfo.depth
-  }
-
-  public getAlphaPresent(): boolean{
-    return this.cjInfo.alphaPresent
-  }
-
-  public getFrameCount(): number{
-    return this.cjInfo.frameCount
-  }
-
-  public getRepetitionCount(): number{
-    return this.cjInfo.repetitionCount
-  }
-
-  public getFrameDurations():  Array<number>{
-    return this.cjInfo.frameDurations
-  }
-
-}
-
-export class CJReturnValueTS {
-
-  cjReturnValue: CJReturnValue = new CJReturnValue()
-
-  constructor(cjReturnValue:CJReturnValue) {
-    this.cjReturnValue = cjReturnValue
-  }
-
-  public getCode(): number{
-    return this.cjReturnValue.code
-  }
-
-  public isSuccess(): boolean{
-    return this.cjReturnValue.issuccess
-  }
-
-  public getColor(): ArrayBuffer|undefined{
-    return this.cjReturnValue.color
-  }
-
-}
+// export class CJReturnValueTS {
+//
+//   cjReturnValue: CJReturnValue = new CJReturnValue()
+//
+//   constructor(cjReturnValue:CJReturnValue) {
+//     this.cjReturnValue = cjReturnValue
+//   }
+//
+//   public getCode(): number{
+//     return this.cjReturnValue.code
+//   }
+//
+//   public isSuccess(): boolean{
+//     return this.cjReturnValue.issuccess
+//   }
+//
+//   public getColor(): ArrayBuffer|undefined{
+//     return this.cjReturnValue.color
+//   }
+//
+// }
 
