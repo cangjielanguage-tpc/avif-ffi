@@ -5,7 +5,7 @@
 <p align="center">
 <img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
-<img alt="" src="https://img.shields.io/badge/cjc-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/cjc-v1.0.3-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
 </p>
@@ -51,9 +51,9 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 
 ```shell
     1.先通过命令把代码下载下来,比如下载develop分支
-      git clone -b develop --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+      git clone -b avif_hybrid --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
               
-    2.选择avif4cj模块,点击Build菜单,然后点击 Make Module 'avif4cj' 等待编译完成,项目则编译成功
+    2.选择avif4hybrid模块,点击Build菜单,然后点击 Make Module 'avif4hybrid' 等待编译完成,项目则编译成功
     
 ```
 
@@ -61,30 +61,25 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 
 #### 1. 把avif-ffi作为三方库依赖引入
 
-```cj
+```ets
 用户如何在自己项目里引入avif-ffi，具体步骤如下：
 
 1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如下载develop分支
-   git clone -b develop --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+   git clone -b avif_hybrid --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
    
 2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
 
-3. 然后在avif4cj模块下的build/default/outputs/default/下找到avif4cj.har
+3. 然后在avif4hybrid模块下的build/default/outputs/default/下找到avif4hybrid.har
 
-4. 用户在自己应用的module下新建一个文件夹名为har,然后把avif4cj.har文件放入其中
+4. 用户在自己应用的module下新建一个文件夹名为har,然后把avif4hybrid.har文件放入其中
 
 5. 然后在用户module下的oh-package.json5下面添加依赖
    "dependencies": {
-        "avif4cj": "file:./har/avif4cj.har"
+        "@cangjie-tpc/avifhybrid": "file:./har/avif4hybrid.har"
    }
-   
-   或者在Terminal终端使用命令
-   ohpm install  (指定到对应的har包路径) 回车执行 也会生成上面的依赖
-   
    添加完后点击自动弹出的sync now同步
     
-6. 同步完成后就可以在自己的代码文件里引用avif4cj里的类了
-   import avif4cj.*
+6. 同步完成后就可以在自己的代码文件里引用avif4hybrid里的类了
    
 ```
 
@@ -239,11 +234,11 @@ struct page8Test {
 
 ## 约束与限制
 
-DevEco Studio (5.1.1.823)
+DevEco Studio (5.1.1.840)
 
-Cangjie Support Plugin 5.1.1.823
+Cangjie Support Plugin 5.1.1.840
 
-Cangjie Compiler: 1.0.1
+Cangjie Compiler: 1.0.3
 
 ## 开源协议
 
