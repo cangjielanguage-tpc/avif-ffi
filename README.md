@@ -5,7 +5,7 @@
 <p align="center">
 <img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
-<img alt="" src="https://img.shields.io/badge/cjc-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/cjc-v1.0.5-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
 </p>
@@ -275,11 +275,11 @@ class EntryView {
 
 ## 约束与限制
 
-DevEco Studio (5.1.1.823)
+DevEco Studio (5.1.1.851)
 
-Cangjie Support Plugin 5.1.1.823
+Cangjie Support Plugin 5.1.1.851
 
-Cangjie Compiler: 1.0.1
+Cangjie Compiler: 1.0.5
 
 ## 开源协议
 
