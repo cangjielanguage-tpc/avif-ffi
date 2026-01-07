@@ -55,6 +55,8 @@ export declare class CJAvifDecoder {
     release(): void
 }
 
+
+
 export declare interface CustomLib {
     CJAvifDecoder: {new (): CJAvifDecoder}
     CJAvifImageModel: {new (): CJAvifImageModel}

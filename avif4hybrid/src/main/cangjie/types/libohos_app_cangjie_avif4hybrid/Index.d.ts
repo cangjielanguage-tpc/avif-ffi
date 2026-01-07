@@ -1,23 +1,3 @@
-export declare class CJAvifDecoder {
-    create(encoded: ArrayBuffer): CJAvifDecoder | undefined
-    createWithThread(encoded: ArrayBuffer, threads: number): CJAvifDecoder | undefined
-    getWidth(): number
-    getHeight(): number
-    getDepth(): number
-    getAlphaPresent(): boolean
-    getFrameCount(): number
-    getRepetitionCount(): number
-    getFrameDurations(): Array<number> | undefined
-    isAvifImageffi(encoded: ArrayBuffer): number
-    getInfoffi(encoded: ArrayBuffer): CJCjinfo | undefined
-    nextFrameIndexffi(): number
-    nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
-    nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
-    decodeffi(encoded: ArrayBuffer, imageWidth: number, imageHeight: number): CJReturnValue
-    release(): void
-    constructor ()
-}
-
 export declare class CJReturnValue {
     code: number
     color: ArrayBuffer | undefined
@@ -59,6 +39,25 @@ export declare class CJAvifImageModel {
     constructor ()
 }
 
+export declare class CJAvifDecoder {
+    create(encoded: ArrayBuffer): CJAvifDecoder | undefined
+    createWithThread(encoded: ArrayBuffer, threads: number): CJAvifDecoder | undefined
+    getWidth(): number
+    getHeight(): number
+    getDepth(): number
+    getAlphaPresent(): boolean
+    getFrameCount(): number
+    getRepetitionCount(): number
+    getFrameDurations(): Array<number> | undefined
+    isAvifImageffi(encoded: ArrayBuffer): number
+    getInfoffi(encoded: ArrayBuffer): CJCjinfo | undefined
+    nextFrameIndexffi(): number
+    nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
+    nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+    decodeffi(encoded: ArrayBuffer, imageWidth: number, imageHeight: number): CJReturnValue
+    release(): void
+    constructor ()
+}
 
 
 
