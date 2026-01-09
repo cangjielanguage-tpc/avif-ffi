@@ -206,15 +206,6 @@ export class AvifDecoderTS{
      * 返回值 number 类型 - 是avif图像返回1 否则返回0
      */    
      public isAvifImageffi(encoded: Uint8Array): number
-
-    /**
-     * 获取AVIF文件信息并填充到CJCjinfo
-     * 
-     * 参数 encoded - avif文件的字节数组信息
-     * 
-     * 返回值 CJCjinfo | undefined类型 - 自定义类 里面包含avif的图像的一些信息如 width height depth alphaPresent frameCount repetitionCount frameDurations
-     */   
-     public getInfoffi(encoded: Uint8Array): CJCjinfo | undefined
      
     /**
      * 获取下一次调用时将返回的帧的从0开始的索引。
@@ -264,78 +255,6 @@ export class AvifDecoderTS{
 }
 ```
 
-class CJCjinfo avif图片信息类
-```ets
-export declare class CJCjinfo {
-
-    constructor () //构造函数
-
-    width: number  //avif图片宽度 单位像素
-    height: number  //avif图片高度 单位像素
-    depth: number  //avif图片深度 单位像素
-    alphaPresent: boolean  //avif图片是否有alpha透明通道 true有 false没有
-    frameCount: number //avif文件对应的图片帧数 静态图默认1帧
-    repetitionCount: number  //动态图片的重复次数 静态图默认为0   动态图-1和0表示无限循环 大于0的数n表示图片会播放(n+1)次
-    frameDurations: Array<number>  //动态图片的每帧显示的时间长度的数组 静态图默认为[1.000000] 动态图一般为长度大于1的数组比如[0.166667, 0.166667, 0.166667, 0.166667, 0.166667]
-    
-    
-    /**
-     * 设置图片宽度
-     * 
-     * 参数 width - 要设置的图片宽度
-     */ 
-    setWidth(width: number): void
-    
-    
-    /**
-     * 设置图片高度
-     * 
-     * 参数 height - 要设置的图片高度
-     */ 
-    setHeight(height: number): void
-    
-    
-    /**
-     * 设置图片深度
-     * 
-     * 参数 height - 要设置的图片深度
-     */  
-    setDepth(depth: number): void
-    
-    
-    /**
-     * 设置图片是否有alpha透明通道
-     * 
-     * 参数 alphaPresent - 图片是否有alpha透明通道 true有 false没有
-     */ 
-    setAlphaPresent(alphaPresent: boolean): void
-    
-    
-    /**
-     * 设置avif文件对应的图片帧数
-     * 
-     * 参数 frameCount - 图片的帧数
-     */  
-    setFrameCount(frameCount: number): void
-    
-    
-    /**
-     * 设置动态图片的重复次数
-     * 
-     * 参数 repetitionCount - 动态图片的重复次数
-     */  
-    setRepetitionCount(repetitionCount: number): void
-    
-    
-    /**
-     * 设置动态图片的每帧显示的时间长度的数组
-     * 
-     * 参数 frameDurations - 动态图片的每帧显示的时间长度的数组
-     */ 
-    setFrameDurations(frameDurations: Array<number>): void
-    
-}
-```
 
 class CJReturnValue 图片解析返回类
 ```ets

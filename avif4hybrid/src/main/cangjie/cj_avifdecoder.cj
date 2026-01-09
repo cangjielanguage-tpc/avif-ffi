@@ -88,22 +88,6 @@ public class CJAvifDecoder {
         return 0
     }
 
-    public func getInfoffi(encoded: Array<Byte>): Option<CJCjinfo> {
-        if (let Some(i) <- decoder) {
-            let cjCJInfo:CJCjinfo = CJCjinfo()
-            let cjInfo:Cjinfo = i.getInfoffi(encoded)
-            cjCJInfo.setWidth(cjInfo.width)
-            cjCJInfo.setHeight(cjInfo.height)
-            cjCJInfo.setDepth(cjInfo.depth)
-            cjCJInfo.setAlphaPresent(cjInfo.alphaPresent)
-            cjCJInfo.setFrameCount(cjInfo.frameCount)
-            cjCJInfo.setRepetitionCount(cjInfo.repetitionCount)
-            cjCJInfo.setFrameDurations(JSArrayEx(cjInfo.frameDurations))
-            return cjCJInfo
-        }
-        return None
-    }
-
     public func nextFrameIndexffi(): Int32 {
         if (let Some(i) <- decoder) {
             return i.nextFrameIndexffi()

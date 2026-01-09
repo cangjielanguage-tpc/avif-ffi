@@ -1,6 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib, CJAvifImageModel,CJCjinfo,CJAvifDecoder,CJReturnValue } from 'libohos_app_cangjie_avif4hybrid.so';
+import { CustomLib, CJAvifImageModel,CJAvifDecoder,CJReturnValue } from 'libohos_app_cangjie_avif4hybrid.so';
 
 export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 
@@ -160,65 +160,112 @@ export class AvifImageModel {
 export class AvifDecoderTS{
 
   cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
+  decodeRes:CJAvifDecoder|undefined = undefined
 
   public create(encoded:Uint8Array):CJAvifDecoder|undefined{
-      return this.cjAvifDecoder.create(encoded)
-    }
+      this.decodeRes = this.cjAvifDecoder.create(encoded)
+      return this.decodeRes
+  }
 
   public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined{
-      return this.cjAvifDecoder.createWithThread(encoded,threads)
+      this.decodeRes = this.cjAvifDecoder.createWithThread(encoded,threads)
+      return this.decodeRes
   }
 
   public getWidth():number{
-    return this.cjAvifDecoder.getWidth()
+    if(this.decodeRes){
+        return this.cjAvifDecoder.getWidth()
+    }else{
+        return 0
+    }
   }
 
   public getHeight():number{
-    return this.cjAvifDecoder.getHeight()
+    if(this.decodeRes){
+      return this.cjAvifDecoder.getHeight()
+    }else{
+      return 0
+    }
   }
 
   public getDepth():number{
-    return this.cjAvifDecoder.getDepth()
+    if(this.decodeRes){
+      return this.cjAvifDecoder.getDepth()
+    }else{
+      return 0
+    }
   }
 
   public getAlphaPresent():boolean{
-    return this.cjAvifDecoder.getAlphaPresent()
+    if(this.decodeRes){
+      return this.cjAvifDecoder.getAlphaPresent()
+    }else{
+      return false
+    }
   }
 
   public getFrameCount():number{
-    return this.cjAvifDecoder.getFrameCount()
+    if(this.decodeRes){
+      return this.cjAvifDecoder.getFrameCount()
+    }else{
+      return 0
+    }
   }
 
   public getRepetitionCount():number{
-    return this.cjAvifDecoder.getRepetitionCount()
+    if(this.decodeRes) {
+       return this.cjAvifDecoder.getRepetitionCount()
+    }else{
+       return 0
+    }
   }
 
   public getFrameDurations(): Array<number> | undefined{
-    return this.cjAvifDecoder.getFrameDurations()
+    if(this.decodeRes) {
+        return this.cjAvifDecoder.getFrameDurations()
+    }else{
+        return undefined
+    }
   }
 
   public isAvifImageffi(encoded: Uint8Array): number{
-    return this.cjAvifDecoder.isAvifImageffi(encoded)
-  }
-
-  public getInfoffi(encoded: Uint8Array): CJCjinfo | undefined{
-    return this.cjAvifDecoder.getInfoffi(encoded)
+    if(this.decodeRes) {
+        return this.cjAvifDecoder.isAvifImageffi(encoded)
+    }else{
+        return 0
+    }
   }
 
   public nextFrameIndexffi(): number{
-    return this.cjAvifDecoder.nextFrameIndexffi()
+    if(this.decodeRes) {
+       return this.cjAvifDecoder.nextFrameIndexffi()
+    }else{
+       return -1
+    }
   }
 
   public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
+    if(this.decodeRes) {
+      return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
+    }else{
+      return new CJReturnValue()
+    }
   }
 
   public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
+    if(this.decodeRes) {
+       return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
+    }else{
+       return new CJReturnValue()
+    }
   }
 
   public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
+    if(this.decodeRes) {
+      return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
+    }else{
+      return new CJReturnValue()
+    }
   }
 
   public release(): void{
