@@ -4,10 +4,10 @@
 
 package ohos_app_cangjie_entry
 
-import ohos.state_manage.*
-import ohos.state_macro_manage.*
-import ohos.component.*
-import ohos.image.*
+import ohos.arkui.state_management.*
+import ohos.arkui.state_macro_manage.*
+import ohos.arkui.component.*
+import kit.ImageKit.*
 import ohos.base.*
 import ohos.resource_manager.ResourceManager
 import avif4cj.*
@@ -118,7 +118,7 @@ class EntryView10 {
 
     let scroller = Scroller()
 
-    var completefunc:(CJImageComplete)->Unit = { imagecomplete =>
+    var completefunc:(ImageLoadResult)->Unit = { imagecomplete =>
         Hilog.error(0, "aviflog", "width=${imagecomplete.width} height=${imagecomplete.height} componentWidth=${imagecomplete.componentWidth} componentHeight=${imagecomplete.componentHeight}")
     }
 
@@ -175,7 +175,7 @@ class EntryView10 {
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {

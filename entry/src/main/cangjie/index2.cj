@@ -5,31 +5,30 @@
 package ohos_app_cangjie_entry
 
 internal import ohos.base.LengthProp
-internal import ohos.component.Column
-internal import ohos.component.Row
-internal import ohos.component.Text
-internal import ohos.component.Button
-internal import ohos.component.CustomView
-internal import ohos.component.CJEntry
-internal import ohos.component.loadNativeView
-internal import ohos.component.FontWeight
-internal import ohos.state_manage.SubscriberManager
-internal import ohos.state_manage.ObservedProperty
-internal import ohos.state_manage.LocalStorage
-import ohos.state_macro_manage.Entry
-import ohos.state_macro_manage.Component
-import ohos.state_macro_manage.State
-import ohos.state_macro_manage.r
+internal import ohos.arkui.component.Column
+internal import ohos.arkui.component.Row
+internal import ohos.arkui.component.Text
+internal import ohos.arkui.component.Button
+internal import ohos.arkui.component.CustomView
+internal import ohos.arkui.component.CJEntry
+internal import ohos.arkui.component.loadNativeView
+internal import ohos.arkui.component.FontWeight
+internal import ohos.arkui.state_management.SubscriberManager
+internal import ohos.arkui.state_management.ObservedProperty
+internal import ohos.arkui.state_management.LocalStorage
+import ohos.arkui.state_macro_manage.Entry
+import ohos.arkui.state_macro_manage.Component
+import ohos.arkui.state_macro_manage.State
+import ohos.arkui.state_macro_manage.r
 import avif4cj.*
 import ohos.hilog.Hilog
 import ohos.resource_manager.ResourceManager
-import ohos.image.PixelMap
-import ohos.image.InitializationOptions
-import ohos.image.createPixelMap
-import ohos.image.PixelMapFormat
-import ohos.image.Size
-import ohos.component.Image
-import ohos.concurrency.launch
+import kit.ImageKit.PixelMap
+import kit.ImageKit.InitializationOptions
+import kit.ImageKit.createPixelMap
+import kit.ImageKit.PixelMapFormat
+import kit.ImageKit.Size
+import ohos.arkui.component.Image
 import ohos.base.Color
 import std.fs.Path
 import std.fs.exists
@@ -39,6 +38,7 @@ import std.fs.OpenMode
 import ohos.base.Length
 import std.collection.ArrayList
 import ohos.system_date_time.SystemDateTime
+import ohos.base.launch
 
 @Entry
 @Component
@@ -49,8 +49,8 @@ class EntryView2 {
     @State
     var mmheight:Length = 20.percent
 
-    let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(size: size)
+    let size: Size = Size(1,1)
+    let opts: InitializationOptions = InitializationOptions(size)
     let color: Array<UInt8> = Array<UInt8>(1 * 1 * 4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
@@ -73,11 +73,11 @@ class EntryView2 {
                 //23是个动画
                 Button("testsingle")
                     .fontSize(20)
-                    .onClick {
+                    .onClick ({
                         evt =>
                             let arr = getImageFromRawFile("a52.avif")
                                 if (let Some(i) <- arr) {
-                                    let startTime = SystemDateTime.getRealTime(isNano: true);
+                                    //let startTime = SystemDateTime.getRealTime(isNano: true);
                                     let avif: ?AvifDecoder = AvifDecoder.create(i)
                                     if(let Some(j) <- avif){
                                         let mWidth = j.getWidth()
@@ -86,18 +86,17 @@ class EntryView2 {
                                         mmheight = Int64(mHeight).px
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
-                                        let endTime = SystemDateTime.getRealTime(isNano: true)
-                                        let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
+                                        //let endTime = SystemDateTime.getRealTime(isNano: true)
+                                        let size: Size = Size(Int32(mWidth),Int32(mHeight))
                                         let opts: InitializationOptions = InitializationOptions(
-                                            editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
-                                            size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                            Size(Int32(mWidth),Int32(mHeight)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                                         pixelMap = createPixelMap(colors, opts)
-                                        Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
+                                        //Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                         j.release()
                                     }
                                 }
 
-                    }
+                    })
 
                //a2可 a3可 a5可 a6可 a8可 a9可 a10可 a11可 a12可 a13可 a14可 a15可 a16可 a17可 a18可 a19可 a20可 a21可 a22黑 a23灰 a24黑
                 //a25黑 a26可 a27可 a28可 a29可 a30可 a31可 a32可 a33白 a34可 a35可 a36白 a37白 a38白 a40白 a41白 a42可 a44可 a46可 a47可
@@ -105,7 +104,7 @@ class EntryView2 {
                 //23是个动画
                 Button("testmult")
                     .fontSize(20)
-                    .onClick {
+                    .onClick ({
                         evt =>
                             let arr = getImageFromRawFile("a25.avif")
                                 if (let Some(i) <- arr) {
@@ -132,8 +131,8 @@ class EntryView2 {
                                                      for (k in 0..frameCount) {
                                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
                                                         p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight))
-                                                        let size2: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
+                                                        let size2: Size = Size(Int32(mWidth),Int32(mHeight))
+                                                        let opts: InitializationOptions = InitializationOptions(size2,editable: true,pixelFormat: PixelMapFormat.Rgba8888)
                                                         let tempPixelMap = createPixelMap(colors, opts)
                                                         launch{
                                                              pixelMap = tempPixelMap
@@ -155,14 +154,14 @@ class EntryView2 {
                                         }
                                     }
                                 }
-                        }
+                        })
             }.width(100.percent)
         }.height(100.percent)
     }
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {

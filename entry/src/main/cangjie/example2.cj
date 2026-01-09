@@ -4,9 +4,9 @@
 
 package ohos_app_cangjie_entry
 
-import ohos.state_manage.*
-import ohos.state_macro_manage.*
-import ohos.component.*
+import ohos.arkui.state_management.*
+import ohos.arkui.state_macro_manage.*
+import ohos.arkui.component.*
 import ohos.base.*
 import ohos.resource_manager.ResourceManager
 import avif4cj.*
@@ -36,7 +36,7 @@ class EntryView12 {
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {

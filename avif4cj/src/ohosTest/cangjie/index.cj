@@ -1,19 +1,19 @@
 package ohos_app_cangjie_avif4cj_test
 
 internal import ohos.base.LengthProp
-internal import ohos.component.Column
-internal import ohos.component.Row
-internal import ohos.component.Text
-internal import ohos.component.CustomView
-internal import ohos.component.CJEntry
-internal import ohos.component.loadNativeView
-internal import ohos.component.FontWeight
-internal import ohos.state_manage.SubscriberManager
-internal import ohos.state_manage.ObservedProperty
-internal import ohos.state_manage.LocalStorage
-import ohos.state_macro_manage.Entry
-import ohos.state_macro_manage.Component
-import ohos.state_macro_manage.State
+internal import ohos.arkui.component.Column
+internal import ohos.arkui.component.Row
+internal import ohos.arkui.component.Text
+internal import ohos.arkui.component.CustomView
+internal import ohos.arkui.component.CJEntry
+internal import ohos.arkui.component.loadNativeView
+internal import ohos.arkui.component.FontWeight
+internal import ohos.arkui.state_management.SubscriberManager
+internal import ohos.arkui.state_management.ObservedProperty
+internal import ohos.arkui.state_management.LocalStorage
+import ohos.arkui.state_macro_manage.Entry
+import ohos.arkui.state_macro_manage.Component
+import ohos.arkui.state_macro_manage.State
 
 @Entry
 @Component

@@ -3,11 +3,17 @@
  */
 package ohos_app_cangjie_entry
 
-internal import ohos.base.AppLog
-internal import ohos.ability.*
-internal import ohos.window.WindowStage
+import kit.PerformanceAnalysisKit.Hilog
+import kit.AbilityKit.Want
+import kit.AbilityKit.UIAbility
+import kit.AbilityKit.LaunchParam
+import kit.AbilityKit.LaunchReason
+import kit.ArkUI.WindowStage
+import ohos.arkui.ui_context.UIContext
+import ohos.app.ability.ui_ability.UIAbilityContext
 
-var globalAbilityContext: Option<AbilityContext> = Option<AbilityContext>.None
+var globalAbilityContext: Option<UIAbilityContext> = Option<UIAbilityContext>.None
+
 
 class MainAbility <: UIAbility {
     public init() {
@@ -16,16 +22,17 @@ class MainAbility <: UIAbility {
     }
 
     public override func onCreate(want: Want, launchParam: LaunchParam): Unit {
-        AppLog.info("MainAbility OnCreated.${want.abilityName}")
-        globalAbilityContext = Option<AbilityContext>.Some(this.context)
+        Hilog.info(1, "Cangjie", "MainAbility OnCreated.${want.abilityName}")
+        globalAbilityContext = Option<UIAbilityContext>.Some(this.context)
         match (launchParam.launchReason) {
-            case LaunchReason.START_ABILITY => AppLog.info("START_ABILITY")
+            case LaunchReason.StartAbility => Hilog.info(1, "Cangjie", "START_ABILITY")
             case _ => ()
         }
     }
 
     public override func onWindowStageCreate(windowStage: WindowStage): Unit {
-        AppLog.info("MainAbility onWindowStageCreate.")
+        Hilog.info(1, "Cangjie", "MainAbility onWindowStageCreate.")
         windowStage.loadContent("EntryView")
     }
 }
+

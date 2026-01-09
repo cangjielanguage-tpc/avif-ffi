@@ -1,6 +1,5 @@
 package ohos_app_cangjie_avif4cj_test
 
-internal import ohos.base.AppLog
 internal import ohos.ability.Want
 internal import ohos.ability.UIAbility
 internal import ohos.ability.LaunchParam

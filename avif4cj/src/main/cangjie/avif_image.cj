@@ -3,33 +3,33 @@
  */
 package avif4cj
 
-internal import ohos.component.Image
-internal import ohos.component.ImageFit
+internal import ohos.arkui.component.Image
+internal import ohos.arkui.component.ImageFit
 internal import ohos.hilog.Hilog
-import ohos.image.Size
-import ohos.image.createPixelMap
-import ohos.image.InitializationOptions
-import ohos.image.PixelMap
-import ohos.image.PixelMapFormat
+import kit.ImageKit.Size
+import kit.ImageKit.createPixelMap
+import kit.ImageKit.InitializationOptions
+import kit.ImageKit.PixelMap
+import kit.ImageKit.PixelMapFormat
 import std.collection.ArrayList
-import ohos.concurrency.launch
-import ohos.component.CJImageComplete
 import ohos.device_info.DeviceInfo
-import ohos.component.If
-import ohos.component.CustomView
-import ohos.component.ViewBuilder
+import ohos.arkui.component.If
+import ohos.arkui.component.CustomView
+import ohos.arkui.component.ViewBuilder
 import ohos.base.Length
 import ohos.base.LengthProp
 internal import ohos.ark_interop.JSContext
 internal import ohos.ark_interop.JSModule
 internal import ohos.ark_interop.JSInteropType
-import ohos.state_manage.ObservedProperty
-import ohos.state_manage.LocalStorage
-import ohos.state_manage.SubscriberManager
-import ohos.state_macro_manage.Component
-import ohos.state_macro_manage.Link
-import ohos.state_macro_manage.State
-import ohos.state_macro_manage.Builder
+import ohos.arkui.state_management.ObservedProperty
+import ohos.arkui.state_management.LocalStorage
+import ohos.arkui.state_management.SubscriberManager
+import ohos.arkui.state_macro_manage.Component
+import ohos.arkui.state_macro_manage.Link
+import ohos.arkui.state_macro_manage.State
+import ohos.arkui.state_macro_manage.Builder
+import ohos.base.launch
+import ohos.arkui.component.image.ImageLoadResult
 
 @Component
 public class AvifImage {
@@ -79,12 +79,12 @@ public class AvifImage {
     var bottomrightBorderRadius:Length = 0.vp
 
     @State
-    var completeCallBack:Option<(CJImageComplete)->Unit> = Option<(CJImageComplete)->Unit>.None
+    var completeCallBack:Option<(ImageLoadResult)->Unit> = Option<(ImageLoadResult)->Unit>.None
 
 
     //一开始的原始初值
-    let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size)
+    let size: Size = Size(1, 1)
+    let opts: InitializationOptions = InitializationOptions(size,editable: true,pixelFormat: PixelMapFormat.Rgba8888)
     let color: Array<UInt8> = Array<UInt8>(1*1*4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
@@ -121,8 +121,8 @@ public class AvifImage {
                               let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
                               j.nextFrameffi(colors, Int32(imageWidth),Int32(imageHeight))
                               //根据生成胡color重新生成pixelmap
-                              let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                              let opts: InitializationOptions = InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                              let size2: Size = Size(Int32(imageWidth),Int32(imageHeight))
+                              let opts: InitializationOptions = InitializationOptions(size2,editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                               let tempPixelMap = createPixelMap(colors, opts)
                               launch{
                                  pixelMap = tempPixelMap
@@ -146,8 +146,8 @@ public class AvifImage {
                                      for (k in 0..frameCount) {
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
                                         j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
-                                        let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888,size: size2)
+                                        let size2: Size = Size(Int32(imageWidth), Int32(imageHeight))
+                                        let opts: InitializationOptions = InitializationOptions(size2,editable: true,pixelFormat: PixelMapFormat.Rgba8888)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch{
                                              pixelMap = tempPixelMap
@@ -195,7 +195,7 @@ public class AvifImage {
         }
     }
 
-    private func doCompleteCallBack(cJImageComplete:CJImageComplete):Unit{
+    private func doCompleteCallBack(cJImageComplete:ImageLoadResult):Unit{
         if(let Some(i) <- completeCallBack){
             i(cJImageComplete)
         }
@@ -208,7 +208,7 @@ public class AvifImage {
             .height(imageViewHeight)
             .objectFit(imageFit)
             .borderRadius(topLeft: topleftBorderRadius, topRight: toprightBorderRadius, bottomLeft: bottomleftBorderRadius, bottomRight: bottomrightBorderRadius)
-            .draggable(isDraggable)
+            //.draggable(isDraggable)
             .onComplete(doCompleteCallBack)
     }
 

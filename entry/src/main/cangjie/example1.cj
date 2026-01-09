@@ -4,24 +4,24 @@
 
 package ohos_app_cangjie_entry
 
-import ohos.component.*
-import ohos.state_manage.*
-import ohos.state_macro_manage.*
+import ohos.arkui.component.*
+import ohos.arkui.state_management.*
+import ohos.arkui.state_macro_manage.*
 import avif4cj.*
 import ohos.resource_manager.ResourceManager
-import ohos.image.PixelMap
-import ohos.image.InitializationOptions
-import ohos.image.createPixelMap
-import ohos.image.PixelMapFormat
-import ohos.image.Size
-import ohos.concurrency.launch
+import kit.ImageKit.PixelMap
+import kit.ImageKit.InitializationOptions
+import kit.ImageKit.createPixelMap
+import kit.ImageKit.PixelMapFormat
+import kit.ImageKit.Size
 import ohos.hilog.Hilog
+import ohos.base.launch
 
 @Entry
 @Component
 class EntryView11 {
-    let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(size: size)
+    let size: Size = Size(1,1)
+    let opts: InitializationOptions = InitializationOptions(size)
     let color: Array<UInt8> = Array<UInt8>(4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
@@ -36,7 +36,7 @@ class EntryView11 {
 
                 Button("showpic")
                     .fontSize(20)
-                    .onClick {
+                    .onClick ({
                         evt =>
                             let arr = getImageFromRawFile("a52.avif")
                             if (let Some(i) <- arr) {
@@ -48,9 +48,9 @@ class EntryView11 {
                                         let mHeight = j.getHeight()
                                         let colors: Array<UInt8> = Array<UInt8>(mWidth * mHeight * 4, repeat: 0)
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
-                                        let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                        let opts: InitializationOptions = InitializationOptions(editable: true,
-                                            pixelFormat: PixelMapFormat.RGBA_8888,size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                        let size: Size = Size(Int32(mWidth),Int32(mHeight))
+                                        let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true,
+                                            pixelFormat: PixelMapFormat.Rgba8888)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch {
                                             pixelMap = tempPixelMap
@@ -59,14 +59,14 @@ class EntryView11 {
                                     }
                                 }
                             }
-                        }
+                        })
             }.width(100.percent)
         }.height(100.percent)
     }
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {
