@@ -1,6 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib, CJAvifImageModel,CJAvifDecoder,CJReturnValue } from 'libohos_app_cangjie_avif4hybrid.so';
+import { CustomLib, CJAvifImageModel,CJAvifDecoder,CJReturnValue } from 'libark_interop_api_avif.so';
 
 export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 

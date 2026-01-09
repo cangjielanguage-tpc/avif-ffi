@@ -42,4 +42,5 @@ export declare interface CustomLib {
     CJAvifDecoder: {new (): CJAvifDecoder}
     CJAvifImageModel: {new (): CJAvifImageModel}
     CJReturnValue: {new (): CJReturnValue}
+    getLoadCJPage(model: CJAvifImageModel): void
 }
