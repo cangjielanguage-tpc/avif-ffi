@@ -114,7 +114,7 @@ export class AvifImageModel {
 
     /*
      * 图片数据加载成功触发回调，返回图片加载成功的状态值
-     * @param callback - 图片加载成功的回调函数，loadingStatus表示图片加载成功的状态值，当返回值为0时，表示图片数据加载成功。当返回值为1时，表示图片解码成功。
+     * @param callback - 图片加载成功的回调函数，loadingStatus表示图片加载成功的状态值，当loadingStatus的值为0时，表示图片数据加载成功。当loadingStatus的值为1时，表示图片解码成功。
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
@@ -255,6 +255,7 @@ export class AvifDecoderTS{
 }
 ```
 
+#### 1.1.2 其他接口
 
 class CJReturnValue 图片解析返回类
 ```ets
