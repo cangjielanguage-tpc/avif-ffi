@@ -48,8 +48,7 @@ class EntryView11 {
                                         let mHeight = j.getHeight()
                                         let colors: Array<UInt8> = Array<UInt8>(mWidth * mHeight * 4, repeat: 0)
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
-                                        let size: Size = Size(Int32(mWidth),Int32(mHeight))
-                                        let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true,
+                                        let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true,
                                             pixelFormat: PixelMapFormat.Rgba8888)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch {

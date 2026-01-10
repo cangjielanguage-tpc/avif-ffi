@@ -191,8 +191,7 @@ class EntryView1 {
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                     j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight))
-                                    let size: Size = Size(Int32(mWidth),Int32(mHeight))
-                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true, srcPixelFormat:PixelMapFormat.Rgba8888,pixelFormat: PixelMapFormat.Bgra8888)
+                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true,pixelFormat: PixelMapFormat.Bgra8888)
                                     pixelMap = createPixelMap(colors, opts)
                                     j.release()
                                 }
@@ -217,8 +216,7 @@ class EntryView1 {
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                     j.nthFrameffi(4, colors, Int32(mWidth),Int32(mHeight))
-                                    let size: Size = Size(Int32(mWidth),Int32(mHeight))
-                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
+                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                                     pixelMap = createPixelMap(colors, opts)
                                     j.release()
                                 }
@@ -238,8 +236,7 @@ class EntryView1 {
                                     let mHeight = j.getHeight()
                                     let colors: Array<UInt8> = Array<UInt8>(mWidth*mHeight*4, repeat: 0)
                                     j.decodeffi(i, colors, Int32(mWidth),Int32(mHeight))
-                                    let size: Size = Size(Int32(mWidth),Int32(mHeight))
-                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
+                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                                     pixelMap = createPixelMap(colors, opts)
                                     j.release()
                                 }
@@ -261,8 +258,7 @@ class EntryView1 {
                                 let colors: Array<UInt8> = Array<UInt8>()
                                 let res = j.nextFrameffi(colors, Int32(mWidth),Int32(mHeight))
                                 if(res == 0){
-                                    let size: Size = Size(Int32(mWidth),Int32(mHeight))
-                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mWidth),Int32(mHeight)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
+                                    let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                                     pixelMap = createPixelMap(colors, opts)
                                  }
                                  j.release()

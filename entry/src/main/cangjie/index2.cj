@@ -87,9 +87,8 @@ class EntryView2 {
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4), repeat: 0)
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
                                         //let endTime = SystemDateTime.getRealTime(isNano: true)
-                                        let size: Size = Size(Int32(mWidth),Int32(mHeight))
                                         let opts: InitializationOptions = InitializationOptions(
-                                            Size(Int32(mWidth),Int32(mHeight)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
+                                            Size(Int32(mHeight),Int32(mWidth)),editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                                         pixelMap = createPixelMap(colors, opts)
                                         //Hilog.error(0, "calcTime", "startTime=${startTime} endTime=${endTime} sjc=${endTime-startTime}")
                                         j.release()
@@ -131,8 +130,7 @@ class EntryView2 {
                                                      for (k in 0..frameCount) {
                                                         let colors: Array<UInt8> = Array<UInt8>(Int64(mWidth * mHeight * 4),repeat: 0)
                                                         p.nthFrameffi(Int32(k), colors, Int32(mWidth), Int32(mHeight))
-                                                        let size2: Size = Size(Int32(mWidth),Int32(mHeight))
-                                                        let opts: InitializationOptions = InitializationOptions(size2,editable: true,pixelFormat: PixelMapFormat.Rgba8888)
+                                                        let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true,pixelFormat: PixelMapFormat.Rgba8888)
                                                         let tempPixelMap = createPixelMap(colors, opts)
                                                         launch{
                                                              pixelMap = tempPixelMap
