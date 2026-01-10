@@ -121,7 +121,7 @@ public class AvifImage {
                               let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
                               j.nextFrameffi(colors, Int32(imageWidth),Int32(imageHeight))
                               //根据生成胡color重新生成pixelmap
-                              let size2: Size = Size(Int32(imageWidth),Int32(imageHeight))
+                              let size2: Size = Size(Int32(imageHeight),Int32(imageWidth))
                               let opts: InitializationOptions = InitializationOptions(size2,editable: true, pixelFormat: PixelMapFormat.Rgba8888)
                               let tempPixelMap = createPixelMap(colors, opts)
                               launch{
@@ -146,7 +146,7 @@ public class AvifImage {
                                      for (k in 0..frameCount) {
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
                                         j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
-                                        let size2: Size = Size(Int32(imageWidth),Int32(imageHeight))
+                                        let size2: Size = Size(Int32(imageHeight),Int32(imageWidth))
                                         let opts: InitializationOptions = InitializationOptions(size2,editable: true,pixelFormat: PixelMapFormat.Rgba8888)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch{
@@ -208,7 +208,7 @@ public class AvifImage {
             .height(imageViewHeight)
             .objectFit(imageFit)
             .borderRadius(topLeft: topleftBorderRadius, topRight: toprightBorderRadius, bottomLeft: bottomleftBorderRadius, bottomRight: bottomrightBorderRadius)
-            //.draggable(isDraggable) //TODO
+            .interopDraggable(isDraggable)
             .onComplete(doCompleteCallBack)
     }
 

@@ -38,7 +38,7 @@ func string2Length(value: String): Length {
             number.px
         case value.endsWith("%") =>
             //LengthType.percent(number/100.0)
-            (number/100.0).percent
+            number.percent
         case _ =>
             //LengthType.vp(number)
             number.vp
