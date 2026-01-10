@@ -6,7 +6,7 @@ internal import ohos.ark_interop.JSCallInfo
 internal import ohos.ark_interop.JSValue
 
 func testCJ(runtime: JSContext, callInfo: JSCallInfo): JSValue {
-    let result = "Hello ${callInfo[0].toString(runtime)}"
+    let result = "Hello ${callInfo[0].toString()}"
     runtime.string(result).toJSValue()
 }
 

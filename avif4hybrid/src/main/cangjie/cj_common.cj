@@ -4,7 +4,6 @@
 
 package ohos_app_cangjie_avif4hybrid
 import ohos.ark_interop.JSObject
-import ohos.base.LengthType
 import ohos.base.Length
 
 
@@ -30,40 +29,39 @@ func string2Length(value: String): Length {
         }
     }
     var number = Float64.tryParse(str) ?? 0.0
-    Hilog.error(0, "tag", "value=${value} number=${number.toString()}")
     return match {
         case value.endsWith("vp") =>
-            LengthType.vp(number)
+            //LengthType.vp(number)
+            number.vp
         case value.endsWith("px") =>
-            LengthType.px(number)
+            //LengthType.px(number)
+            number.px
         case value.endsWith("%") =>
-            LengthType.percent(number/100.0)
-        case value.endsWith("lpx") =>
-            LengthType.lpx(number)
-        case value.endsWith("fp") =>
-            LengthType.fp(number)
+            //LengthType.percent(number/100.0)
+            (number/100.0).percent
         case _ =>
-            LengthType.vp(number)
+            //LengthType.vp(number)
+            number.vp
     }
 }
 
 public func getLoadCJPage(ctx: JSContext, callInfo: JSCallInfo): JSValue {
     var model: ?CJAvifImageModel = None
     if (callInfo[0].typeof() != JSType.UNDEFINED) {
-        let cfgObj: JSObject = callInfo[0].asObject(ctx)
+        let cfgObj: JSObject = callInfo[0].asObject()
         let cfgExt: Option<JSExternal> = cfgObj.getAttachInfo()
         if (let Some(v) <- cfgExt) {
             model = v.cast<CJAvifImageModel>()
         }
     }
-    let elmetId = ViewStackProcessor.AllocateNewElmetIdForNextComponent()
-    ViewStackProcessor.StartGetAccessRecordingFor(elmetId)
+    let elmetId = ViewStackProcessor.allocateNewElmetIdForNextComponent()
+    ViewStackProcessor.startGetAccessRecordingFor(elmetId)
     let comp = CJAvifView(
         Option<CustomView>.None,
         cjmodel: ObservedProperty<Option<CJAvifImageModel>>("", model)
     )
     CustomView.create(comp)
-    ViewStackProcessor.StopGetAccessRecording()
+    ViewStackProcessor.stopGetAccessRecording()
     return ctx
         .function(
             {

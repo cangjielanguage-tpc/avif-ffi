@@ -4,13 +4,12 @@
 package ohos_app_cangjie_avif4hybrid
 
 import ohos.ark_interop_macro.Interop
-import ohos.component.Column
-import ohos.ark_interop.JSCurrentJSContext
+import ohos.arkui.component.Column
 import ohos.ark_interop.SharedObject
-import ohos.image.Component
-import ohos.state_macro_manage.*
-import ohos.component.*
-import ohos.state_manage.*
+import kit.ImageKit.Component
+import ohos.arkui.state_macro_manage.*
+import ohos.arkui.component.*
+import ohos.arkui.state_management.*
 internal import ohos.ark_interop.*
 internal import ohos.ark_interop_helper.*
 
@@ -94,24 +93,24 @@ class CJAvifView {
                 return ImageFit.Auto
             } else if (fit == "scaledown") {
                 return ImageFit.ScaleDown
-            } else if (fit == "top_start") {
-                return ImageFit.TOP_START
-            } else if (fit == "top") {
-                return ImageFit.TOP
-            } else if (fit == "top_end") {
-                return ImageFit.TOP_END
-            } else if (fit == "start") {
-                return ImageFit.START
-            } else if (fit == "center") {
-                return ImageFit.CENTER
-            } else if (fit == "end") {
-                return ImageFit.END
-            } else if (fit == "bottom_start") {
-                return ImageFit.BOTTOM_START
-            } else if (fit == "bottom") {
-                return ImageFit.BOTTOM
-            } else if (fit == "bottom_end") {
-                return ImageFit.BOTTOM_END
+//            } else if (fit == "top_start") {
+//                return ImageFit.TOP_START
+//            } else if (fit == "top") {
+//                return ImageFit.TOP
+//            } else if (fit == "top_end") {
+//                return ImageFit.TOP_END
+//            } else if (fit == "start") {
+//                return ImageFit.START
+//            } else if (fit == "center") {
+//                return ImageFit.CENTER
+//            } else if (fit == "end") {
+//                return ImageFit.END
+//            } else if (fit == "bottom_start") {
+//                return ImageFit.BOTTOM_START
+//            } else if (fit == "bottom") {
+//                return ImageFit.BOTTOM
+//            } else if (fit == "bottom_end") {
+//                return ImageFit.BOTTOM_END    //TODO
             }else {
                 return ImageFit.Contain
             }

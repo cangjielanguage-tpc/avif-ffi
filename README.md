@@ -3,10 +3,10 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.0-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
-<img alt="" src="https://img.shields.io/badge/cjc-v1.0.3-brightgreen" style="display: inline-block;" />
-<img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/cjc-v1.1.0-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/cjcov-NA%25-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
 </p>
 
@@ -50,10 +50,10 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 描述具体的编译过程：
 
 ```shell
-    1.先通过命令把代码下载下来,比如下载develop分支
-      git clone -b avif_hybrid --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+    1.先通过命令把代码下载下来
+      git clone -b 分支名 --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
               
-    2.选择avif4hybrid模块,点击Build菜单,然后点击 Make Module 'avif4hybrid' 等待编译完成,项目则编译成功
+    2.在deveco里选择avif4hybrid模块,点击Build菜单,然后点击 Make Module 'avif4hybrid' 等待编译完成,项目则编译成功
     
 ```
 
@@ -64,8 +64,8 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 ```ets
 用户如何在自己项目里引入avif-ffi，具体步骤如下：
 
-1. 通过git命令,把自己需要的avif-ffi分支拉下来,比如下载develop分支
-   git clone -b avif_hybrid --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
+1. 通过git命令,把自己需要的avif-ffi分支拉下来
+   git clone -b 分支名 --depth 1 https://gitcode.com/Cangjie-TPC/avif-ffi.git
    
 2. 把avif-ffi项目用deveco编译通过，方法如上面的编译构建
 

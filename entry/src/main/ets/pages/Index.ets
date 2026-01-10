@@ -293,33 +293,6 @@ struct Index {
         }
         .width('100%')
 
-        Row() {
-          Text("")// 宽度
-            .width(10)
-          Button("13. 点击事件")
-            .height(50)// 高度
-            .layoutWeight(1)// 容器尺寸确定时，元素与兄弟节点主轴布局尺寸按照权重进行分配，忽略本身尺寸设置仅在Row/Column/Flex布局中生效
-            .fontColor(0xFFFFFFFF)// 文本颜色
-            .backgroundColor(0xFFFF0000)// 背景颜色
-            .margin({ top: 5, bottom: 5 })// 外边距
-            .align(Alignment.Center)// 内容对齐方式
-            .fontSize(14)// 字体大小
-            .onClick(async e => {
-              // 点击动作触发该方法调用
-              const res = $r("app.media.a27");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
-              let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
-              let cjinfo = decoderTs.getInfoffi(validData1)
-              hilog.error(0,"test13","width="+cjinfo?.width+"  height="+cjinfo?.height+" depth="+cjinfo?.depth)
-              hilog.error(0,"test13","alphapresent="+cjinfo?.alphaPresent+"  framecount="+cjinfo?.frameCount+" repetitionCount="+cjinfo?.repetitionCount)
-              decoderTs.release()
-            })
-          Text("")// 宽度
-            .width(10)
-        }
-        .width('100%')
 
         Row() {
           Text("")// 宽度

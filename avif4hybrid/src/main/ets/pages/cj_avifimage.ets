@@ -1,6 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib, CJAvifImageModel,CJCjinfo,CJAvifDecoder,CJReturnValue } from 'libohos_app_cangjie_avif4hybrid.so';
+import { CustomLib, CJAvifImageModel, CJAvifDecoder, CJReturnValue } from 'libark_interop_api_avif.so';
 
 export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 
@@ -49,26 +49,26 @@ export struct AvifViewTS {
       if (this.model.imagePicHeight > 0) {
         cjAvifImageModel.setImagePicHeight(this.model.imagePicHeight)
       }
-      if (this.model.imageViewWidth != '' ) {
+      if (this.model.imageViewWidth != '') {
         cjAvifImageModel.setImageViewWidth(this.model.imageViewWidth)
       }
-      if (this.model.imageViewHeight != '' ) {
+      if (this.model.imageViewHeight != '') {
         cjAvifImageModel.setImageViewHeight(this.model.imageViewHeight)
       }
       if (this.model.imageFit != '') {
         cjAvifImageModel.setImageFit(this.model.imageFit)
       }
       cjAvifImageModel.setDraggable(this.model.isDraggable)
-      if (this.model.topleftBorderRadius != '' ) {
+      if (this.model.topleftBorderRadius != '') {
         cjAvifImageModel.setTopleftBorderRadius(this.model.topleftBorderRadius)
       }
-      if (this.model.toprightBorderRadius != '' ) {
+      if (this.model.toprightBorderRadius != '') {
         cjAvifImageModel.setToprightBorderRadius(this.model.toprightBorderRadius)
       }
-      if (this.model.bottomleftBorderRadius != '' ) {
+      if (this.model.bottomleftBorderRadius != '') {
         cjAvifImageModel.setBottomleftBorderRadius(this.model.bottomleftBorderRadius)
       }
-      if (this.model.bottomrightBorderRadius != '' ) {
+      if (this.model.bottomrightBorderRadius != '') {
         cjAvifImageModel.setBottomrightBorderRadius(this.model.bottomrightBorderRadius)
       }
       if (this.model.onCompleteCallback !== undefined) {
@@ -80,9 +80,7 @@ export struct AvifViewTS {
 }
 
 
-
 export class AvifImageModel {
-
   imageBuffer?: Uint8Array = undefined
   imagePicWidth: number = 0
   imagePicHeight: number = 0
@@ -116,6 +114,7 @@ export class AvifImageModel {
     return this
 
   }
+
   public setImageViewHeight(imageViewHeight: string): AvifImageModel {
     this.imageViewHeight = imageViewHeight
     return this
@@ -126,27 +125,27 @@ export class AvifImageModel {
     return this
   }
 
-  public  setDraggable(draggable: boolean): AvifImageModel {
+  public setDraggable(draggable: boolean): AvifImageModel {
     this.isDraggable = draggable
     return this
   }
 
-  public  setTopleftBorderRadius(topleftBorderRadius: string): AvifImageModel {
+  public setTopleftBorderRadius(topleftBorderRadius: string): AvifImageModel {
     this.topleftBorderRadius = topleftBorderRadius
     return this
   }
 
-  public  setToprightBorderRadius(toprightBorderRadius: string): AvifImageModel {
+  public setToprightBorderRadius(toprightBorderRadius: string): AvifImageModel {
     this.toprightBorderRadius = toprightBorderRadius
     return this
   }
 
-  public  setBottomleftBorderRadius(bottomleftBorderRadius: string): AvifImageModel {
+  public setBottomleftBorderRadius(bottomleftBorderRadius: string): AvifImageModel {
     this.bottomleftBorderRadius = bottomleftBorderRadius
     return this
   }
 
-  public  setBottomrightBorderRadius(bottomrightBorderRadius: string): AvifImageModel {
+  public setBottomrightBorderRadius(bottomrightBorderRadius: string): AvifImageModel {
     this.bottomrightBorderRadius = bottomrightBorderRadius
     return this
   }
@@ -157,72 +156,118 @@ export class AvifImageModel {
   }
 }
 
-export class AvifDecoderTS{
-
+export class AvifDecoderTS {
   cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
+  decodeRes: CJAvifDecoder | undefined = undefined
 
-  public create(encoded:Uint8Array):CJAvifDecoder|undefined{
-      return this.cjAvifDecoder.create(encoded)
+  public create(encoded: Uint8Array): CJAvifDecoder | undefined {
+    this.decodeRes = this.cjAvifDecoder.create(encoded)
+    return this.decodeRes
+  }
+
+  public createWithThread(encoded: Uint8Array, threads: number): CJAvifDecoder | undefined {
+    this.decodeRes = this.cjAvifDecoder.createWithThread(encoded, threads)
+    return this.decodeRes
+  }
+
+  public getWidth(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getWidth()
+    } else {
+      return 0
     }
-
-  public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined{
-      return this.cjAvifDecoder.createWithThread(encoded,threads)
   }
 
-  public getWidth():number{
-    return this.cjAvifDecoder.getWidth()
+  public getHeight(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getHeight()
+    } else {
+      return 0
+    }
   }
 
-  public getHeight():number{
-    return this.cjAvifDecoder.getHeight()
+  public getDepth(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getDepth()
+    } else {
+      return 0
+    }
   }
 
-  public getDepth():number{
-    return this.cjAvifDecoder.getDepth()
+  public getAlphaPresent(): boolean {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getAlphaPresent()
+    } else {
+      return false
+    }
   }
 
-  public getAlphaPresent():boolean{
-    return this.cjAvifDecoder.getAlphaPresent()
+  public getFrameCount(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getFrameCount()
+    } else {
+      return 0
+    }
   }
 
-  public getFrameCount():number{
-    return this.cjAvifDecoder.getFrameCount()
+  public getRepetitionCount(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getRepetitionCount()
+    } else {
+      return 0
+    }
   }
 
-  public getRepetitionCount():number{
-    return this.cjAvifDecoder.getRepetitionCount()
+  public getFrameDurations(): Array<number> | undefined {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.getFrameDurations()
+    } else {
+      return undefined
+    }
   }
 
-  public getFrameDurations(): Array<number> | undefined{
-    return this.cjAvifDecoder.getFrameDurations()
+  public isAvifImageffi(encoded: Uint8Array): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.isAvifImageffi(encoded)
+    } else {
+      return 0
+    }
   }
 
-  public isAvifImageffi(encoded: Uint8Array): number{
-    return this.cjAvifDecoder.isAvifImageffi(encoded)
+
+  public nextFrameIndexffi(): number {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.nextFrameIndexffi()
+    } else {
+      return -1
+    }
   }
 
-  public getInfoffi(encoded: Uint8Array): CJCjinfo | undefined{
-    return this.cjAvifDecoder.getInfoffi(encoded)
+  public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.nextFrameffi(imageWidth, imageHeight)
+    } else {
+      return new CJReturnValue()
+    }
   }
 
-  public nextFrameIndexffi(): number{
-    return this.cjAvifDecoder.nextFrameIndexffi()
+  public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.nthFrameffi(index, imageWidth, imageHeight)
+    } else {
+      return new CJReturnValue()
+    }
   }
 
-  public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
+  public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue {
+    if (this.decodeRes) {
+      return this.cjAvifDecoder.decodeffi(encoded, imageWidth, imageHeight)
+    } else {
+      return new CJReturnValue()
+    }
   }
 
-  public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
-  }
-
-  public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
-    return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
-  }
-
-  public release(): void{
+  public release(): void {
     this.cjAvifDecoder.release()
   }
-
 }
