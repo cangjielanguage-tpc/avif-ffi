@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v2.0.0-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.1.0-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjcov-86.2%25-brightgreen" style="display: inline-block;" />
@@ -99,26 +99,24 @@ avif-ffi是一个对avif图片进行解码显示的仓颉库，解码后静态av
 ```cangjie
 package ohos_app_cangjie_entry
 
-import ohos.component.*
-import ohos.state_manage.*
-import ohos.state_macro_manage.*
+import ohos.arkui.component.*
+import ohos.arkui.state_management.*
+import ohos.arkui.state_macro_manage.*
 import avif4cj.*
 import ohos.resource_manager.ResourceManager
-import ohos.image.PixelMap
-import ohos.image.InitializationOptions
-import ohos.image.createPixelMap
-import ohos.image.PixelMapFormat
-import ohos.image.Size
-import ohos.concurrency.launch
-import ohos.base.*
-import ohos.ability.getStageContext
+import kit.ImageKit.PixelMap
+import kit.ImageKit.InitializationOptions
+import kit.ImageKit.createPixelMap
+import kit.ImageKit.PixelMapFormat
+import kit.ImageKit.Size
 import ohos.hilog.Hilog
+import ohos.base.launch
 
 @Entry
 @Component
-class EntryView {
-    let size: Size = Size(width: 1, height: 1)
-    let opts: InitializationOptions = InitializationOptions(size: size)
+class EntryView11 {
+    let size: Size = Size(1,1)
+    let opts: InitializationOptions = InitializationOptions(size)
     let color: Array<UInt8> = Array<UInt8>(4, repeat: 0)
     @State
     var pixelMap: PixelMap = createPixelMap(color, opts)
@@ -133,9 +131,8 @@ class EntryView {
 
                 Button("showpic")
                     .fontSize(20)
-                    .onClick {
+                    .onClick ({
                         evt =>
-                            //需确保自己项目的raw下面有对应的文件
                             let arr = getImageFromRawFile("a52.avif")
                             if (let Some(i) <- arr) {
                                 let avif: ?AvifDecoder = AvifDecoder.create(i)
@@ -146,9 +143,8 @@ class EntryView {
                                         let mHeight = j.getHeight()
                                         let colors: Array<UInt8> = Array<UInt8>(mWidth * mHeight * 4, repeat: 0)
                                         j.nextFrameffi(colors, Int32(mWidth), Int32(mHeight))
-                                        let size: Size = Size(width: Int32(mWidth), height: Int32(mHeight))
-                                        let opts: InitializationOptions = InitializationOptions(editable: true,
-                                            pixelFormat: PixelMapFormat.RGBA_8888,size: Size(width: Int32(mWidth), height: Int32(mHeight)))
+                                        let opts: InitializationOptions = InitializationOptions(Size(Int32(mHeight),Int32(mWidth)),editable: true,
+                                            pixelFormat: PixelMapFormat.Rgba8888)
                                         let tempPixelMap = createPixelMap(colors, opts)
                                         launch {
                                             pixelMap = tempPixelMap
@@ -157,22 +153,21 @@ class EntryView {
                                     }
                                 }
                             }
-                        }
+                        })
             }.width(100.percent)
         }.height(100.percent)
     }
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            //globalAbilityContext为?AblityContext类型，自行提供
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow()))
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {
             return None
         }
     }
-    
+
     protected override func aboutToDisappear() {
         try{
             this.pixelMap.release()
@@ -196,26 +191,23 @@ class EntryView {
 
 示例代码如下：
 ```cangjie
-
 package ohos_app_cangjie_entry
 
-import ohos.state_manage.*
-import ohos.state_macro_manage.*
-import ohos.component.*
+import ohos.arkui.state_management.*
+import ohos.arkui.state_macro_manage.*
+import ohos.arkui.component.*
 import ohos.base.*
 import ohos.resource_manager.ResourceManager
 import avif4cj.*
-import ohos.ability.getStageContext
 
 @Entry
 @Component
-class EntryView {
+class EntryView12 {
 
     var imageValue51:?Array<UInt8> = None
     var imageValue25:?Array<UInt8> = None
 
     protected override func aboutToAppear() {
-        //需确保自己项目的raw下面有对应的文件
         imageValue51 = getImageFromRawFile("a51.avif") //静态图
         imageValue25 = getImageFromRawFile("a25.avif") //动态图
     }
@@ -225,34 +217,15 @@ class EntryView {
     func build() {
         Scroll(this.scroller){
             Column(){
-               /*
-                * 参数 imageBuffer - avif文件的字节数组信息 必填
-                * 参数 imageViewWidth - 图片显示控件的宽度 可缺省 默认值是 100.percent
-                * 参数 imageViewHeight - 图片显示控件的高度 可缺省 默认值是 100.percent
-                * 参数 imagePicWidth - 要显示的图片的宽度 单位是像素px 可缺省 默认值是图片原始宽度 
-                * 参数 imagePicHeight - 要显示的图片的高度 单位是像素px 可缺省 默认值是图片原始高度 
-                * 参数 imageFit - 图片和控件的对齐方式 可缺省 默认值是 ImageFit.Contain
-                * 参数 isDraggable - 图片是否可拖拽 可缺省 默认值是 false
-                * 参数 topleftBorderRadius - 图片的左上角的圆角弧度 可缺省 默认值是 0.vp
-                * 参数 toprightBorderRadius - 图片的右上角的圆角弧度 可缺省 默认值是 0.vp
-                * 参数 bottomleftBorderRadius - 图片的左下角的圆角弧度 可缺省 默认值是 0.vp
-                * 参数 bottomrightBorderRadius - 图片的右下角的圆角弧度 可缺省 默认值是 0.vp
-                * 参数 completeCallBack - 参数类型是 Option<(CJImageComplete)->Unit> 图片加载成功后的回调 可缺省 
-                */
-                AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None,
-                topleftBorderRadius:20.vp,toprightBorderRadius:20.vp,bottomleftBorderRadius:20.vp,bottomrightBorderRadius:20.vp,
-                completeCallBack:Option<(CJImageComplete)->Unit>.None,isDraggable:true)
-                AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None,
-                topleftBorderRadius:20.vp,toprightBorderRadius:20.vp,bottomleftBorderRadius:20.vp,bottomrightBorderRadius:20.vp,
-                completeCallBack:Option<(CJImageComplete)->Unit>.None,isDraggable:true)
+                AvifImage(imageBuffer:imageValue25,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
+                AvifImage(imageBuffer:imageValue51,imageViewWidth:600.px,imageViewHeight:400.px,imagePicWidth:600,imagePicHeight:400,imageFit:ImageFit.None)
             }
         }
     }
 
     private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
         try {
-            //globalAbilityContext为?AblityContext类型，自行提供
-            let resourceManager = ResourceManager.getResourceManager(getStageContext(globalAbilityContext.getOrThrow())) 
+            let resourceManager = globalAbilityContext.getOrThrow().resourceManager
             let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
             return arr
         } catch (e: Exception) {
@@ -260,8 +233,6 @@ class EntryView {
         }
     }
 }
-
-
 ```
 
 执行结果如下：
