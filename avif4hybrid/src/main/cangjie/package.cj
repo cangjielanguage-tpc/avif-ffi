@@ -20,3 +20,62 @@ internal import std.convert.Parsable
 internal import ohos.hilog.Hilog
 internal import ohos.device_info.DeviceInfo
 internal import ohos.image.createImageSource
+import ohos.image.PixelMap
+import stdx.crypto.digest.MD5
+import stdx.encoding.hex.toHexString
+import std.fs.exists
+import std.fs.Directory
+import std.fs.File
+import std.fs.OpenMode
+
+
+//这个key是多方因素组成
+let memoryMap: HashMap<String, PixelMap> = HashMap<String, PixelMap>()
+let cacheDirPath = "/data/storage/el2/base/haps/entry/cache/avifcache"
+
+func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {
+    var md5Instance = MD5()
+    md5Instance.write(buffer)
+    var md: Array<Byte> = md5Instance.finish()
+    var result: String = toHexString(md)
+    return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
+}
+
+// func pixelmapToFile(pixelMap:PixelMap,fileName:String): Bool {
+//    let imagePacker : ImagePacker = createImagePacker()
+//    //TODO 没有文件夹就创建
+//    let path = cacheDirPath2+"/"+fileName
+//    let tempFile = FileFs.open(path,mode:OpenMode.CREATE.mode|OpenMode.READ_WRITE.mode)
+//    let packingOption = PackingOption("image/png",100)
+//    try{
+//        imagePacker.packToFile(pixelMap, IntNative(tempFile.fd), packingOption)
+//        return true
+//    }catch(e:Exception){
+//        Hilog.error(0,"exception","${e.toString()}")
+//        return false
+//    }
+//}
+
+func colorToFile(key: String, buffer: Array<UInt8>, width: Int64, height: Int64): Bool {
+    try {
+        let dirPath = cacheDirPath
+        if (!exists(dirPath)) {
+            Directory.create(dirPath)
+        }
+        let filePath = dirPath + "/" + key
+        let tempFile = File(filePath, OpenMode.ReadWrite)
+        let imageInfoArr: Array<UInt8> = Array<UInt8>(4, repeat: 0)
+        imageInfoArr[0] = UInt8(width >> 8 & 0xFF)
+        imageInfoArr[1] = UInt8(width & 0xFF)
+        imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
+        imageInfoArr[3] = UInt8(height & 0xFF)
+        tempFile.write(imageInfoArr)
+        tempFile.write(buffer)
+        tempFile.flush()
+        tempFile.close()
+        return true
+    } catch (e: Exception) {
+        Hilog.error(0, "exception", "${e.toString()}")
+        return false
+    }
+}

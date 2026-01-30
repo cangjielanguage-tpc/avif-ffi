@@ -30,7 +30,7 @@ func string2Length(value: String): Length {
         }
     }
     var number = Float64.tryParse(str) ?? 0.0
-    Hilog.error(0, "tag", "value=${value} number=${number.toString()}")
+    //Hilog.error(0, "tag", "value=${value} number=${number.toString()}")
     return match {
         case value.endsWith("vp") =>
             LengthType.vp(number)
