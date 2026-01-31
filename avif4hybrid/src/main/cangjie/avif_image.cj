@@ -34,13 +34,14 @@ import std.time.DateTime
 import std.fs.exists
 import std.fs.File
 import std.fs.OpenMode
+import ohos.ability.getStageContext
 
 @Component
 public class AvifImage {
 
     //图片源数据 必传
     @Link
-    var imageBuffer: ?Array<UInt8>
+    var uri: String
 
     //图片宽度
     @State
@@ -101,141 +102,84 @@ public class AvifImage {
     var isLoop: Bool = true
 
     var key = ""
+    var sjc1 = 0
 
     protected override func aboutToAppear() {
-        let sjc1 = DateTime
-            .now()
-            .toUnixTimeStamp()
-            .toNanoseconds()
-        if (let Some(i) <- imageBuffer) {
-            key = getmd5key(i, imagePicWidth, imagePicHeight)
-            let memPixelMap: ?PixelMap = memoryMap.get(key)
-            let fileExist = exists(cacheDirPath + "/" + key)
-            if (let Some(map) <- memPixelMap) {
-                //如果有值
-                pixelMap = map
-                let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                Hilog.error(0, "memory", "走的是内存缓存 耗时${sjc2 - sjc1}")
-                return
-            } else if (fileExist) {
-                spawn {
-                    let filePath = cacheDirPath + "/" + key
-                    let source: Array<UInt8> = File.readFrom(filePath)
-                    let finalWidth: Int32 = Int32(UInt16(source[0]) << 8 | UInt16(source[1]))
-                    let finalHeight: Int32 = Int32(UInt16(source[2]) << 8 | UInt16(source[3]))
-                    let colors = source[4..source.size]
-                    let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                    let opts: InitializationOptions = InitializationOptions(editable: true,
-                        pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                    let tempPixelMap = createPixelMap(colors, opts)
-                    memoryMap.add(key, tempPixelMap)
-                    launch {
-                        let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                        Hilog.error(0, "local", "走的是本地缓存 耗时${sjc2 - sjc1}")
-                        pixelMap = tempPixelMap
-                    }
-                }
-                return
-            } else {
-                let avif: ?AvifDecoder = AvifDecoder.create(i)
-                if (let Some(j) <- avif) {
-                    //分为单帧和多帧
-                    let frameCount: Int64 = j.getFrameCount()
-                    var imageTempWidth = j.getWidth()
-                    var imageTempHeight = j.getHeight()
-                    if (imagePicWidth != 0) {
-                        imageTempWidth = imagePicWidth
-                    }
-                    if (imagePicHeight != 0) {
-                        imageTempHeight = imagePicHeight
-                    }
-                    let imageWidth = imageTempWidth
-                    let imageHeight = imageTempHeight
-                    if (frameCount <= 0) {
-                        throw Exception("frameCount can not be <= 0")
-                    } else {
-                        if (frameCount == 1) {
-                            //单帧图
-                            spawn {
-                                let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
-                                j.nextFrameffi(colors, Int32(imageWidth), Int32(imageHeight))
-                                //根据生成胡color重新生成pixelmap
-                                let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                                let opts: InitializationOptions = InitializationOptions(editable: true,
-                                    pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                                let tempPixelMap = createPixelMap(colors, opts)
-                                launch {
-                                    let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                                    Hilog.error(0, "memory", "没有走缓存 耗时${sjc2 - sjc1}")
-                                    pixelMap = tempPixelMap
-                                }
-                                //保存一份到本地存储
-                                //pixelmapToFile(tempPixelMap, key)
-                                //保存一份到本地存储
-                                colorToFile(key,colors,imageWidth,imageHeight)
-                                //这里生成了就要保存到内存中
-                                memoryMap.add(key, tempPixelMap)
-                                j.release()
-                            }
-                            return
-                        } else {
-                            //多帧图
-                            isSinglePic = false
-                            if (j
-                                .getFrameDurations()
-                                .isNone()) {
-                                throw Exception("FrameDurations can not be None")
-                            }
-                            if (j
-                                .getFrameDurations()
-                                .getOrThrow()
-                                .size != frameCount) {
-                                throw Exception("FrameDurations should be equal to frameCount")
-                            }
-                            let durationList: Array<Float64> = j
-                                .getFrameDurations()
-                                .getOrThrow()
-                            spawn {
-                                while (isLoop) {
-                                    if (pixelMapList.size != frameCount) {
-                                        for (k in 0..frameCount) {
-                                            let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),
-                                                repeat: 0)
-                                            j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
-                                            let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                                            let opts: InitializationOptions = InitializationOptions(editable: true,
-                                                pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                                            let tempPixelMap = createPixelMap(colors, opts)
-                                            launch {
-                                                pixelMap = tempPixelMap
-                                            }
-                                            sleep(durationList[Int64(k)] * Duration.second)
-                                            pixelMapList.add(tempPixelMap)
-                                        }
-                                    } else {
-                                        j.release()
-                                        for (k in 0..pixelMapList.size) {
-                                            let tempPixelMap = pixelMapList
-                                                .get(k)
-                                                .getOrThrow()
-                                            launch {
-                                                pixelMap = tempPixelMap
-                                            }
-                                            sleep(durationList[Int64(k)] * Duration.second)
-                                        }
-                                    }
-                                }
-                            }
-                            return
-                        }
-                    }
-                } else {
-                    Hilog.error(0, "aviflog",
-                        "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
+        sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+        key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
+        let memPixelMap: ?CacheBean = memoryMap.get(key)
+        let fileExist = exists(cacheDirPath + "/" + key)
+
+        if (let Some(map) <- memPixelMap) {
+            //如果有值
+            if(let Some(i) <- map.pixelMap){
+                pixelMap = i
+            }else{
+                //这里是多图的内存缓存逻辑了
+            }
+            let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+            Hilog.error(0, "memory", "走的是内存缓存 耗时${sjc2 - sjc1}")
+            return
+        } else if (fileExist) {
+            spawn {
+                let filePath = cacheDirPath + "/" + key
+                let source: Array<UInt8> = File.readFrom(filePath)
+                let finalWidth: Int32 = Int32(UInt16(source[0]) << 8 | UInt16(source[1]))
+                let finalHeight: Int32 = Int32(UInt16(source[2]) << 8 | UInt16(source[3]))
+                let colors = source[4..source.size]
+                let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
+                let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                let tempPixelMap = createPixelMap(colors, opts)
+                let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
+                memoryMap.add(key, cacheBean)
+                launch {
+                    let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+                    Hilog.error(0, "local", "走的是本地缓存 耗时${sjc2 - sjc1}")
+                    pixelMap = tempPixelMap
                 }
             }
+            return
         } else {
-            throw Exception("imageBuffer can not be none")
+            if (this.uri.startsWith("http")) {
+                //把数据下载下来
+                ImgHttp.request(this.uri, {
+                    e, imageBuffer => dealWithBuffer(imageBuffer)
+                })
+            } else if(this.uri.startsWith("rawfile://")){
+                let fileName = this.uri.removePrefix("rawfile://")
+                let imageBuffer = getImageFromRawFile(fileName)
+                dealWithBuffer(imageBuffer)
+            } else if(this.uri.startsWith("media://")){
+                let mediaName = this.uri.removePrefix("media://")
+                let imageBuffer = getImageFromMedia(mediaName)
+                dealWithBuffer(imageBuffer)
+            }else{
+                let localFilePath = this.uri
+                let imageBuffer: Array<UInt8> = File.readFrom(localFilePath)
+                dealWithBuffer(imageBuffer)
+            }
+        }
+    }
+
+    private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
+        try {
+            let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+            let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
+            return arr
+        } catch (e: Exception) {
+            Hilog.error(0,"rawfile","${e.toString()}")
+            return None
+        }
+    }
+
+    private func getImageFromMedia(mediaName: String): ?Array<UInt8> {
+        try {
+            let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+            let arr: Array<UInt8> = resourceManager.getMediaByName(mediaName,0)
+            return arr
+        } catch (e: Exception) {
+            Hilog.error(0,"media","${e.toString()}")
+            return None
         }
     }
 
@@ -247,10 +191,7 @@ public class AvifImage {
             } else {
                 //多帧就release list 不要release pixelmap 会导致重复release
                 for (i in 0..pixelMapList.size) {
-                    pixelMapList
-                        .get(i)
-                        .getOrThrow()
-                        .release()
+                    pixelMapList.get(i).getOrThrow().release()
                 }
                 isLoop = false
             }
@@ -262,6 +203,96 @@ public class AvifImage {
     private func doCompleteCallBack(cJImageComplete: CJImageComplete): Unit {
         if (let Some(i) <- completeCallBack) {
             i(cJImageComplete.loadingStatus)
+        }
+    }
+
+    private func dealWithBuffer(imageBuffer: ?Array<UInt8>): Unit {
+        if (let Some(i) <- imageBuffer) {
+            let avif: ?AvifDecoder = AvifDecoder.create(i)
+            if (let Some(j) <- avif) {
+                //分为单帧和多帧
+                let frameCount: Int64 = j.getFrameCount()
+                var imageTempWidth = j.getWidth()
+                var imageTempHeight = j.getHeight()
+                if (imagePicWidth != 0) {
+                    imageTempWidth = imagePicWidth
+                }
+                if (imagePicHeight != 0) {
+                    imageTempHeight = imagePicHeight
+                }
+                let imageWidth = imageTempWidth
+                let imageHeight = imageTempHeight
+                if (frameCount <= 0) {
+                    throw Exception("frameCount can not be <= 0")
+                } else {
+                    if (frameCount == 1) {
+                        //单帧图
+                        spawn {
+                            let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
+                            j.nextFrameffi(colors, Int32(imageWidth), Int32(imageHeight))
+                            //根据生成胡color重新生成pixelmap
+                            let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                            let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                            let tempPixelMap = createPixelMap(colors, opts)
+                            launch {
+                                let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+                                Hilog.error(0, "net", "走的是网络 耗时${sjc2 - sjc1}")
+                                pixelMap = tempPixelMap
+                            }
+                            //保存一份到本地存储
+                            colorToFile(key, colors, imageWidth, imageHeight)
+                            //这里生成了就要保存到内存中
+                            let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
+                            memoryMap.add(key, cacheBean)
+                            j.release()
+                        }
+                        return
+                    } else {
+                        //多帧图
+                        isSinglePic = false
+                        if (j.getFrameDurations().isNone()) {
+                            throw Exception("FrameDurations can not be None")
+                        }
+                        if (j.getFrameDurations().getOrThrow().size != frameCount) {
+                            throw Exception("FrameDurations should be equal to frameCount")
+                        }
+                        let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
+                        spawn {
+                            while (isLoop) {
+                                if (pixelMapList.size != frameCount) {
+                                    for (k in 0..frameCount) {
+                                        let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
+                                        j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
+                                        let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                                        let tempPixelMap = createPixelMap(colors, opts)
+                                        launch {
+                                            pixelMap = tempPixelMap
+                                        }
+                                        sleep(durationList[Int64(k)] * Duration.second)
+                                        pixelMapList.add(tempPixelMap)
+                                    }
+                                } else {
+                                    j.release()
+                                    for (k in 0..pixelMapList.size) {
+                                        let tempPixelMap = pixelMapList.get(k).getOrThrow()
+                                        launch {
+                                            pixelMap = tempPixelMap
+                                        }
+                                        sleep(durationList[Int64(k)] * Duration.second)
+                                    }
+                                }
+                            }
+                        }
+                        return
+                    }
+                }
+            } else {
+                Hilog.error(0, "aviflog",
+                    "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
+            }
+        } else {
+            throw Exception("imageBuffer can not be none")
         }
     }
 

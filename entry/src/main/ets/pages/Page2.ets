@@ -12,34 +12,20 @@ struct page2Test {
 
   @State ready: boolean = false
 
+
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a2");
-    const res3 = $r("app.media.a3");
-    const res5 = $r("app.media.a5");
-    const res6 = $r("app.media.a6");
-    const res8 = $r("app.media.a8");
 
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    let array3 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res3.id)
-    let array5 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res5.id)
-    let array6 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res6.id)
-    let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
 
-    if (array2) {
-      this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px')
-    }
-    if (array3) {
-      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px')
-    }
-    if (array5) {
-      this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px')
-    }
-    if (array6) {
-      this.avifImageModel6.setImageBuffer(array6).setImageViewWidth('600px').setImageViewHeight('400px')
-    }
-    if (array8) {
-      this.avifImageModel8.setImageBuffer(array8).setImageViewWidth('600px').setImageViewHeight('400px')
-    }
+      this.avifImageModel2.setUri("rawfile://a2.avif")
+
+      this.avifImageModel3.setUri("rawfile://a3.avif")
+
+      this.avifImageModel5.setUri("rawfile://a5.avif")
+
+      this.avifImageModel6.setUri("rawfile://a6.avif")
+
+      this.avifImageModel8.setUri("rawfile://a8.avif")
+
     this.ready = true
   }
 

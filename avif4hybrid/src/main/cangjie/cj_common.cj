@@ -74,6 +74,23 @@ public func getLoadCJPage(ctx: JSContext, callInfo: JSCallInfo): JSValue {
         .toJSValue()
 }
 
+/**
+ * 设置StageContext互操作函数
+ *
+ * @param runtime JSContext
+ * @param callInfo 接口数据
+ * @return JSValue 返回值
+ */
+func setGlobalContext(runtime: JSContext, callInfo: JSCallInfo): JSValue {
+    let jsEnv = runtime.getNapiEnv()
+    let jsValue = arkTsValuetoNapiValue(jsEnv, callInfo[0])
+    if (isStageMode(jsEnv, jsValue)) {
+        GlobalContext.setContext(getContextStageMode(jsEnv, jsValue))
+    } else {
+    }
+    return runtime.undefined().toJSValue()
+}
+
 
 
 

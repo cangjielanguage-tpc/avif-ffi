@@ -1,3 +1,5 @@
+import { Context } from "@kit.AbilityKit"
+
 export declare class CJReturnValue {
     code: number
     color: ArrayBuffer | undefined
@@ -5,7 +7,7 @@ export declare class CJReturnValue {
 }
 
 export declare class CJAvifImageModel {
-    setImageBuffer(imageBuffer: ArrayBuffer): void
+    setUri(uri: string): void
     setImagePicWidth(imagePicWidth: number): void
     setImagePicHeight(imagePicHeight: number): void
     setImageViewWidth(imageViewWidth: string): void
@@ -43,4 +45,6 @@ export declare interface CustomLib {
     CJAvifImageModel: {new (): CJAvifImageModel}
     CJReturnValue: {new (): CJReturnValue}
     getLoadCJPage(model: CJAvifImageModel): void
+    setGlobalContext(context: Context): void
+
 }

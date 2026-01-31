@@ -4,42 +4,35 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct page1Test {
+  @State avifImageModel1: AvifImageModel = new AvifImageModel()
   @State avifImageModel2: AvifImageModel = new AvifImageModel()
   @State avifImageModel3: AvifImageModel = new AvifImageModel()
+  @State avifImageModel4: AvifImageModel = new AvifImageModel()
   @State avifImageModel5: AvifImageModel = new AvifImageModel()
-  @State avifImageModel6: AvifImageModel = new AvifImageModel()
-  @State avifImageModel8: AvifImageModel = new AvifImageModel()
 
   @State ready: boolean = false
 
+  url1 = 'https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif'
+  url2 = 'https://pic7.inter.ptqy.gitv.tv/image/20230620/40/02/v_173008524_m_601_284_160.avif'
+  url3 = 'https://pic8.iqiyipic.com/image/20250701/ac/18/a_100628502_m_601_m2_579_772.avif'
+  url4 = 'https://m.inter.ptqy.gitv.tv/u4/image/20250214/18/3c/pv_7438183095956800_d_601_592_333.avif'
+  url5 = 'https://pic2.inter.ptqy.gitv.tv/image/20211129/8d/7c/a_502637340006_d_705_402_556.avif'
+
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a2");
-    const res3 = $r("app.media.a3");
-    const res5 = $r("app.media.a5");
-    const res6 = $r("app.media.a6");
-    const res8 = $r("app.media.a8");
 
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    let array3 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res3.id)
-    let array5 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res5.id)
-    let array6 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res6.id)
-    let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
 
-    if (array2) {
-      this.avifImageModel2.setImageBuffer(array2)
-    }
-    if (array3) {
-      this.avifImageModel3.setImageBuffer(array3)
-    }
-    if (array5) {
-      this.avifImageModel5.setImageBuffer(array5)
-    }
-    if (array6) {
-      this.avifImageModel6.setImageBuffer(array6)
-    }
-    if (array8) {
-      this.avifImageModel8.setImageBuffer(array8)
-    }
+
+
+      this.avifImageModel1.setUri(this.url1)
+
+      this.avifImageModel2.setUri(this.url2)
+
+      this.avifImageModel3.setUri(this.url3)
+
+      this.avifImageModel4.setUri(this.url4)
+
+      this.avifImageModel5.setUri(this.url5)
+
     this.ready = true
   }
 
@@ -48,11 +41,11 @@ struct page1Test {
       Scroll() {
         Column() {
           if (this.ready) {
+            AvifViewTS({ model: this.avifImageModel1 })
             AvifViewTS({ model: this.avifImageModel2 })
             AvifViewTS({ model: this.avifImageModel3 })
+            AvifViewTS({ model: this.avifImageModel4 })
             AvifViewTS({ model: this.avifImageModel5 })
-            AvifViewTS({ model: this.avifImageModel6 })
-            AvifViewTS({ model: this.avifImageModel8 })
 
           }
         }

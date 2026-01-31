@@ -16,7 +16,8 @@ internal import ohos.ark_interop_helper.*
 
 @Interop[ArkTS]
 public class CJAvifImageModel {
-    var imageBuffer: ?Array<Byte> = None
+    //var imageBuffer: ?Array<Byte> = None
+    var uri:String = ""
     var imagePicWidth: Int64 = 0
     var imagePicHeight: Int64 = 0
     var imageViewWidth: String = "0.vp"
@@ -32,8 +33,11 @@ public class CJAvifImageModel {
     public init() {
     }
 
-    public func setImageBuffer(imageBuffer: Array<Byte>): Unit {
-        this.imageBuffer = imageBuffer
+//    public func setImageBuffer(imageBuffer: Array<Byte>): Unit {
+//        this.imageBuffer = imageBuffer
+//    }
+    public func setUri(uri: String): Unit {
+        this.uri = uri
     }
     public func setImagePicWidth(imagePicWidth: Int64): Unit {
         this.imagePicWidth = imagePicWidth
@@ -125,7 +129,7 @@ class CJAvifView {
     func build() {
         Column() {
             if (let Some(v) <- this.cjmodel) {
-                AvifImage(imageBuffer: v.imageBuffer,
+                AvifImage(uri: v.uri,
                     imageViewWidth:string2Length(v.imageViewWidth),
                     imageViewHeight: string2Length(v.imageViewHeight),
                     imagePicWidth: v.imagePicWidth,

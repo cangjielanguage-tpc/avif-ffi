@@ -30,7 +30,7 @@ import std.fs.OpenMode
 
 
 //这个key是多方因素组成
-let memoryMap: HashMap<String, PixelMap> = HashMap<String, PixelMap>()
+let memoryMap: HashMap<String, CacheBean> = HashMap<String, CacheBean>()
 let cacheDirPath = "/data/storage/el2/base/haps/entry/cache/avifcache"
 
 func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {
@@ -41,20 +41,6 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
     return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
 }
 
-// func pixelmapToFile(pixelMap:PixelMap,fileName:String): Bool {
-//    let imagePacker : ImagePacker = createImagePacker()
-//    //TODO 没有文件夹就创建
-//    let path = cacheDirPath2+"/"+fileName
-//    let tempFile = FileFs.open(path,mode:OpenMode.CREATE.mode|OpenMode.READ_WRITE.mode)
-//    let packingOption = PackingOption("image/png",100)
-//    try{
-//        imagePacker.packToFile(pixelMap, IntNative(tempFile.fd), packingOption)
-//        return true
-//    }catch(e:Exception){
-//        Hilog.error(0,"exception","${e.toString()}")
-//        return false
-//    }
-//}
 
 func colorToFile(key: String, buffer: Array<UInt8>, width: Int64, height: Int64): Bool {
     try {

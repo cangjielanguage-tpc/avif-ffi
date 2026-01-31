@@ -40,8 +40,9 @@ export struct AvifViewTS {
   async getModel(): Promise<CJAvifImageModel> {
     let cjAvifImageModel: CJAvifImageModel = new global_customLib.CJAvifImageModel()
     if (this.model !== undefined) {
-      if (this.model.imageBuffer !== undefined) {
-        cjAvifImageModel.setImageBuffer(this.model.imageBuffer)
+      if (this.model.uri != '') {
+        cjAvifImageModel.setUri(this.model.uri)
+        global_customLib.setGlobalContext(getContext(this))
       }
       if (this.model.imagePicWidth > 0) {
         cjAvifImageModel.setImagePicWidth(this.model.imagePicWidth)
@@ -83,7 +84,8 @@ export struct AvifViewTS {
 
 export class AvifImageModel {
 
-  imageBuffer?: Uint8Array = undefined
+  // imageBuffer?: Uint8Array = undefined
+  uri:string = "" //网络图片 本地图片
   imagePicWidth: number = 0
   imagePicHeight: number = 0
   imageViewWidth: string = '100%'
@@ -96,8 +98,13 @@ export class AvifImageModel {
   bottomrightBorderRadius: string = '0vp'
   onCompleteCallback?: (loadingStatus: number) => void = undefined
 
-  public setImageBuffer(imageBuffer: Uint8Array): AvifImageModel {
-    this.imageBuffer = imageBuffer
+  // public setImageBuffer(imageBuffer: Uint8Array): AvifImageModel {
+  //   this.imageBuffer = imageBuffer
+  //   return this
+  // }
+
+  public setUri(uri: string): AvifImageModel {
+    this.uri = uri
     return this
   }
 
