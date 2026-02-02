@@ -41,6 +41,25 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
     return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
 }
 
+func multiImageToFile(key:String,buffer: ?Array<UInt8>):Bool{
+    try {
+        let dirPath = cacheDirPath
+        if (!exists(dirPath)) {
+            Directory.create(dirPath)
+        }
+        if (let Some(i) <- buffer) {
+            let filePath = dirPath + "/multi" + key
+            let tempFile = File(filePath, OpenMode.ReadWrite)
+            tempFile.write(i)
+            tempFile.flush()
+            tempFile.close()
+        }
+        return true
+    } catch (e: Exception) {
+        Hilog.error(0, "exception", "${e.toString()}")
+        return false
+    }
+}
 
 func colorToFile(key: String, buffer: Array<UInt8>, width: Int64, height: Int64): Bool {
     try {

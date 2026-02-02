@@ -109,34 +109,64 @@ public class AvifImage {
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
         let memPixelMap: ?CacheBean = memoryMap.get(key)
         let fileExist = exists(cacheDirPath + "/" + key)
+        let multifileExist = exists(cacheDirPath + "/multi" + key)
 
         if (let Some(map) <- memPixelMap) {
             //如果有值
             if(let Some(i) <- map.pixelMap){
                 pixelMap = i
+                let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+                Hilog.error(0, "memory", "走的是单图内存缓存 耗时${sjc2 - sjc1}")
             }else{
                 //这里是多图的内存缓存逻辑了
-            }
-            let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-            Hilog.error(0, "memory", "走的是内存缓存 耗时${sjc2 - sjc1}")
-            return
-        } else if (fileExist) {
-            spawn {
-                let filePath = cacheDirPath + "/" + key
-                let source: Array<UInt8> = File.readFrom(filePath)
-                let finalWidth: Int32 = Int32(UInt16(source[0]) << 8 | UInt16(source[1]))
-                let finalHeight: Int32 = Int32(UInt16(source[2]) << 8 | UInt16(source[3]))
-                let colors = source[4..source.size]
-                let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                let tempPixelMap = createPixelMap(colors, opts)
-                let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                memoryMap.add(key, cacheBean)
-                launch {
-                    let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                    Hilog.error(0, "local", "走的是本地缓存 耗时${sjc2 - sjc1}")
-                    pixelMap = tempPixelMap
+                var multiList :?MultiPixelMap = map.getMultiPixelMap()
+                if(let Some(j) <- multiList){
+                    //表示多图缓存有值
+                    let pixelMapList = j.getPixelMapList()
+                    let durationList = j.getFrameDurations()
+                    Hilog.error(0, "memory", "走的是多图内存缓存")
+                    spawn {
+                        while (isLoop) {
+                            for (k in 0..pixelMapList.size) {
+                                let tempPixelMap = pixelMapList.get(k).getOrThrow()
+                                launch {
+                                    pixelMap = tempPixelMap
+                                }
+                                sleep(durationList[Int64(k)] * Duration.second)
+                            }
+                        }
+                    }
                 }
+            }
+            return
+        } else if (fileExist||multifileExist) {
+            if(fileExist){
+                //单图文件的本地缓存
+                spawn {
+                    let filePath = cacheDirPath + "/" + key
+                    let source: Array<UInt8> = File.readFrom(filePath)
+                    let finalWidth: Int32 = Int32(UInt16(source[0]) << 8 | UInt16(source[1]))
+                    let finalHeight: Int32 = Int32(UInt16(source[2]) << 8 | UInt16(source[3]))
+                    let colors = source[4..source.size]
+                    let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
+                    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                    let tempPixelMap = createPixelMap(colors, opts)
+                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
+                    if(!memoryMap.contains(key)){
+                        memoryMap.add(key, cacheBean)
+                    }
+                    launch {
+                        let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+                        Hilog.error(0, "local", "走的是单图本地缓存 耗时${sjc2 - sjc1}")
+                        pixelMap = tempPixelMap
+                    }
+                }
+            }else{
+                //多图文件的本地缓存
+                let filePath = cacheDirPath + "/multi" + key
+                let imageBuffer: Array<UInt8> = File.readFrom(filePath)
+                Hilog.error(0, "local", "走的是多图本地缓存")
+                dealWithBuffer(imageBuffer)
             }
             return
         } else {
@@ -190,9 +220,9 @@ public class AvifImage {
             //this.pixelMap.release()
             } else {
                 //多帧就release list 不要release pixelmap 会导致重复release
-                for (i in 0..pixelMapList.size) {
-                    pixelMapList.get(i).getOrThrow().release()
-                }
+//                for (i in 0..pixelMapList.size) {
+//                    pixelMapList.get(i).getOrThrow().release()
+//                }
                 isLoop = false
             }
         } catch (e: Exception) {
@@ -236,14 +266,16 @@ public class AvifImage {
                             let tempPixelMap = createPixelMap(colors, opts)
                             launch {
                                 let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                                Hilog.error(0, "net", "走的是网络 耗时${sjc2 - sjc1}")
+                                Hilog.error(0, "net", "走的是单图网络 耗时${sjc2 - sjc1}")
                                 pixelMap = tempPixelMap
                             }
                             //保存一份到本地存储
                             colorToFile(key, colors, imageWidth, imageHeight)
                             //这里生成了就要保存到内存中
                             let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                            memoryMap.add(key, cacheBean)
+                            if(!memoryMap.contains(key)){
+                                memoryMap.add(key, cacheBean)
+                            }
                             j.release()
                         }
                         return
@@ -256,6 +288,7 @@ public class AvifImage {
                         if (j.getFrameDurations().getOrThrow().size != frameCount) {
                             throw Exception("FrameDurations should be equal to frameCount")
                         }
+                        let repeatCount:Int64 = j.getRepetitionCount()
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
                         spawn {
                             while (isLoop) {
@@ -271,9 +304,25 @@ public class AvifImage {
                                         }
                                         sleep(durationList[Int64(k)] * Duration.second)
                                         pixelMapList.add(tempPixelMap)
+                                        if(pixelMapList.size == frameCount){
+                                             j.release()
+                                             Hilog.error(0, "net", "走的是多图网络")
+                                             let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
+                                             let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None)
+                                             if(!memoryMap.contains(key)){
+                                                 memoryMap.add(key, cacheBean)
+                                             }
+                                             //仅限网络情况坐下缓存,避免下载
+                                             if(this.uri.startsWith("http")){
+                                                //网络图片这种情况把文件缓存下来
+                                                spawn{
+                                                    multiImageToFile(key,imageBuffer)
+                                                }
+                                             }
+                                        }
                                     }
                                 } else {
-                                    j.release()
+                                    //这里做内存缓存处理
                                     for (k in 0..pixelMapList.size) {
                                         let tempPixelMap = pixelMapList.get(k).getOrThrow()
                                         launch {

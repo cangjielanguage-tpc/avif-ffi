@@ -34,11 +34,11 @@ class CacheBean {
 
 //多图缓存对象
 class MultiPixelMap{
-    var frameDurations: ArrayList<Float64> = ArrayList<Float64>()
+    var frameDurations: Array<Float64> = Array<Float64>()
     var pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
     var repetitionCount: Int32 = 0
 
-    func setFrameDurations(frameDurations:ArrayList<Float64>){
+    func setFrameDurations(frameDurations:Array<Float64>){
         this.frameDurations = frameDurations
     }
 
@@ -50,7 +50,7 @@ class MultiPixelMap{
         this.repetitionCount = repetitionCount
     }
 
-    func getFrameDurations():ArrayList<Float64>{
+    func getFrameDurations():Array<Float64>{
         return frameDurations
     }
 
@@ -62,9 +62,9 @@ class MultiPixelMap{
         return repetitionCount
     }
 
-    init(frameDurations:ArrayList<Float64>,pixelMapList:ArrayList<PixelMap>,repetitionCount:Int32){
-        this.frameDurations = frameDurations
+    init(pixelMapList:ArrayList<PixelMap>,frameDurations:Array<Float64>,repetitionCount:Int32){
         this.pixelMapList = pixelMapList
+        this.frameDurations = frameDurations
         this.repetitionCount = repetitionCount
     }
 }
