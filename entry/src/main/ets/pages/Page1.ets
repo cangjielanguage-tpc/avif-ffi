@@ -23,15 +23,15 @@ struct page1Test {
 
 
 
-      this.avifImageModel1.setUri(this.url1)
+      this.avifImageModel1.setUri(this.url1).setImageViewWidth('600px').setImageViewHeight('400px')
 
-      this.avifImageModel2.setUri(this.url2)
+      this.avifImageModel2.setUri(this.url2).setImageViewWidth('600px').setImageViewHeight('400px')
 
-      this.avifImageModel3.setUri(this.url3)
+      this.avifImageModel3.setUri(this.url3).setImageViewWidth('600px').setImageViewHeight('400px')
 
-      this.avifImageModel4.setUri(this.url4)
+      this.avifImageModel4.setUri(this.url4).setImageViewWidth('600px').setImageViewHeight('400px')
 
-      this.avifImageModel5.setUri(this.url5)
+      this.avifImageModel5.setUri(this.url5).setImageViewWidth('600px').setImageViewHeight('400px')
 
     this.ready = true
   }
@@ -41,11 +41,11 @@ struct page1Test {
       Scroll() {
         Column() {
           if (this.ready) {
+            AvifViewTS({ model: this.avifImageModel5 })
             AvifViewTS({ model: this.avifImageModel1 })
             AvifViewTS({ model: this.avifImageModel2 })
             AvifViewTS({ model: this.avifImageModel3 })
             AvifViewTS({ model: this.avifImageModel4 })
-            AvifViewTS({ model: this.avifImageModel5 })
 
           }
         }

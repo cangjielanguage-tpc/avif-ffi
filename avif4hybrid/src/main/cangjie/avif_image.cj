@@ -107,7 +107,7 @@ public class AvifImage {
     protected override func aboutToAppear() {
         sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
-        let memPixelMap: ?CacheBean = memoryMap.get(key)
+        let memPixelMap: ?CacheBean = memoryLruCache.get(key)
         let fileExist = exists(cacheDirPath + "/" + key)
         let multifileExist = exists(cacheDirPath + "/multi" + key)
 
@@ -152,9 +152,7 @@ public class AvifImage {
                     let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
                     let tempPixelMap = createPixelMap(colors, opts)
                     let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                    if(!memoryMap.contains(key)){
-                        memoryMap.add(key, cacheBean)
-                    }
+                    memoryLruCache.put(key, cacheBean)
                     launch {
                         let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
                         Hilog.error(0, "local", "走的是单图本地缓存 耗时${sjc2 - sjc1}")
@@ -273,9 +271,7 @@ public class AvifImage {
                             colorToFile(key, colors, imageWidth, imageHeight)
                             //这里生成了就要保存到内存中
                             let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                            if(!memoryMap.contains(key)){
-                                memoryMap.add(key, cacheBean)
-                            }
+                            memoryLruCache.put(key, cacheBean)
                             j.release()
                         }
                         return
@@ -309,9 +305,7 @@ public class AvifImage {
                                              Hilog.error(0, "net", "走的是多图网络")
                                              let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
                                              let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None)
-                                             if(!memoryMap.contains(key)){
-                                                 memoryMap.add(key, cacheBean)
-                                             }
+                                             memoryLruCache.put(key, cacheBean)
                                              //仅限网络情况坐下缓存,避免下载
                                              if(this.uri.startsWith("http")){
                                                 //网络图片这种情况把文件缓存下来

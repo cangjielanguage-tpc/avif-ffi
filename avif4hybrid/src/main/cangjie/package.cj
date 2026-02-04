@@ -30,8 +30,9 @@ import std.fs.OpenMode
 
 
 //这个key是多方因素组成
-let memoryMap: HashMap<String, CacheBean> = HashMap<String, CacheBean>()
 let cacheDirPath = "/data/storage/el2/base/haps/entry/cache/avifcache"
+
+let memoryLruCache:MemoryLruCache = MemoryLruCache(256, 1024 * 1024 * 1024)
 
 func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {
     var md5Instance = MD5()
