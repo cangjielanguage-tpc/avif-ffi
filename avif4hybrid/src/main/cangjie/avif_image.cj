@@ -31,10 +31,8 @@ import ohos.state_macro_manage.Link
 import ohos.state_macro_manage.State
 import ohos.state_macro_manage.Builder
 import std.time.DateTime
-import std.fs.exists
-import std.fs.File
-import std.fs.OpenMode
 import ohos.ability.getStageContext
+import ohos.file_fs.FileFs
 
 @Component
 public class AvifImage {
@@ -108,8 +106,8 @@ public class AvifImage {
         sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
         let memPixelMap: ?CacheBean = memoryLruCache.get(key)
-        let fileExist = exists(cacheDirPath + "/" + key)
-        let multifileExist = exists(cacheDirPath + "/multi" + key)
+        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
+        let multifileExist = FileUtils.getInstance().exist(fileLruCache.path + "/multi" + key)
 
         if (let Some(map) <- memPixelMap) {
             //如果有值
