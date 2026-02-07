@@ -101,6 +101,19 @@ class FileUtils {
     }
   }
 
+  func writeDataSync(path: String, wh:Array<UInt8>,content: Array<UInt8>): Bool {
+    try {
+      let fd = FileFs.open(path, mode:(READ_WRITE.mode | CREATE.mode | APPEND.mode)).fd
+      FileFs.write(fd, wh)
+      FileFs.write(fd, content)
+      FileFs.close(fd)
+      return true
+    }catch (e: Exception) {
+      Hilog.error(0, "writeDataSync", e.toString())
+      return false
+    }
+  }
+
     /**
    * 判断path文件是否存在
    *

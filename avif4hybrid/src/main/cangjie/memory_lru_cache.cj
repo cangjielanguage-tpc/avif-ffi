@@ -17,7 +17,6 @@ class MemoryLruCache {
     private let mtx = ReentrantMutex()
 
     init(size: Int64, memory: Int64) {
-        Hilog.error(0,"testtest","进来了2")
         if (size <= 0 || size > this.defaultMaxSize) {
             this.maxSize = this.defaultSize
         } else {

@@ -103,7 +103,6 @@ public class AvifImage {
     var sjc1 = 0
 
     protected override func aboutToAppear() {
-          Hilog.error(0,"testtest","进来了4")
         sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
         let memPixelMap: ?CacheBean = memoryLruCache.get(key)
@@ -112,14 +111,12 @@ public class AvifImage {
 
         if (let Some(map) <- memPixelMap) {
             //如果有值
-            Hilog.error(0,"testtest","进来了5")
             if(let Some(i) <- map.pixelMap){
                 pixelMap = i
                 let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
                 Hilog.error(0, "memory", "走的是单图内存缓存 耗时${sjc2 - sjc1}")
             }else{
                 //这里是多图的内存缓存逻辑了
-                Hilog.error(0,"testtest","进来了6")
                 var multiList :?MultiPixelMap = map.getMultiPixelMap()
                 if(let Some(j) <- multiList){
                     //表示多图缓存有值
@@ -143,7 +140,6 @@ public class AvifImage {
         } else if (fileExist||multifileExist) {
             if(fileExist){
                 //单图文件的本地缓存
-                Hilog.error(0,"testtest","进来了7")
                 spawn {
                     let source:?Array<UInt8> = fileLruCache.get(key)
                     if(let Some(i) <- source){
@@ -165,7 +161,6 @@ public class AvifImage {
                     }
                 }
             }else{
-                Hilog.error(0,"testtest","进来了8")
                 //多图文件的本地缓存
                 let source:?Array<UInt8> = fileLruCache.get("multi"+key)
                 if(let Some(i) <- source){
@@ -248,7 +243,6 @@ public class AvifImage {
     }
 
     private func dealWithBuffer(imageBuffer: ?Array<UInt8>): Unit {
-        Hilog.error(0,"testtest","进来了9")
         if (let Some(i) <- imageBuffer) {
             let avif: ?AvifDecoder = AvifDecoder.create(i)
             if (let Some(j) <- avif) {

@@ -18,14 +18,13 @@ class FileLruCache {
   var path: String = '' //路径
   var lruCache: LruCache<Int64> = LruCache<Int64>() //这个Int64指的是文件的大小 key就是那个url+width+height的md5
   var isInited: Bool = false //是否初始化
-  var context: StageContext = GlobalContext.getContext().getOrThrow()
+  //var context: StageContext = GlobalContext.getContext().getOrThrow()
   let defaultMaxMemorySize: Int64 = 10 * 1024 * 1024 * 1024 //默认最大内存数
   let defaultMemorySize: Int64 = 1024 * 1024 * 1024 //不设置时候的默认内存
   private let mtx = ReentrantMutex()
 
 
     init(fileSize: Int64, memorySize: Int64,folderName:String) {
-        Hilog.error(0,"testtest","进来了1")
         if (fileSize <= 0 || fileSize > Int64.Max) {
             this.maxFileSize = Int64.Max
         }else{
@@ -48,7 +47,6 @@ class FileLruCache {
     if (this.isInited) {
       return
     }
-    Hilog.error(0,"testtest","进来了3")
     //简单点 让用户只填一个文件夹名
     let startTime = DateTime.now().toUnixTimeStamp().toNanoseconds()
      CACHE_FOLDER = folderName
@@ -82,7 +80,7 @@ class FileLruCache {
         addMemorySize(fileSize)
     }
     trimToSize()
-    Hilog.info(0,"initFileCachetesttest","image init initFileCache: ${(DateTime.now().toUnixTimeStamp().toNanoseconds()-startTime)} ,num: ${filenames.size}  ,nums: ${this.lruCache.size()} ,size:${this.currentMemorySize}")
+    Hilog.info(0,"initFileCache","image init initFileCache: ${(DateTime.now().toUnixTimeStamp().toNanoseconds()-startTime)} ,num: ${filenames.size}  ,nums: ${this.lruCache.size()} ,size:${this.currentMemorySize}")
     this.isInited = true
   }
 
@@ -143,8 +141,7 @@ class FileLruCache {
         imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
         imageInfoArr[3] = UInt8(height & 0xFF)
         let pre = this.lruCache.put(key,value)
-        FileUtils.getInstance().writeDataSync(this.path + key, imageInfoArr)
-        FileUtils.getInstance().writeDataSync(this.path + key, content)
+        FileUtils.getInstance().writeDataSync(this.path + key, imageInfoArr,content)
         if (let Some(i) <- pre) {
           this.addMemorySize(i)
         }
