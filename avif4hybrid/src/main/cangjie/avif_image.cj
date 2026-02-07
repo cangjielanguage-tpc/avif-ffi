@@ -276,7 +276,7 @@ public class AvifImage {
                                 pixelMap = tempPixelMap
                             }
                             //保存一份到本地存储
-                            fileLruCache.put(key,i.size+4,i,imageWidth,imageHeight)
+                            fileLruCache.put(key,colors.size+4,colors,imageWidth,imageHeight)
                             //这里生成了就要保存到内存中
                             let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
                             memoryLruCache.put(key, cacheBean)

@@ -106,6 +106,7 @@ class FileUtils {
       let fd = FileFs.open(path, mode:(READ_WRITE.mode | CREATE.mode | APPEND.mode)).fd
       FileFs.write(fd, wh)
       FileFs.write(fd, content)
+      FileFs.fsync(fd)
       FileFs.close(fd)
       return true
     }catch (e: Exception) {
