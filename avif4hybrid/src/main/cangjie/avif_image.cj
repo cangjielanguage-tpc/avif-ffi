@@ -103,20 +103,23 @@ public class AvifImage {
     var sjc1 = 0
 
     protected override func aboutToAppear() {
+          Hilog.error(0,"testtest","进来了4")
         sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
         let memPixelMap: ?CacheBean = memoryLruCache.get(key)
         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-        let multifileExist = FileUtils.getInstance().exist(fileLruCache.path + "/multi" + key)
+        let multifileExist = FileUtils.getInstance().exist(fileLruCache.path + "multi" + key)
 
         if (let Some(map) <- memPixelMap) {
             //如果有值
+            Hilog.error(0,"testtest","进来了5")
             if(let Some(i) <- map.pixelMap){
                 pixelMap = i
                 let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
                 Hilog.error(0, "memory", "走的是单图内存缓存 耗时${sjc2 - sjc1}")
             }else{
                 //这里是多图的内存缓存逻辑了
+                Hilog.error(0,"testtest","进来了6")
                 var multiList :?MultiPixelMap = map.getMultiPixelMap()
                 if(let Some(j) <- multiList){
                     //表示多图缓存有值
@@ -140,29 +143,37 @@ public class AvifImage {
         } else if (fileExist||multifileExist) {
             if(fileExist){
                 //单图文件的本地缓存
+                Hilog.error(0,"testtest","进来了7")
                 spawn {
-                    let filePath = cacheDirPath + "/" + key
-                    let source: Array<UInt8> = File.readFrom(filePath)
-                    let finalWidth: Int32 = Int32(UInt16(source[0]) << 8 | UInt16(source[1]))
-                    let finalHeight: Int32 = Int32(UInt16(source[2]) << 8 | UInt16(source[3]))
-                    let colors = source[4..source.size]
-                    let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                    let tempPixelMap = createPixelMap(colors, opts)
-                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                    memoryLruCache.put(key, cacheBean)
-                    launch {
-                        let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
-                        Hilog.error(0, "local", "走的是单图本地缓存 耗时${sjc2 - sjc1}")
-                        pixelMap = tempPixelMap
+                    let source:?Array<UInt8> = fileLruCache.get(key)
+                    if(let Some(i) <- source){
+                        let finalWidth: Int32 = Int32(UInt16(i[0]) << 8 | UInt16(i[1]))
+                        let finalHeight: Int32 = Int32(UInt16(i[2]) << 8 | UInt16(i[3]))
+                        let colors = i[4..i.size]
+                        let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
+                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                        let tempPixelMap = createPixelMap(colors, opts)
+                        let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
+                        memoryLruCache.put(key, cacheBean)
+                        launch {
+                            let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
+                            Hilog.error(0, "local", "走的是单图本地缓存 耗时${sjc2 - sjc1}")
+                            pixelMap = tempPixelMap
+                        }
+                    }else{
+                        Hilog.error(0, "diskcache", "获取的单图本地缓存内容为空")
                     }
                 }
             }else{
+                Hilog.error(0,"testtest","进来了8")
                 //多图文件的本地缓存
-                let filePath = cacheDirPath + "/multi" + key
-                let imageBuffer: Array<UInt8> = File.readFrom(filePath)
-                Hilog.error(0, "local", "走的是多图本地缓存")
-                dealWithBuffer(imageBuffer)
+                let source:?Array<UInt8> = fileLruCache.get("multi"+key)
+                if(let Some(i) <- source){
+                    dealWithBuffer(i)
+                    Hilog.error(0, "local", "走的是多图本地缓存")
+                }else{
+                    Hilog.error(0, "diskcache", "获取的多图本地缓存内容为空")
+                }
             }
             return
         } else {
@@ -179,9 +190,13 @@ public class AvifImage {
                 let mediaName = this.uri.removePrefix("media://")
                 let imageBuffer = getImageFromMedia(mediaName)
                 dealWithBuffer(imageBuffer)
+            } else if(this.uri.startsWith("file://")){
+                let localFilePath = this.uri.removePrefix("file://")
+                let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
+                dealWithBuffer(imageBuffer)
             }else{
                 let localFilePath = this.uri
-                let imageBuffer: Array<UInt8> = File.readFrom(localFilePath)
+                let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
                 dealWithBuffer(imageBuffer)
             }
         }
@@ -233,6 +248,7 @@ public class AvifImage {
     }
 
     private func dealWithBuffer(imageBuffer: ?Array<UInt8>): Unit {
+        Hilog.error(0,"testtest","进来了9")
         if (let Some(i) <- imageBuffer) {
             let avif: ?AvifDecoder = AvifDecoder.create(i)
             if (let Some(j) <- avif) {
@@ -266,7 +282,7 @@ public class AvifImage {
                                 pixelMap = tempPixelMap
                             }
                             //保存一份到本地存储
-                            colorToFile(key, colors, imageWidth, imageHeight)
+                            fileLruCache.put(key,i.size+4,i,imageWidth,imageHeight)
                             //这里生成了就要保存到内存中
                             let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
                             memoryLruCache.put(key, cacheBean)
@@ -308,7 +324,7 @@ public class AvifImage {
                                              if(this.uri.startsWith("http")){
                                                 //网络图片这种情况把文件缓存下来
                                                 spawn{
-                                                    multiImageToFile(key,imageBuffer)
+                                                    fileLruCache.put("multi" + key,i.size,i)
                                                 }
                                              }
                                         }

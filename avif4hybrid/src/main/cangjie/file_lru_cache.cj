@@ -21,9 +21,11 @@ class FileLruCache {
   var context: StageContext = GlobalContext.getContext().getOrThrow()
   let defaultMaxMemorySize: Int64 = 10 * 1024 * 1024 * 1024 //默认最大内存数
   let defaultMemorySize: Int64 = 1024 * 1024 * 1024 //不设置时候的默认内存
+  private let mtx = ReentrantMutex()
 
 
     init(fileSize: Int64, memorySize: Int64,folderName:String) {
+        Hilog.error(0,"testtest","进来了1")
         if (fileSize <= 0 || fileSize > Int64.Max) {
             this.maxFileSize = Int64.Max
         }else{
@@ -46,6 +48,7 @@ class FileLruCache {
     if (this.isInited) {
       return
     }
+    Hilog.error(0,"testtest","进来了3")
     //简单点 让用户只填一个文件夹名
     let startTime = DateTime.now().toUnixTimeStamp().toNanoseconds()
      CACHE_FOLDER = folderName
@@ -79,105 +82,157 @@ class FileLruCache {
         addMemorySize(fileSize)
     }
     trimToSize()
-    Hilog.info(0,"initFileCache","image init initFileCache: ${(DateTime.now().toUnixTimeStamp().toNanoseconds()-startTime)} ,num: ${filenames.size}  ,nums: ${this.lruCache.size()} ,size:${this.currentMemorySize}")
+    Hilog.info(0,"initFileCachetesttest","image init initFileCache: ${(DateTime.now().toUnixTimeStamp().toNanoseconds()-startTime)} ,num: ${filenames.size}  ,nums: ${this.lruCache.size()} ,size:${this.currentMemorySize}")
     this.isInited = true
   }
 
   public func isFileCacheInit():Bool {
-    return this.isInited
+    synchronized(mtx) {
+        return this.isInited
+    }
   }
 
   public func getCacheFolder(): String {
-    return CACHE_FOLDER
+      synchronized(mtx) {
+         return CACHE_FOLDER
+      }
   }
 
     // 添加缓存键值对,同时写文件
   func put(key: String, value: Int64,content:Array<UInt8>): Unit {
-    if (key.size == 0 || value < 0) {
-      throw Exception('key or value is invalid ')
+    synchronized(mtx) {
+        if (key.size == 0 || value < 0) {
+          throw Exception('key or value is invalid ')
+        }
+        if (!this.isInited) {
+          return
+        }
+        // 如果size满了的话，需要按照LRU的方式删除第一个
+        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
+          remove(this.lruCache.keys()[0])
+        } else if (this.lruCache.containsKey(key)) {
+          remove(key)
+        }
+        let pre = this.lruCache.put(key,value)
+        FileUtils.getInstance().writeDataSync(this.path + key, content)
+        if (let Some(i) <- pre) {
+          this.addMemorySize(i)
+        }
+        trimToSize()
     }
-    if (!this.isInited) {
-      return
-    }
-    // 如果size满了的话，需要按照LRU的方式删除第一个
-    if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
-      remove(this.lruCache.keys()[0])
-    } else if (this.lruCache.containsKey(key)) {
-      remove(key)
-    }
-    let pre = this.lruCache.put(key,value)
-    FileUtils.getInstance().writeDataSync(this.path + key, content)
-    if (let Some(i) <- pre) {
-      this.addMemorySize(i)
-    }
-    trimToSize()
   }
 
+   // 添加缓存键值对,同时写文件,单图是特别处理过的
+  func put(key: String, value: Int64,content:Array<UInt8>,width: Int64, height: Int64): Unit {
+    synchronized(mtx) {
+        if (key.size == 0 || value < 0) {
+          throw Exception('key or value is invalid ')
+        }
+        if (!this.isInited) {
+          return
+        }
+        // 如果size满了的话，需要按照LRU的方式删除第一个
+        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
+          remove(this.lruCache.keys()[0])
+        } else if (this.lruCache.containsKey(key)) {
+          remove(key)
+        }
+        let imageInfoArr: Array<UInt8> = Array<UInt8>(4, repeat: 0)
+        imageInfoArr[0] = UInt8(width >> 8 & 0xFF)
+        imageInfoArr[1] = UInt8(width & 0xFF)
+        imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
+        imageInfoArr[3] = UInt8(height & 0xFF)
+        let pre = this.lruCache.put(key,value)
+        FileUtils.getInstance().writeDataSync(this.path + key, imageInfoArr)
+        FileUtils.getInstance().writeDataSync(this.path + key, content)
+        if (let Some(i) <- pre) {
+          this.addMemorySize(i)
+        }
+        trimToSize()
+    }
+  }
+
+
   func get(key: String): ?Array<UInt8> {
-      if (!this.isInited) {
-        return None
+      synchronized(mtx) {
+          if (!this.isInited) {
+            return None
+          }
+          if (let Some(i) <- this.lruCache.get(key)) {
+            return FileUtils.getInstance().readFileSync(this.path + key)
+          }
+          return None
       }
-      if (let Some(i) <- this.lruCache.get(key)) {
-        return FileUtils.getInstance().readFileSync(this.path + key)
-      }
-      return None
   }
 
      // 移除键为key的缓存
   func remove(key: String): Unit {
-    if (key.size == 0) {
-      throw Exception('key is null,checking the parameter')
-    }
-    if (!this.isInited) {
-      return
-    }
-    let remove: ?Int64 = this.lruCache.remove(key)
-    if (let Some(i) <- remove) {
-      FileUtils.getInstance().deleteFile(this.path + key)
-      removeMemorySize(i)
+    synchronized(mtx) {
+        if (key.size == 0) {
+          throw Exception('key is null,checking the parameter')
+        }
+        if (!this.isInited) {
+          return
+        }
+        let remove: ?Int64 = this.lruCache.remove(key)
+        if (let Some(i) <- remove) {
+          FileUtils.getInstance().deleteFile(this.path + key)
+          removeMemorySize(i)
+        }
     }
   }
 
   func removeAll(): Unit {
-    if (!this.isInited) {
-      return
-    }
-    this.lruCache.clear()
-    this.currentMemorySize = 0
+    synchronized(mtx) {
+        if (!this.isInited) {
+          return
+        }
+        this.lruCache.clear()
+        this.currentMemorySize = 0
 
-    let filenames: Array<String> = FileUtils.getInstance().listFile(this.path)
-    for (filename in filenames) {
-        FileUtils.getInstance().deleteFile(this.path + filename)
-    }
+        let filenames: Array<String> = FileUtils.getInstance().listFile(this.path)
+        for (filename in filenames) {
+            FileUtils.getInstance().deleteFile(this.path + filename)
+        }
+     }
   }
 
    func size(): Int64 {
-    return this.lruCache.size()
+    synchronized(mtx) {
+        return this.lruCache.size()
+    }
   }
 
      // 移除较少使用的缓存数据
   private func trimToSize(): Unit {
-    while (true) {
-      if (this.currentMemorySize <= this.maxMemorySize || this.lruCache.isEmpty()) {
-        break
-      }
-      let delkey = this.lruCache.keys()[0]
-      let remove: ?Int64 = this.lruCache.remove(delkey)
-      if(let Some(i) <- remove){
-         FileUtils.getInstance().deleteFile(this.path + delkey)
-         removeMemorySize(i)
-      }
+    synchronized(mtx) {
+        while (true) {
+          if (this.currentMemorySize <= this.maxMemorySize || this.lruCache.isEmpty()) {
+            break
+          }
+          let delkey = this.lruCache.keys()[0]
+          let remove: ?Int64 = this.lruCache.remove(delkey)
+          if(let Some(i) <- remove){
+             FileUtils.getInstance().deleteFile(this.path + delkey)
+             removeMemorySize(i)
+          }
+        }
     }
   }
 
   private func removeMemorySize(value: Int64): Unit {
-      this.currentMemorySize -= value
-      Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+      synchronized(mtx) {
+          this.currentMemorySize -= value
+          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+      }
   }
 
   private func addMemorySize(value:Int64): Unit {
-      this.currentMemorySize += value
-      Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+      synchronized(mtx) {
+          this.currentMemorySize += value
+          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+      }
   }
+
 
 }

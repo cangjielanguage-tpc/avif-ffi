@@ -23,10 +23,10 @@ internal import ohos.image.createImageSource
 import ohos.image.PixelMap
 import stdx.crypto.digest.MD5
 import stdx.encoding.hex.toHexString
+import ohos.file_fs.FileFs
 
 
 //这个key是多方因素组成
-let cacheDirPath = "/data/storage/el2/base/haps/entry/cache/avifcache"
 
 var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 1024 * 1024 * 1024)
 var fileLruCache:FileLruCache = FileLruCache(256, 1024 * 1024 * 1024,FileLruCache.CACHE_FOLDER)
@@ -50,18 +50,15 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
 
 func multiImageToFile(key:String,buffer: ?Array<UInt8>):Bool{
     try {
-        let dirPath = cacheDirPath
-        if (!exists(dirPath)) {
-            Directory.create(dirPath)
-        }
+        let dirPath = fileLruCache.path
+        FileUtils.getInstance().createFolder(dirPath)
         if (let Some(i) <- buffer) {
-            let filePath = dirPath + "/multi" + key
-            let tempFile = File(filePath, OpenMode.ReadWrite)
-            tempFile.write(i)
-            tempFile.flush()
-            tempFile.close()
+            let filePath = dirPath + "multi" + key
+            FileUtils.getInstance().writeDataSync(filePath,i)
+            return true
+        }else{
+            return false
         }
-        return true
     } catch (e: Exception) {
         Hilog.error(0, "exception", "${e.toString()}")
         return false
@@ -70,21 +67,18 @@ func multiImageToFile(key:String,buffer: ?Array<UInt8>):Bool{
 
 func colorToFile(key: String, buffer: Array<UInt8>, width: Int64, height: Int64): Bool {
     try {
-        let dirPath = cacheDirPath
-        if (!exists(dirPath)) {
-            Directory.create(dirPath)
-        }
-        let filePath = dirPath + "/" + key
-        let tempFile = File(filePath, OpenMode.ReadWrite)
+        let dirPath = fileLruCache.path
+        FileUtils.getInstance().createFolder(dirPath)
+        let filePath = dirPath + key
+        let fd = FileFs.open(filePath, mode:(READ_WRITE.mode | CREATE.mode | TRUNC.mode)).fd
         let imageInfoArr: Array<UInt8> = Array<UInt8>(4, repeat: 0)
         imageInfoArr[0] = UInt8(width >> 8 & 0xFF)
         imageInfoArr[1] = UInt8(width & 0xFF)
         imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
         imageInfoArr[3] = UInt8(height & 0xFF)
-        tempFile.write(imageInfoArr)
-        tempFile.write(buffer)
-        tempFile.flush()
-        tempFile.close()
+        FileFs.write(fd, imageInfoArr)
+        FileFs.write(fd, buffer)
+        FileFs.close(fd)
         return true
     } catch (e: Exception) {
         Hilog.error(0, "exception", "${e.toString()}")
