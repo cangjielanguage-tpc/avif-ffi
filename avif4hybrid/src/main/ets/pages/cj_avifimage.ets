@@ -169,13 +169,13 @@ export class AvifDecoderTS{
   cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
   decodeRes:CJAvifDecoder|undefined = undefined
 
-  public create(encoded:Uint8Array):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.create(encoded)
+  public create(uri:string):CJAvifDecoder|undefined{
+      this.decodeRes = this.cjAvifDecoder.create(uri)
       return this.decodeRes
   }
 
-  public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.createWithThread(encoded,threads)
+  public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined{
+      this.decodeRes = this.cjAvifDecoder.createWithThread(uri,threads)
       return this.decodeRes
   }
 

@@ -22,8 +22,8 @@ export declare class CJAvifImageModel {
 }
 
 export declare class CJAvifDecoder {
-    create(encoded: ArrayBuffer): CJAvifDecoder | undefined
-    createWithThread(encoded: ArrayBuffer, threads: number): CJAvifDecoder | undefined
+    create(uri: string): CJAvifDecoder | undefined
+    createWithThread(uri: string, threads: number): CJAvifDecoder | undefined
     getWidth(): number
     getHeight(): number
     getDepth(): number

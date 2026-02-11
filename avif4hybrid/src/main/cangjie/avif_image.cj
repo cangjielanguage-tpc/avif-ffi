@@ -197,28 +197,6 @@ public class AvifImage {
         }
     }
 
-    private func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
-        try {
-            let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
-            let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
-            return arr
-        } catch (e: Exception) {
-            Hilog.error(0,"rawfile","${e.toString()}")
-            return None
-        }
-    }
-
-    private func getImageFromMedia(mediaName: String): ?Array<UInt8> {
-        try {
-            let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
-            let arr: Array<UInt8> = resourceManager.getMediaByName(mediaName,0)
-            return arr
-        } catch (e: Exception) {
-            Hilog.error(0,"media","${e.toString()}")
-            return None
-        }
-    }
-
     protected override func aboutToDisappear() {
         try {
             if (isSinglePic) {

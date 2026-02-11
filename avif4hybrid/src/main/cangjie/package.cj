@@ -48,3 +48,32 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
     return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
 }
 
+func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64,index:Int32): String {
+    var md5Instance = MD5()
+    md5Instance.write(buffer)
+    var md: Array<Byte> = md5Instance.finish()
+    var result: String = toHexString(md)
+    return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()+"idx"+index.toString()
+}
+
+ func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
+    try {
+        let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+        let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
+        return arr
+    } catch (e: Exception) {
+        Hilog.error(0,"rawfile","${e.toString()}")
+        return None
+    }
+}
+
+ func getImageFromMedia(mediaName: String): ?Array<UInt8> {
+    try {
+        let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+        let arr: Array<UInt8> = resourceManager.getMediaByName(mediaName,0)
+        return arr
+    } catch (e: Exception) {
+        Hilog.error(0,"media","${e.toString()}")
+        return None
+    }
+}
