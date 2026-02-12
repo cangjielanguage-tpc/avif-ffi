@@ -169,6 +169,10 @@ export class AvifDecoderTS{
   cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
   decodeRes:CJAvifDecoder|undefined = undefined
 
+  constructor() {
+    global_customLib.setGlobalContext(getContext(this))
+  }
+
   public create(uri:string):CJAvifDecoder|undefined{
       this.decodeRes = this.cjAvifDecoder.create(uri)
       return this.decodeRes
@@ -235,9 +239,9 @@ export class AvifDecoderTS{
     }
   }
 
-  public isAvifImageffi(encoded: Uint8Array): number{
+  public isAvifImageffi(): number{
     if(this.decodeRes) {
-        return this.cjAvifDecoder.isAvifImageffi(encoded)
+        return this.cjAvifDecoder.isAvifImageffi()
     }else{
         return 0
     }
@@ -267,9 +271,9 @@ export class AvifDecoderTS{
     }
   }
 
-  public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
+  public decodeffi(imageWidth: number, imageHeight: number): CJReturnValue{
     if(this.decodeRes) {
-      return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
+      return this.cjAvifDecoder.decodeffi(imageWidth,imageHeight)
     }else{
       return new CJReturnValue()
     }

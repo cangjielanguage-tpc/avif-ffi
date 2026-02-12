@@ -18,7 +18,7 @@ public class CJAvifDecoder {
     private var decoder: Option<AvifDecoder> = None
     var mKey = ""
     var mUri = ""
-
+    var encoded:?Array<Byte> = None
     public func create(uri: String): Option<CJAvifDecoder> {
         return createWithThread(uri, 1)
     }
@@ -28,20 +28,13 @@ public class CJAvifDecoder {
         //在这里将uri转化为arryauint8,并生成key
          if (uri.startsWith("http")) {
             //把数据下载下来
-            ImgHttp.request(uri, {
-                e, imageBuffer => launch{
-                    if(let Some(i) <- imageBuffer){
-                        return createLoginc(i,threads)
-                    }else{
-                        if(let Some(j) <- e){
-                            Hilog.error(0, "ImgHttp.request", e.toString())
-                        }else{
-                            Hilog.error(0, "ImgHttp.request", "下载内容失败")
-                        }
-                        return Option<CJAvifDecoder>.None
-                    }
-                }
-            })
+           let imageBuffer = getImageFromNet(uri)
+           if(let Some(i) <- imageBuffer){
+              return createLoginc(i,threads)
+            }else{
+              Hilog.error(0, "getImageFromRawFile", "获取网络文件内容失败")
+              return Option<CJAvifDecoder>.None
+            }
         }else if(uri.startsWith("rawfile://")){
              let fileName = uri.removePrefix("rawfile://")
              let imageBuffer = getImageFromRawFile(fileName)
@@ -82,6 +75,7 @@ public class CJAvifDecoder {
     }
 
     private func createLoginc(buffer:Array<UInt8>,threads:Int32):Option<CJAvifDecoder>{
+        encoded = buffer
         decoder = AvifDecoder(buffer, threads)
         if(let Some(k) <- decoder){
             if (k.decoder == 0) {
@@ -146,9 +140,11 @@ public class CJAvifDecoder {
         return None
     }
 
-    public func isAvifImageffi(encoded: Array<Byte>): Int32 {
+    public func isAvifImageffi(): Int32 {
         if (let Some(i) <- decoder) {
-            return i.isAvifImageffi(encoded)
+            if(let Some(j) <- encoded){
+                 return i.isAvifImageffi(j)
+            }
         }
         return 0
     }
@@ -327,7 +323,7 @@ public class CJAvifDecoder {
 
 
     //这种会底层C会重新创建decoder,因此多图情况只能解码第一帧,单图不影响
-    public func decodeffi(encoded: Array<Byte>, imageWidth: Int32, imageHeight: Int32): CJReturnValue {
+    public func decodeffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue {
         let value:CJReturnValue = CJReturnValue()
          if(imageWidth <= 0 || imageHeight <= 0){
             value.issuccess = false
@@ -339,6 +335,12 @@ public class CJAvifDecoder {
             value.issuccess = false
             return value
         }
+
+        if(encoded.isNone()){
+            value.issuccess = false
+            return value
+        }
+
         //单图
         //先生成key
         if(count == 1){
@@ -384,7 +386,7 @@ public class CJAvifDecoder {
         //本地也没有
         let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
         if (let Some(i) <- decoder) {
-            value.issuccess = i.decodeffi(encoded, color, imageWidth, imageHeight)
+            value.issuccess = i.decodeffi(encoded.getOrThrow(), color, imageWidth, imageHeight)
             if(value.issuccess){
                 spawn{
                     let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))

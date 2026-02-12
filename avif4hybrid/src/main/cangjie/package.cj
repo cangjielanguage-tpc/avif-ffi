@@ -24,6 +24,8 @@ import ohos.image.PixelMap
 import stdx.crypto.digest.MD5
 import stdx.encoding.hex.toHexString
 import ohos.file_fs.FileFs
+import stdx.net.tls.TlsClientConfig
+import stdx.net.http.ClientBuilder
 
 
 //这个key是多方因素组成
@@ -74,6 +76,38 @@ func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeig
         return arr
     } catch (e: Exception) {
         Hilog.error(0,"media","${e.toString()}")
+        return None
+    }
+}
+
+ func getImageFromNet(urlStr: String): ?Array<UInt8> {
+    try {
+        let fut: Future<?Array<UInt8>> = spawn {
+            var tlsConfig = TlsClientConfig()
+            tlsConfig.verifyMode = TrustAll
+            let client = ClientBuilder().tlsConfig(tlsConfig).build()
+            let ret = client.get(urlStr)
+            if (let Some(v) <- ret.bodySize) {
+                let buf = Array<UInt8>(v, repeat: 0)
+                var readNumAll = 0
+                while (readNumAll < v) {
+                    let readNum = ret.body.read(buf[readNumAll..v])
+                    if (readNum <= 0) {
+                        break
+                    }
+                    readNumAll += readNum
+                }
+                client.close()
+                return buf
+            } else {
+                client.close()
+                return None
+            }
+        }
+        let result: ?Array<UInt8>  = fut.get()
+        return result
+    } catch (e: Exception) {
+        Hilog.error(0,"getImageFromNet","${e.toString()}")
         return None
     }
 }

@@ -31,11 +31,11 @@ export declare class CJAvifDecoder {
     getFrameCount(): number
     getRepetitionCount(): number
     getFrameDurations(): Array<number> | undefined
-    isAvifImageffi(encoded: ArrayBuffer): number
+    isAvifImageffi(): number
     nextFrameIndexffi(): number
     nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
     nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
-    decodeffi(encoded: ArrayBuffer, imageWidth: number, imageHeight: number): CJReturnValue
+    decodeffi(imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
 }
 
