@@ -181,11 +181,12 @@ public class CJAvifDecoder {
          //根据key判断内存中有没有
         let memPixelMap: ?CacheBean = memoryLruCache.get(mKey)
         if(let Some(cache) <- memPixelMap){
+            Hilog.error(0,"info","走内存了")
             let pixelMap = cache.getPixelMap()
             if(let Some(i) <- pixelMap){
                 let readBuffer: Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4), repeat: 0)
                 i.readPixelsToBuffer(readBuffer)
-                value.color = readBuffer
+                value.color = convertBGRAtoRGBA(readBuffer)
                 value.issuccess = true
                 return value
             }
@@ -194,6 +195,7 @@ public class CJAvifDecoder {
         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mKey)
         if(fileExist){
             //找到本地缓存了
+                Hilog.error(0,"info","走本地了")
                 let source:?Array<UInt8> = fileLruCache.get(mKey)
                 if(let Some(i) <- source){
                     let colors = i[4..i.size]
@@ -212,6 +214,7 @@ public class CJAvifDecoder {
                 }
         }
         //本地也没有
+        Hilog.error(0,"info","走网络了")
         let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
         if (let Some(i) <- decoder) {
             value.code =  i.nextFrameffi(color, imageWidth, imageHeight)
@@ -264,7 +267,7 @@ public class CJAvifDecoder {
             if(let Some(i) <- pixelMap){
                 let readBuffer: Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4), repeat: 0)
                 i.readPixelsToBuffer(readBuffer)
-                value.color = readBuffer
+                value.color = convertBGRAtoRGBA(readBuffer)
                 value.issuccess = true
                 return value
             }
@@ -357,7 +360,7 @@ public class CJAvifDecoder {
             if(let Some(i) <- pixelMap){
                 let readBuffer: Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4), repeat: 0)
                 i.readPixelsToBuffer(readBuffer)
-                value.color = readBuffer
+                value.color = convertBGRAtoRGBA(readBuffer)
                 value.issuccess = true
                 return value
             }

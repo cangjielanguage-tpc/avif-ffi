@@ -115,6 +115,7 @@ public class AvifImage {
                 pixelMap = i
                 let sjc2 = DateTime.now().toUnixTimeStamp().toNanoseconds()
                 Hilog.error(0, "memory", "走的是单图内存缓存 耗时${sjc2 - sjc1}")
+                return
             }else{
                 //这里是多图的内存缓存逻辑了
                 var multiList :?MultiPixelMap = map.getMultiPixelMap()
@@ -134,10 +135,12 @@ public class AvifImage {
                             }
                         }
                     }
+                    return
                 }
             }
-            return
-        } else if (fileExist||multifileExist) {
+          }
+
+        if (fileExist||multifileExist) {
             if(fileExist){
                 //单图文件的本地缓存
                 spawn {
@@ -162,13 +165,15 @@ public class AvifImage {
                 }
             }else{
                 //多图文件的本地缓存
-                let source:?Array<UInt8> = fileLruCache.get("multi"+key)
-                if(let Some(i) <- source){
-                    dealWithBuffer(i)
-                    Hilog.error(0, "local", "走的是多图本地缓存")
-                }else{
-                    Hilog.error(0, "diskcache", "获取的多图本地缓存内容为空")
-                }
+                spawn {
+                      let source:?Array<UInt8> = fileLruCache.get("multi"+key)
+                      if(let Some(i) <- source){
+                          dealWithBuffer(i)
+                          Hilog.error(0, "local", "走的是多图本地缓存")
+                      }else{
+                        Hilog.error(0, "diskcache", "获取的多图本地缓存内容为空")
+                      }
+                 }
             }
             return
         } else {
@@ -198,20 +203,7 @@ public class AvifImage {
     }
 
     protected override func aboutToDisappear() {
-        try {
-            if (isSinglePic) {
-            //单帧直接release
-            //this.pixelMap.release()
-            } else {
-                //多帧就release list 不要release pixelmap 会导致重复release
-//                for (i in 0..pixelMapList.size) {
-//                    pixelMapList.get(i).getOrThrow().release()
-//                }
-                isLoop = false
-            }
-        } catch (e: Exception) {
-            Hilog.error(0, "releasepixelmap", "error=${e.toString()}")
-        }
+        isLoop = false
     }
 
     private func doCompleteCallBack(cJImageComplete: CJImageComplete): Unit {

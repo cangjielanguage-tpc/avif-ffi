@@ -111,3 +111,30 @@ func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeig
         return None
     }
 }
+
+func convertBGRAtoRGBA(bgraData: Array<UInt8>): Array<UInt8> {
+    // 校验输入数据合法性：必须是4的整数倍（每个像素4字节）
+    if (bgraData.size % 4 != 0) {
+        throw Exception("BGRA数据长度必须是4的整数倍")
+    }
+
+    // 创建与输入长度相同的输出数组
+    var rgbaData = Array<UInt8>(bgraData.size,repeat: 0)
+
+    // 遍历每个像素（步长为4，对应每个像素的4个通道）
+    for (i in 0..bgraData.size where i % 4 == 0) {
+        // 提取BGRA的四个通道值
+        let b = bgraData[i]    // 蓝通道
+        let g = bgraData[i+1]  // 绿通道
+        let r = bgraData[i+2]  // 红通道
+        let a = bgraData[i+3]  // 透明通道
+
+        // 转换为RGBA并写入输出数组
+        rgbaData[i] = r        // 红通道放到第一位
+        rgbaData[i+1] = g      // 绿通道保持第二位
+        rgbaData[i+2] = b      // 蓝通道放到第三位
+        rgbaData[i+3] = a      // 透明通道保持第四位
+    }
+
+    return rgbaData
+}
