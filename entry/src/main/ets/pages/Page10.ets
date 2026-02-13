@@ -4,7 +4,7 @@ import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/li
 
 @Entry
 @Component
-struct page8Test {
+struct page10Test {
   @State pixelMap: PixelMap | undefined = undefined
   @State mWidth: number = 0
   @State mHeight: number = 0
@@ -12,14 +12,14 @@ struct page8Test {
   async aboutToAppear(): Promise<void> {
     let decoderTs = new AvifDecoderTS()
     //这是resources/base/meida下的文件
-    //decoderTs.create("media://a2")    
+    //decoderTs.create("media://a22")
     //这是resources/rawfile下的文件   
-    //decoderTs.create("rawfile://a3.avif")
+    //decoderTs.create("rawfile://a23.avif")
     //这是网络图片
-    decoderTs.create("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
+    decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
-    let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(this.mWidth, this.mHeight)
+    let cjreturnValue: CJReturnValue = decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
     let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }

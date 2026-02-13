@@ -365,7 +365,7 @@ struct Index {
         Row() {
           Text("")// 宽度
             .width(10)
-          Button("16. 展示16")
+          Button("18. 展示18")
             .height(50)// 高度
             .layoutWeight(1)// 容器尺寸确定时，元素与兄弟节点主轴布局尺寸按照权重进行分配，忽略本身尺寸设置仅在Row/Column/Flex布局中生效
             .fontColor(0xFFFFFFFF)// 文本颜色

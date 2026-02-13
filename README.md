@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.0-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.5-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjcov-NA%25-brightgreen" style="display: inline-block;" />
@@ -23,6 +23,7 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 - 🚀 支持avif静态图片解码显示。
 - 🚀 支持avif动态图片解码显示。
 - 🚀 提供了自定义组件方式，方便用户使用。
+- 🚀 增加了缓存功能
 
 
 
@@ -99,8 +100,13 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct page11Test {
+  avifImageModel1: AvifImageModel = new AvifImageModel()
   avifImageModel2: AvifImageModel = new AvifImageModel()
-  avifImageModel22: AvifImageModel = new AvifImageModel()
+  avifImageModel3: AvifImageModel = new AvifImageModel()
+  avifImageModel4: AvifImageModel = new AvifImageModel()
+  avifImageModel5: AvifImageModel = new AvifImageModel()
+  avifImageModel6: AvifImageModel = new AvifImageModel()
+
   @State ready: boolean = false
 
   completeCallback(status: number): void {
@@ -108,16 +114,8 @@ struct page11Test {
   }
 
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a2");
-    const res22 = $r("app.media.a22");
 
-
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    let array22 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res22.id)
-
-
-    if (array2) {
-      this.avifImageModel2.setImageBuffer(array2)
+      this.avifImageModel1.setUri("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
         .setImageViewWidth('600px')
         .setImageViewHeight('400px')
         .setTopleftBorderRadius('20vp')
@@ -126,9 +124,8 @@ struct page11Test {
         .setBottomrightBorderRadius('20vp')
         .setOnComplete(this.completeCallback)
         .setDraggable(false)
-    }
-    if (array22) {
-      this.avifImageModel22.setImageBuffer(array22)
+
+      this.avifImageModel2.setUri("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
         .setImageViewWidth('600px')
         .setImageViewHeight('400px')
         .setTopleftBorderRadius('20vp')
@@ -137,8 +134,48 @@ struct page11Test {
         .setBottomrightBorderRadius('20vp')
         .setOnComplete(this.completeCallback)
         .setDraggable(true)
-    }
-    this.ready = true
+
+    this.avifImageModel3.setUri("media://a2")
+      .setImageViewWidth('600px')
+      .setImageViewHeight('400px')
+      .setTopleftBorderRadius('20vp')
+      .setToprightBorderRadius('20vp')
+      .setBottomleftBorderRadius('20vp')
+      .setBottomrightBorderRadius('20vp')
+      .setOnComplete(this.completeCallback)
+      .setDraggable(true)
+
+    this.avifImageModel4.setUri("media://a22")
+      .setImageViewWidth('600px')
+      .setImageViewHeight('400px')
+      .setTopleftBorderRadius('20vp')
+      .setToprightBorderRadius('20vp')
+      .setBottomleftBorderRadius('20vp')
+      .setBottomrightBorderRadius('20vp')
+      .setOnComplete(this.completeCallback)
+      .setDraggable(true)
+
+    this.avifImageModel5.setUri("rawfile://a3.avif")
+      .setImageViewWidth('600px')
+      .setImageViewHeight('400px')
+      .setTopleftBorderRadius('20vp')
+      .setToprightBorderRadius('20vp')
+      .setBottomleftBorderRadius('20vp')
+      .setBottomrightBorderRadius('20vp')
+      .setOnComplete(this.completeCallback)
+      .setDraggable(true)
+
+    this.avifImageModel6.setUri("rawfile://a23.avif")
+      .setImageViewWidth('600px')
+      .setImageViewHeight('400px')
+      .setTopleftBorderRadius('20vp')
+      .setToprightBorderRadius('20vp')
+      .setBottomleftBorderRadius('20vp')
+      .setBottomrightBorderRadius('20vp')
+      .setOnComplete(this.completeCallback)
+      .setDraggable(true)
+
+       this.ready = true
   }
 
   build() {
@@ -146,8 +183,12 @@ struct page11Test {
       Scroll() {
         Column() {
           if (this.ready) {
+            AvifViewTS({ model: this.avifImageModel1 })
             AvifViewTS({ model: this.avifImageModel2 })
-            AvifViewTS({ model: this.avifImageModel22 })
+            AvifViewTS({ model: this.avifImageModel3 })
+            AvifViewTS({ model: this.avifImageModel4 })
+            AvifViewTS({ model: this.avifImageModel5 })
+            AvifViewTS({ model: this.avifImageModel6 })
           }
         }
         .width('100%')
@@ -156,7 +197,6 @@ struct page11Test {
     }
   }
 }
-
 ```
 
 执行结果如下：
@@ -184,11 +224,13 @@ struct page8Test {
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a6");
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    const validData2 = array2 ?? new Uint8Array(); 
     let decoderTs = new AvifDecoderTS()
-    decoderTs.create(validData2)
+    //这是resources/base/meida下的文件
+    //decoderTs.create("media://a2")    
+    //这是resources/rawfile下的文件   
+    //decoderTs.create("rawfile://a3.avif")
+    //这是网络图片
+    decoderTs.create("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
     let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(this.mWidth, this.mHeight)
@@ -219,8 +261,6 @@ struct page8Test {
     }
   }
 }
-
-
 
 ```
 

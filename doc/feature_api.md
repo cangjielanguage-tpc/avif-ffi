@@ -24,12 +24,16 @@ export class AvifImageModel {
     constructor () //构造函数
 
      /*
-     * 设置图片的字节数组
-     * @param 参数 imageBuffer - 图片的字节数组数据
+     * 设置图片的路径
+     * @param 参数 uri - 图片的路径 
+     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,不需要加.avif后缀
+     * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
+     * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
+     * 网络图片直接写url即可
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-    public setImageBuffer(imageBuffer: Uint8Array): AvifImageModel
+    public setUri(uri: string): AvifImageModel
     
      /*
      * 设置图片对象的宽度
@@ -133,21 +137,21 @@ export class AvifDecoderTS{
 
      /*
      * 创建图片的解码器
-     * @param 参数 encoded - 图片的字节数组数据
+     * @param 参数 uri - 图片的路径
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public create(encoded:Uint8Array):CJAvifDecoder|undefined
+     public create(uri:string):CJAvifDecoder|undefined
     
     
     /*
      * 创建图片的解码器
-     * @param 参数 encoded - 图片的字节数组数据
+     * @param 参数 uri - 图片的路径
      * @param 参数 threads -  需要的线程数,小于0表示值为手机默认cpu核心数,等于0表示手机默认cpu核心数和2之间小的那个数，大于0并且不大于cpu核心数
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined
+     public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined
      
     /*
      * 获取avif文件对应图片的宽度,单位像素
@@ -200,12 +204,10 @@ export class AvifDecoderTS{
 
     /**
      * 判断文件是否是avif图像
-     * 
-     * 参数 encoded - avif文件的字节数组信息
      *
      * 返回值 number 类型 - 是avif图像返回1 否则返回0
      */    
-     public isAvifImageffi(encoded: Uint8Array): number
+     public isAvifImageffi(): number
      
     /**
      * 获取下一次调用时将返回的帧的从0开始的索引。
@@ -233,18 +235,17 @@ export class AvifDecoderTS{
      * 
      * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */    
-     public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
+     public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
 
     /**
      * 将动画AVIF的下一帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
      * 
-     * 参数 encoded - avif文件的字节数组信息
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
      * 
      * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */   
-     public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
+     public decodeffi(imageWidth: number, imageHeight: number): CJReturnValue
 
     /**
      * 销毁avif图片的解码器,释放内存,以防出现资源浪费问题
