@@ -138,6 +138,10 @@ export class AvifDecoderTS{
      /*
      * 创建图片的解码器
      * @param 参数 uri - 图片的路径
+     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,不需要加.avif后缀
+     * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
+     * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
+     * 网络图片直接写url即可
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
