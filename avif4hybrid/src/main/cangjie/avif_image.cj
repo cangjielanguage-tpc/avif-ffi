@@ -101,6 +101,7 @@ public class AvifImage {
 
     var key = ""
     var sjc1 = 0
+    var fut:?Future<Unit> = None
 
     protected override func aboutToAppear() {
         sjc1 = DateTime.now().toUnixTimeStamp().toNanoseconds()
@@ -204,6 +205,9 @@ public class AvifImage {
 
     protected override func aboutToDisappear() {
         isLoop = false
+        if(let Some(i) <- fut){
+            i.cancel()
+        }
     }
 
     private func doCompleteCallBack(cJImageComplete: CJImageComplete): Unit {
@@ -264,10 +268,13 @@ public class AvifImage {
                         }
                         let repeatCount:Int64 = j.getRepetitionCount()
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
-                        spawn {
+                        fut =  spawn {
                             while (isLoop) {
                                 if (pixelMapList.size != frameCount) {
                                     for (k in 0..frameCount) {
+                                        if (Thread.currentThread.hasPendingCancellation) {
+                                            return
+                                        }
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
                                         j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
                                         let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
@@ -280,7 +287,6 @@ public class AvifImage {
                                         pixelMapList.add(tempPixelMap)
                                         if(pixelMapList.size == frameCount){
                                              j.release()
-                                             Hilog.error(0, "net", "走的是多图网络")
                                              let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
                                              let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None)
                                              memoryLruCache.put(key, cacheBean)
@@ -296,6 +302,9 @@ public class AvifImage {
                                 } else {
                                     //这里做内存缓存处理
                                     for (k in 0..pixelMapList.size) {
+                                        if (Thread.currentThread.hasPendingCancellation) {
+                                            return
+                                        }
                                         let tempPixelMap = pixelMapList.get(k).getOrThrow()
                                         launch {
                                             pixelMap = tempPixelMap
