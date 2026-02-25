@@ -259,7 +259,14 @@ public class AvifImage {
                         return
                     } else {
                         //多帧图
-                        isSinglePic = false
+                         isSinglePic = false
+                         //仅限网络情况坐下缓存,避免下载
+                         if(this.uri.startsWith("http")){
+                            //网络图片这种情况把文件缓存下来
+                            spawn{
+                                fileLruCache.put("multi" + key,i.size,i)
+                            }
+                         }
                         if (j.getFrameDurations().isNone()) {
                             throw Exception("FrameDurations can not be None")
                         }
@@ -290,13 +297,6 @@ public class AvifImage {
                                              let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
                                              let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None)
                                              memoryLruCache.put(key, cacheBean)
-                                             //仅限网络情况坐下缓存,避免下载
-                                             if(this.uri.startsWith("http")){
-                                                //网络图片这种情况把文件缓存下来
-                                                spawn{
-                                                    fileLruCache.put("multi" + key,i.size,i)
-                                                }
-                                             }
                                         }
                                     }
                                 } else {

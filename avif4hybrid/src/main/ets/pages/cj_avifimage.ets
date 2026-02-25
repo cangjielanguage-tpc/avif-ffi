@@ -284,3 +284,13 @@ export class AvifDecoderTS{
   }
 
 }
+
+export class GlobalUtils {
+  static setMemoryLruCacheTS(countSize:number,memorySize:number):void{
+    global_customLib.setMemoryLruCache(countSize,memorySize)
+  }
+
+  static setFileLruCacheTS(countSize:number,memorySize:number):void{
+    global_customLib.setFileLruCache(countSize,memorySize)
+  }
+}

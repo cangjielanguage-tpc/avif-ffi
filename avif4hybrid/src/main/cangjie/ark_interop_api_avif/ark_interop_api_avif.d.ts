@@ -46,5 +46,6 @@ export declare interface CustomLib {
     CJReturnValue: {new (): CJReturnValue}
     getLoadCJPage(model: CJAvifImageModel): void
     setGlobalContext(context: Context): void
-
+    setMemoryLruCache(countSize:number,memorySize:number):void
+    setFileLruCache(countSize:number,memorySize:number):void
 }

@@ -24,7 +24,7 @@ class FileLruCache {
   private let mtx = ReentrantMutex()
 
 
-    init(fileSize: Int64, memorySize: Int64,folderName:String) {
+    init(fileSize: Int64, memorySize: Int64) {
         if (fileSize <= 0 || fileSize > Int64.Max) {
             this.maxFileSize = Int64.Max
         }else{
@@ -36,21 +36,32 @@ class FileLruCache {
             this.maxMemorySize = memorySize
         }
         this.currentMemorySize = 0
-        initFileCache(folderName)
+        initFileCache()
     }
 
+    func setSize(fileSize: Int64, memorySize: Int64) {
+        if (fileSize <= 0 || fileSize > Int64.Max) {
+            this.maxFileSize = Int64.Max
+        }else{
+            this.maxFileSize = fileSize
+        }
+        if (memorySize <= 0 || memorySize > this.defaultMaxMemorySize) {
+            this.maxMemorySize = this.defaultMemorySize
+        }else{
+            this.maxMemorySize = memorySize
+        }
+    }
 
     /**
    * 遍历缓存文件目录，初始化缓存
    */
-  public func initFileCache(folderName: String) {
+  public func initFileCache() {
     if (this.isInited) {
       return
     }
     //简单点 让用户只填一个文件夹名
     let startTime = DateTime.now().toUnixTimeStamp().toNanoseconds()
-     CACHE_FOLDER = folderName
-     this.path = BASE_FOLDER + FileUtils.SEPARATOR + CACHE_FOLDER + FileUtils.SEPARATOR
+    this.path = BASE_FOLDER + FileUtils.SEPARATOR + CACHE_FOLDER + FileUtils.SEPARATOR
     //创建目录
     FileUtils.getInstance().createFolder(this.path)
     // 遍历缓存目录下的文件，按照时间顺序加入缓存

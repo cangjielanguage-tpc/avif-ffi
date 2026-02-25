@@ -27,7 +27,7 @@ class FileUtils {
         try {
             let isExist: Bool = FileFs.access(path)
             if (!isExist) {
-                FileFs.mkdir(path)
+                FileFs.mkdir(path,true)
             }
             return true
         } catch (e: Exception) {

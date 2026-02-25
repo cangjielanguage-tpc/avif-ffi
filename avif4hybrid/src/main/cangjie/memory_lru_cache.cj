@@ -30,6 +30,19 @@ class MemoryLruCache {
         this.currentMemory = 0
     }
 
+    func setSize(size: Int64, memory: Int64) {
+        if (size <= 0 || size > this.defaultMaxSize) {
+            this.maxSize = this.defaultSize
+        } else {
+            this.maxSize = size
+        }
+        if (memory <= 0 || memory > this.defaultMaxMemorySize) {
+            this.maxMemory = this.defaultMemorySize
+        } else {
+            this.maxMemory = memory
+        }
+    }
+
     // 添加缓存键值对
     func put(key: String, value: CacheBean): Unit {
         synchronized(mtx) {

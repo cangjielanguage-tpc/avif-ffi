@@ -91,6 +91,20 @@ func setGlobalContext(runtime: JSContext, callInfo: JSCallInfo): JSValue {
     return runtime.undefined().toJSValue()
 }
 
+func setMemoryLruCache(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let countSize =Int64(callInfo[0].toNumber())
+    let memorySize =Int64(callInfo[1].toNumber())
+    memoryLruCache.setSize(countSize,memorySize)
+    return runtime.undefined().toJSValue()
+}
+
+func setFileLruCache(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let countSize =Int64(callInfo[0].toNumber())
+    let memorySize =Int64(callInfo[1].toNumber())
+    fileLruCache.setSize(countSize,memorySize)
+    return runtime.undefined().toJSValue()
+}
+
 
 
 

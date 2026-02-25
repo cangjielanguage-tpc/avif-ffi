@@ -41,5 +41,7 @@ let EXPORT_MODULE = JSModule.registerModule {
     runtime, exports => exports["testCJ"] = runtime.function(testCJ).toJSValue()
     exports["getLoadCJPage"] = runtime.function(getLoadCJPage).toJSValue()
     exports["setGlobalContext"] = runtime.function(setGlobalContext).toJSValue()
+    exports["setMemoryLruCache"] = runtime.function(setMemoryLruCache).toJSValue()
+    exports["setFileLruCache"] = runtime.function(setFileLruCache).toJSValue()
 
 }

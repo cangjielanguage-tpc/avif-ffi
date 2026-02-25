@@ -30,16 +30,8 @@ import stdx.net.http.ClientBuilder
 
 //这个key是多方因素组成
 
-var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 1024 * 1024 * 1024)
-var fileLruCache:FileLruCache = FileLruCache(256, 1024 * 1024 * 1024,FileLruCache.CACHE_FOLDER)
-
-func setMemoryLruCache(countSize:Int64,memorySize:Int64):Unit{
-    memoryLruCache = MemoryLruCache(countSize,memorySize)
-}
-
-func setFileLruCache(countSize:Int64,memorySize:Int64,folderName:String):Unit{
-    fileLruCache = FileLruCache(countSize,memorySize,folderName)
-}
+var memoryLruCache:MemoryLruCache = MemoryLruCache(512, 1024 * 1024 * 1024)
+var fileLruCache:FileLruCache = FileLruCache(512, 1024 * 1024 * 1024)
 
 
 func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {

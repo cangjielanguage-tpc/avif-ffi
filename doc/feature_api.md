@@ -274,3 +274,28 @@ export declare class CJReturnValue {
 
 }
 ```
+
+```ets
+export class GlobalUtils {
+
+  /**
+     * 设置内存缓存的最大内存对象个数和内存之和的上限，不设置的化默认值512和1024*1024*1024
+     * 
+     * 参数 countSize - 内存对象的个数，必须大于0,小于等于65536
+     * 参数 memorySize - 内存之和的上限,必须大于0，小于等于 10 * 1024 * 1024 * 1024
+     * 
+     * 返回值 void 类型 
+     */   
+  static setMemoryLruCacheTS(countSize:number,memorySize:number):void
+  
+  /**
+     * 设置文件缓存的最大文件对象个数和文件大小之和的上限，不设置的化默认值512和1024*1024*1024
+     * 
+     * 参数 countSize - 文件缓存对象的个数，必须大于0，小于等于Int64最大值
+     * 参数 memorySize - 文件大小之和的上限，必须大于0，小于等于10 * 1024 * 1024 * 1024
+     * 
+     * 返回值 void 类型 
+     */   
+  static setFileLruCacheTS(countSize:number,memorySize:number):void
+}
+```
