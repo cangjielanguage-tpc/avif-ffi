@@ -1,10 +1,5 @@
 package ohos_app_cangjie_avif4hybrid
 
-internal import ohos.ark_interop.JSModule
-internal import ohos.ark_interop.JSContext
-internal import ohos.ark_interop.JSCallInfo
-internal import ohos.ark_interop.JSValue
-
 func testCJ(runtime: JSContext, callInfo: JSCallInfo): JSValue {
     let result = "Hello ${callInfo[0].toString(runtime)}"
     runtime.string(result).toJSValue()

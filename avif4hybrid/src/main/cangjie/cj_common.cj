@@ -3,10 +3,6 @@
  */
 
 package ohos_app_cangjie_avif4hybrid
-import ohos.ark_interop.JSObject
-import ohos.base.LengthType
-import ohos.base.Length
-
 
 public func convertJSValueToLength(context: JSContext, input: JSValue): Length {
     if (input.isNumber()) {

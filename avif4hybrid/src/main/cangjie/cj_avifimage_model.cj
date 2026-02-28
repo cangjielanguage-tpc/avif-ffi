@@ -4,15 +4,7 @@
 package ohos_app_cangjie_avif4hybrid
 
 import ohos.ark_interop_macro.Interop
-import ohos.component.Column
-import ohos.ark_interop.JSCurrentJSContext
-import ohos.ark_interop.SharedObject
-import ohos.image.Component
-import ohos.state_macro_manage.*
-import ohos.component.*
-import ohos.state_manage.*
-internal import ohos.ark_interop.*
-internal import ohos.ark_interop_helper.*
+import ohos.state_macro_manage.Component
 
 @Interop[ArkTS]
 public class CJAvifImageModel {

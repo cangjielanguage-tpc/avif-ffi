@@ -1,20 +1,13 @@
 {
   "apiType": "stageMode",
   "buildOption": {
-//    "externalNativeOptions": {
-//      "path": "./src/main/cpp/CMakeLists.txt",
-//      "arguments": "",
-//      "cppFlags": ""
-//    },
     "cangjieOptions": {
       "path": "./cjpm.toml",
       "abiFilters": [
         "arm64-v8a",
         "x86_64"
-      ]
-    },
-    "arkOptions": {
-      "byteCodeHar": false
+      ],
+      "flattenLibs": true
     },
     "nativeLib": {
       "debugSymbol": {

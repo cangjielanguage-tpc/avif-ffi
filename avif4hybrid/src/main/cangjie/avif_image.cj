@@ -15,21 +15,38 @@ import std.collection.ArrayList
 import ohos.concurrency.launch
 import ohos.component.CJImageComplete
 import ohos.device_info.DeviceInfo
-import ohos.component.If
-import ohos.component.CustomView
-import ohos.component.ViewBuilder
-import ohos.base.Length
-import ohos.base.LengthProp
+internal import ohos.component.If
+internal import ohos.component.CustomView
+internal import ohos.component.ViewBuilder
+internal import ohos.component.ReuseParams
+internal import ohos.component.__Recycle__
+internal import ohos.component.LegalCallCheck
+internal import ohos.component.FakeComponent
+internal import ohos.base.Length
+internal import ohos.base.LengthType
+internal import ohos.base.LengthProp
 internal import ohos.ark_interop.JSContext
 internal import ohos.ark_interop.JSModule
 internal import ohos.ark_interop.JSInteropType
-import ohos.state_manage.ObservedProperty
-import ohos.state_manage.LocalStorage
-import ohos.state_manage.SubscriberManager
+internal import ohos.state_manage.ObservedProperty
+internal import ohos.state_manage.LocalStorage
+internal import ohos.state_manage.SubscriberManager
+internal import ohos.state_manage.ViewStackProcessor
 import ohos.state_macro_manage.Component
 import ohos.state_macro_manage.Link
 import ohos.state_macro_manage.State
 import ohos.state_macro_manage.Builder
+internal import std.convert.Parsable
+internal import ohos.ark_interop.JSCallInfo
+internal import ohos.ark_interop.JSValue
+internal import ohos.component.Column
+internal import ohos.ark_interop.JSCurrentJSContext
+internal import ohos.ark_interop.SharedObject
+internal import ohos.ark_interop.JSArrayEx
+internal import ohos.ark_interop.JSObject
+internal import ohos.ark_interop.JSExternal
+internal import ohos.ark_interop.JSType
+internal import ohos.ark_interop.JSInteropByte
 
 @Component
 public class AvifImage {
