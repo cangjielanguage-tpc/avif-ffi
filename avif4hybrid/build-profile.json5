@@ -9,6 +9,9 @@
       ],
       "flattenLibs": true
     },
+    "arkOptions": {
+      "byteCodeHar": false
+    },
     "nativeLib": {
       "debugSymbol": {
         "strip": false
