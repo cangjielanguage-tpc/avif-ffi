@@ -30,6 +30,7 @@ export class AvifImageModel {
      * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
      * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
      * 网络图片直接写url即可
+     * 注意：未设置图片路径时会抛出imagebuffer can not be none的异常
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
