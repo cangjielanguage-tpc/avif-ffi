@@ -1,5 +1,6 @@
 import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
 import { image } from '@kit.ImageKit';
+import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
 
 @Entry
 @Component
@@ -9,14 +10,16 @@ struct page10Test {
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a15");
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    const validData2 = array2 ?? new Uint8Array(); // 兜底空的 Uint8Array
     let decoderTs = new AvifDecoderTS()
-    decoderTs.create(validData2)
+    //这是resources/base/meida下的文件
+    //decoderTs.create("media://a22")
+    //这是resources/rawfile下的文件   
+    //decoderTs.create("rawfile://a23.avif")
+    //这是网络图片
+    decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
-    let cjreturnValue = decoderTs.decodeffi(validData2, this.mWidth, this.mHeight)
+    let cjreturnValue: CJReturnValue = decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
     let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
@@ -37,7 +40,6 @@ struct page10Test {
             .width(this.mWidth)
             .height(this.mHeight)
             .objectFit(ImageFit.Fill)
-
         }
         .width('100%')
       }.scrollBar(BarState.Off)
@@ -45,4 +47,3 @@ struct page10Test {
     }
   }
 }
-

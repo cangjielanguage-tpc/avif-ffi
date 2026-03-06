@@ -4,12 +4,16 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct page7Test {
-   avifImageModel2: AvifImageModel = new AvifImageModel()
-   avifImageModel3: AvifImageModel = new AvifImageModel()
-   avifImageModel5: AvifImageModel = new AvifImageModel()
-   avifImageModel6: AvifImageModel = new AvifImageModel()
-   avifImageModel8: AvifImageModel = new AvifImageModel()
-
+  avifImageModel2: AvifImageModel = new AvifImageModel()
+  avifImageModel3: AvifImageModel = new AvifImageModel()
+  avifImageModel5: AvifImageModel = new AvifImageModel()
+  avifImageModel6: AvifImageModel = new AvifImageModel()
+  avifImageModel8: AvifImageModel = new AvifImageModel()
+  avifImageModel9: AvifImageModel = new AvifImageModel()
+  avifImageModel10: AvifImageModel = new AvifImageModel()
+  avifImageModel11: AvifImageModel = new AvifImageModel()
+  avifImageModel12: AvifImageModel = new AvifImageModel()
+  avifImageModel13: AvifImageModel = new AvifImageModel()
   @State ready: boolean = false
 
   completeCallback(status: number): void {
@@ -17,34 +21,17 @@ struct page7Test {
   }
 
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a2");
-    const res3 = $r("app.media.a3");
-    const res5 = $r("app.media.a5");
-    const res6 = $r("app.media.a6");
-    const res8 = $r("app.media.a8");
-
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    let array3 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res3.id)
-    let array5 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res5.id)
-    let array6 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res6.id)
-    let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
-
-    if (array2) {
-      this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(false)
-    }
-    if (array3) {
-      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
-    }
-    if (array5) {
-      this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
-    }
-    if (array6) {
-      this.avifImageModel6.setImageBuffer(array6).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
-    }
-    if (array8) {
-      this.avifImageModel8.setImageBuffer(array8).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
-    }
-    this.ready = true
+      this.avifImageModel2.setUri("media://a2").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(false)
+      this.avifImageModel3.setUri("media://a3").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel5.setUri("media://a5").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel6.setUri("media://a6").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel8.setUri("media://a8").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel9.setUri("media://a9").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(false)
+      this.avifImageModel10.setUri("media://a10").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel11.setUri("media://a11").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel12.setUri("media://a12").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.avifImageModel13.setUri("media://a13").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
+      this.ready = true
   }
 
   build() {
@@ -57,7 +44,11 @@ struct page7Test {
             AvifViewTS({ model: this.avifImageModel5 })
             AvifViewTS({ model: this.avifImageModel6 })
             AvifViewTS({ model: this.avifImageModel8 })
-
+            AvifViewTS({ model: this.avifImageModel9 })
+            AvifViewTS({ model: this.avifImageModel10 })
+            AvifViewTS({ model: this.avifImageModel11 })
+            AvifViewTS({ model: this.avifImageModel12 })
+            AvifViewTS({ model: this.avifImageModel13 })
           }
         }
         .width('100%')

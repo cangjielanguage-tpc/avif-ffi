@@ -1,6 +1,0 @@
-{
-  "name": "libark_interop_api_avif.so",
-  "types": "./ark_interop_api_avif.d.ts",
-  "version": "1.0.0",
-  "description": ""
-}

@@ -4,90 +4,104 @@
 
 package ohos_app_cangjie_avif4hybrid
 
-public class InfoRN {
-    public var isSuccess: Bool = false //是否成功
-    public var errMsg: String = "" //是否成功
-    public var isSinglePic: Bool = true //是否单图
-    public var width: UInt32 = 0  //图片的最终宽度
-    public var height: UInt32 = 0  //图片的最终高度
-    public var depth: UInt32 = 0
-    public var alphaPresent: Bool = false
-    public var frameCount: Int32 = 0  //图片的帧数
-    public var repetitionCount: Int32 = 0
-    public var frameDurations: ?Array<Float64> = None //多图的时间集合数据
-    public var dataColors: ?Array<Array<UInt8>> = None  //图片的像素数据  单图长度为1 多图长度为framecount
+var memoryLruCache:MemoryLruCache = MemoryLruCache(512, 1024 * 1024 * 1024)
+var fileLruCache:FileLruCache = FileLruCache(512, 1024 * 1024 * 1024)
+
+
+//这个key是多方因素组成
+func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {
+    var md5Instance = MD5()
+    md5Instance.write(buffer)
+    var md: Array<Byte> = md5Instance.finish()
+    var result: String = toHexString(md)
+    return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
 }
 
-public func dealAvifWithRN(buffer:Array<UInt8>,imagePicWidth:Int64,imagePicHeight:Int64):InfoRN{
-       var info:InfoRN = InfoRN()
-       let decoder:?AvifDecoder = AvifDecoder.create(buffer)
-       if(let Some(j) <- decoder){
-            //表示是正确的avif数据
-            //分为单帧和多帧
-          let frameCount:Int64 = j.getFrameCount() //图片的帧数
-          var imageTempWidth = j.getWidth() //图片的原始宽
-          var imageTempHeight = j.getHeight() //图片的原始高
-          if(imagePicWidth != 0){
-            imageTempWidth = imagePicWidth //图片的需要生成的宽
-          }
-          if(imagePicHeight != 0){
-            imageTempHeight = imagePicHeight //图片的需要生成的高
-          }
-          let imageWidth = imageTempWidth //最后实际的宽
-          let imageHeight = imageTempHeight //最好实际的高
-          if(frameCount <= 0){
-               info.isSuccess = false
-               info.errMsg = "frameCount can not be <= 0"
-               return info
-          }else{
-             if(frameCount == 1){
-                //单帧图
-                      info.dataColors = Array<Array<UInt8>>(1,repeat:Array<UInt8>())
-                      let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
-                      j.nextFrameffi(colors, Int32(imageWidth),Int32(imageHeight))
-                      //这里已经生成了color
-                      j.release()
-                      info.isSuccess = true
-                      info.width = UInt32(imageWidth)
-                      info.height = UInt32(imageHeight)
-                      info.isSinglePic = true
-                      info.frameCount = 1
-                      info.dataColors.getOrThrow()[0] = colors
-                      return info
-             }else{
-                //多帧图
-                if(j.getFrameDurations().isNone()){
-                    info.isSuccess = false
-                    info.errMsg = "FrameDurations can not be None"
-                    return info
+func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64,index:Int32): String {
+    var md5Instance = MD5()
+    md5Instance.write(buffer)
+    var md: Array<Byte> = md5Instance.finish()
+    var result: String = toHexString(md)
+    return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()+"idx"+index.toString()
+}
+
+ func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
+    try {
+        let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+        let arr: Array<UInt8> = resourceManager.getRawFileContent(rawFileName)
+        return arr
+    } catch (e: Exception) {
+        Hilog.error(0,"rawfile","${e.toString()}")
+        return None
+    }
+}
+
+ func getImageFromMedia(mediaName: String): ?Array<UInt8> {
+    try {
+        let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
+        let arr: Array<UInt8> = resourceManager.getMediaByName(mediaName,0)
+        return arr
+    } catch (e: Exception) {
+        Hilog.error(0,"media","${e.toString()}")
+        return None
+    }
+}
+
+ func getImageFromNet(urlStr: String): ?Array<UInt8> {
+    try {
+        let fut: Future<?Array<UInt8>> = spawn {
+            var tlsConfig = TlsClientConfig()
+            tlsConfig.verifyMode = TrustAll
+            let client = ClientBuilder().tlsConfig(tlsConfig).build()
+            let ret = client.get(urlStr)
+            if (let Some(v) <- ret.bodySize) {
+                let buf = Array<UInt8>(v, repeat: 0)
+                var readNumAll = 0
+                while (readNumAll < v) {
+                    let readNum = ret.body.read(buf[readNumAll..v])
+                    if (readNum <= 0) {
+                        break
+                    }
+                    readNumAll += readNum
                 }
-                if(j.getFrameDurations().getOrThrow().size != frameCount){
-                    info.isSuccess = false
-                    info.errMsg = "FrameDurations should be equal to frameCount"
-                    return info
-                }
-                info.dataColors = Array<Array<UInt8>>(frameCount,repeat:Array<UInt8>())
-                let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
-                 for (k in 0..frameCount) {
-                    let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
-                    j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
-                    info.dataColors.getOrThrow()[k] = colors
-                 }
-                 info.isSuccess = true
-                 info.isSinglePic = false
-                 info.width = UInt32(imageWidth)
-                 info.height = UInt32(imageHeight)
-                 info.depth = UInt32(j.getDepth())
-                 info.alphaPresent = j.getAlphaPresent()
-                 info.frameCount = Int32(frameCount)
-                 info.repetitionCount = Int32(j.getRepetitionCount())
-                 info.frameDurations = durationList
-                 return info
-             }
-          }
-       }else{
-             info.isSuccess = false
-             info.errMsg = "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data"
-             return info
-       }
+                client.close()
+                return buf
+            } else {
+                client.close()
+                return None
+            }
+        }
+        let result: ?Array<UInt8>  = fut.get()
+        return result
+    } catch (e: Exception) {
+        Hilog.error(0,"getImageFromNet","${e.toString()}")
+        return None
+    }
+}
+
+func convertBGRAtoRGBA(bgraData: Array<UInt8>): Array<UInt8> {
+    // 校验输入数据合法性：必须是4的整数倍（每个像素4字节）
+    if (bgraData.size % 4 != 0) {
+        throw Exception("BGRA数据长度必须是4的整数倍")
+    }
+
+    // 创建与输入长度相同的输出数组
+    var rgbaData = Array<UInt8>(bgraData.size,repeat: 0)
+
+    // 遍历每个像素（步长为4，对应每个像素的4个通道）
+    for (i in 0..bgraData.size where i % 4 == 0) {
+        // 提取BGRA的四个通道值
+        let b = bgraData[i]    // 蓝通道
+        let g = bgraData[i+1]  // 绿通道
+        let r = bgraData[i+2]  // 红通道
+        let a = bgraData[i+3]  // 透明通道
+
+        // 转换为RGBA并写入输出数组
+        rgbaData[i] = r        // 红通道放到第一位
+        rgbaData[i+1] = g      // 绿通道保持第二位
+        rgbaData[i+2] = b      // 蓝通道放到第三位
+        rgbaData[i+3] = a      // 透明通道保持第四位
+    }
+
+    return rgbaData
 }

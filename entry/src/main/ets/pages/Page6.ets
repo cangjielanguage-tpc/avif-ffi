@@ -9,38 +9,36 @@ struct page6Test {
   @State avifImageModel5: AvifImageModel = new AvifImageModel()
   @State avifImageModel6: AvifImageModel = new AvifImageModel()
   @State avifImageModel8: AvifImageModel = new AvifImageModel()
-
+  @State avifImageModel9: AvifImageModel = new AvifImageModel()
+  @State avifImageModel10: AvifImageModel = new AvifImageModel()
+  @State avifImageModel11: AvifImageModel = new AvifImageModel()
+  @State avifImageModel12: AvifImageModel = new AvifImageModel()
+  @State avifImageModel13: AvifImageModel = new AvifImageModel()
   @State ready: boolean = false
 
   async aboutToAppear(): Promise<void> {
-    const res2 = $r("app.media.a2");
-    const res3 = $r("app.media.a3");
-    const res5 = $r("app.media.a5");
-    const res6 = $r("app.media.a6");
-    const res8 = $r("app.media.a8");
 
-    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
-    let array3 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res3.id)
-    let array5 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res5.id)
-    let array6 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res6.id)
-    let array8 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res8.id)
+      this.avifImageModel2.setUri("media://a2").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
 
-    if (array2) {
-      this.avifImageModel2.setImageBuffer(array2).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
-    }
-    if (array3) {
-      this.avifImageModel3.setImageBuffer(array3).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
-    }
-    if (array5) {
-      this.avifImageModel5.setImageBuffer(array5).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
-    }
-    if (array6) {
-      this.avifImageModel6.setImageBuffer(array6).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
-    }
-    if (array8) {
-      this.avifImageModel8.setImageBuffer(array8).setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
-    }
-    this.ready = true
+      this.avifImageModel3.setUri("media://a3").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel5.setUri("media://a5").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel6.setUri("media://a6").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel8.setUri("media://a8").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel9.setUri("media://a9").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel10.setUri("media://a10").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel11.setUri("media://a11").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel12.setUri("media://a12").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.avifImageModel13.setUri("media://a13").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp')
+
+      this.ready = true
   }
 
   build() {
@@ -53,7 +51,11 @@ struct page6Test {
             AvifViewTS({ model: this.avifImageModel5 })
             AvifViewTS({ model: this.avifImageModel6 })
             AvifViewTS({ model: this.avifImageModel8 })
-
+            AvifViewTS({ model: this.avifImageModel9 })
+            AvifViewTS({ model: this.avifImageModel10 })
+            AvifViewTS({ model: this.avifImageModel11 })
+            AvifViewTS({ model: this.avifImageModel12 })
+            AvifViewTS({ model: this.avifImageModel13 })
           }
         }
         .width('100%')

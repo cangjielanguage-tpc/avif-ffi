@@ -161,12 +161,9 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.cat");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
-              let isavif = decoderTs.isAvifImageffi(validData1)
+              decoderTs.create("media://cat")
+              let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test1",isavif.toString())
               decoderTs.release()
             })
@@ -188,12 +185,9 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.a3");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.createWithThread(validData1,2)
-              let isavif = decoderTs.isAvifImageffi(validData1)
+              decoderTs.createWithThread("media://a3",2)
+              let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test2",isavif.toString())
               decoderTs.release()
             })
@@ -215,12 +209,9 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.2");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
-              let isavif = decoderTs.isAvifImageffi(validData1)
+              decoderTs.create("media://2")
+              let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test3",isavif.toString())
               decoderTs.release()
             })
@@ -242,12 +233,9 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.a2");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
-              let isavif = decoderTs.isAvifImageffi(validData1)
+              decoderTs.create("rawfile://a2.avif")
+              let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test4",isavif.toString())
               decoderTs.release()
             })
@@ -270,12 +258,8 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.a26");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
-
+              decoderTs.create("media://a26")
               let width = decoderTs.getWidth()
               let height = decoderTs.getHeight()
               let depth = decoderTs.getDepth()
@@ -306,11 +290,8 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              const res = $r("app.media.a2");
-              let array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res.id)
-              const validData1 = array ?? new Uint8Array(); // 兜底空的 Uint8Array
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create(validData1)
+              decoderTs.create("media://a2")
               let index1 = decoderTs.nextFrameIndexffi()
               hilog.error(0,"test14","index1="+index1)
               decoderTs.release()
@@ -384,7 +365,7 @@ struct Index {
         Row() {
           Text("")// 宽度
             .width(10)
-          Button("16. 展示16")
+          Button("18. 展示18")
             .height(50)// 高度
             .layoutWeight(1)// 容器尺寸确定时，元素与兄弟节点主轴布局尺寸按照权重进行分配，忽略本身尺寸设置仅在Row/Column/Flex布局中生效
             .fontColor(0xFFFFFFFF)// 文本颜色

@@ -3,7 +3,6 @@
  */
 package ohos_app_cangjie_avif4hybrid
 
-
 public var context: ?JSContext = None
 
 let _ = {
