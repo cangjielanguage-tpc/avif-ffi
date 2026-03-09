@@ -1,14 +1,11 @@
-import { Context } from "@kit.AbilityKit"
-
 export declare class CJReturnValue {
     code: number
     color: ArrayBuffer | undefined
     issuccess: boolean
-    constructor ()
 }
 
 export declare class CJAvifImageModel {
-    setUri(uri: string): void
+    setImageBuffer(imageBuffer: ArrayBuffer): void
     setImagePicWidth(imagePicWidth: number): void
     setImagePicHeight(imagePicHeight: number): void
     setImageViewWidth(imageViewWidth: string): void
@@ -20,12 +17,11 @@ export declare class CJAvifImageModel {
     setBottomleftBorderRadius(bottomleftBorderRadius: string): void
     setBottomrightBorderRadius(bottomrightBorderRadius: string): void
     setCompleteCallback(completeCallBack: (funcArg0: number) => void): void
-    constructor ()
 }
 
 export declare class CJAvifDecoder {
-    create(uri: string): CJAvifDecoder | undefined
-    createWithThread(uri: string, threads: number): CJAvifDecoder | undefined
+    create(encoded: ArrayBuffer): CJAvifDecoder | undefined
+    createWithThread(encoded: ArrayBuffer, threads: number): CJAvifDecoder | undefined
     getWidth(): number
     getHeight(): number
     getDepth(): number
@@ -33,20 +29,18 @@ export declare class CJAvifDecoder {
     getFrameCount(): number
     getRepetitionCount(): number
     getFrameDurations(): Array<number> | undefined
-    isAvifImageffi(): number
+    isAvifImageffi(encoded: ArrayBuffer): number
     nextFrameIndexffi(): number
     nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
     nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
-    decodeffi(imageWidth: number, imageHeight: number): CJReturnValue
+    decodeffi(encoded: ArrayBuffer, imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
-    constructor ()
 }
 
 
-export declare function setGlobalContext(context: Context): void
-
-export declare function getLoadCJPage(model: CJAvifImageModel): void
-
-export declare function setMemoryLruCache(countSize:number,memorySize:number): void
-
-export declare function setFileLruCache(countSize:number,memorySize:number): void
+export declare interface CustomLib {
+    CJAvifDecoder: {new (): CJAvifDecoder}
+    CJAvifImageModel: {new (): CJAvifImageModel}
+    CJReturnValue: {new (): CJReturnValue}
+    getLoadCJPage(model: CJAvifImageModel): void
+}

@@ -1,7 +1,6 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import {GlobalUtils } from '@cangjie-tpc/avifhybrid';
 
 const DOMAIN = 0x0000;
 
@@ -9,8 +8,6 @@ export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
-    GlobalUtils.setMemoryLruCacheTS(256 * 2, 1024 * 1024 * 1024 * 2)
-    GlobalUtils.setFileLruCacheTS(256 * 2, 1024 * 1024 * 1024 * 2)
   }
 
   onDestroy(): void {

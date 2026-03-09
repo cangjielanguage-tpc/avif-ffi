@@ -245,6 +245,7 @@ public class AvifDecoder {
             var perPixelByte:Int32 = 4
             let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * perPixelByte, format, 0)
             releaseArrayRawData<UInt8>(handleColor)
+            releaseArrayRawData<UInt8>(handlePic)
             return res
         }
     }

@@ -9,15 +9,19 @@ struct page9Test {
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
+    const res2 = $r("app.media.a24");
+    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
+    const validData2 = array2 ?? new Uint8Array(); // 兜底空的 Uint8Array
     let decoderTs = new AvifDecoderTS()
-    decoderTs.create("media://a24")
+    decoderTs.create(validData2)
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
     let cjreturnValue = decoderTs.nthFrameffi(3, this.mWidth, this.mHeight)
-    let validReturnValue:ArrayBuffer = cjreturnValue.color ?? new ArrayBuffer(0)
+    let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
     this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    decoderTs.release()
   }
 
   aboutToDisappear(): void {

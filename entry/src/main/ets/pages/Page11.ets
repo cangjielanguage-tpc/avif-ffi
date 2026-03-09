@@ -4,13 +4,8 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct page11Test {
-  avifImageModel1: AvifImageModel = new AvifImageModel()
   avifImageModel2: AvifImageModel = new AvifImageModel()
-  avifImageModel3: AvifImageModel = new AvifImageModel()
-  avifImageModel4: AvifImageModel = new AvifImageModel()
-  avifImageModel5: AvifImageModel = new AvifImageModel()
-  avifImageModel6: AvifImageModel = new AvifImageModel()
-
+  avifImageModel22: AvifImageModel = new AvifImageModel()
   @State ready: boolean = false
 
   completeCallback(status: number): void {
@@ -18,8 +13,16 @@ struct page11Test {
   }
 
   async aboutToAppear(): Promise<void> {
+    const res2 = $r("app.media.a2");
+    const res22 = $r("app.media.a22");
 
-      this.avifImageModel1.setUri("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
+
+    let array2 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res2.id)
+    let array22 = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent(res22.id)
+
+
+    if (array2) {
+      this.avifImageModel2.setImageBuffer(array2)
         .setImageViewWidth('600px')
         .setImageViewHeight('400px')
         .setTopleftBorderRadius('20vp')
@@ -28,8 +31,9 @@ struct page11Test {
         .setBottomrightBorderRadius('20vp')
         .setOnComplete(this.completeCallback)
         .setDraggable(false)
-
-      this.avifImageModel2.setUri("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
+    }
+    if (array22) {
+      this.avifImageModel22.setImageBuffer(array22)
         .setImageViewWidth('600px')
         .setImageViewHeight('400px')
         .setTopleftBorderRadius('20vp')
@@ -38,48 +42,8 @@ struct page11Test {
         .setBottomrightBorderRadius('20vp')
         .setOnComplete(this.completeCallback)
         .setDraggable(true)
-
-    this.avifImageModel3.setUri("media://a2")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel4.setUri("media://a22")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel5.setUri("rawfile://a3.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel6.setUri("rawfile://a23.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-       this.ready = true
+    }
+    this.ready = true
   }
 
   build() {
@@ -87,12 +51,8 @@ struct page11Test {
       Scroll() {
         Column() {
           if (this.ready) {
-            AvifViewTS({ model: this.avifImageModel1 })
             AvifViewTS({ model: this.avifImageModel2 })
-            AvifViewTS({ model: this.avifImageModel3 })
-            AvifViewTS({ model: this.avifImageModel4 })
-            AvifViewTS({ model: this.avifImageModel5 })
-            AvifViewTS({ model: this.avifImageModel6 })
+            AvifViewTS({ model: this.avifImageModel22 })
           }
         }
         .width('100%')
@@ -101,3 +61,4 @@ struct page11Test {
     }
   }
 }
+

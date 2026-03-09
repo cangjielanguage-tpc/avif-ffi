@@ -1,5 +1,9 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
-import { CJAvifImageModel,CJAvifDecoder,CJReturnValue,setGlobalContext,getLoadCJPage,setMemoryLruCache,setFileLruCache} from 'libohos_app_cangjie_avif4hybrid.so';
+import { requireCJLib } from 'libark_interop_loader.so'
+import { CustomLib, CJAvifImageModel,CJAvifDecoder,CJReturnValue } from 'libark_interop_api_avif.so';
+
+export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
+
 
 class CJNodeController extends NodeController {
   rootNode?: FrameNode = undefined
@@ -13,7 +17,7 @@ class CJNodeController extends NodeController {
   makeNode(ctx: UIContext): FrameNode | null {
     if (this.rootNode === undefined) {
       this.rootNode = new FrameNode(ctx)
-      getLoadCJPage(this.model)
+      global_customLib.getLoadCJPage(this.model)
     }
     return this.rootNode
   }
@@ -34,11 +38,10 @@ export struct AvifViewTS {
   }
 
   async getModel(): Promise<CJAvifImageModel> {
-    let cjAvifImageModel: CJAvifImageModel = new CJAvifImageModel()
+    let cjAvifImageModel: CJAvifImageModel = new global_customLib.CJAvifImageModel()
     if (this.model !== undefined) {
-      if (this.model.uri != '') {
-        cjAvifImageModel.setUri(this.model.uri)
-        setGlobalContext(getContext(this))
+      if (this.model.imageBuffer !== undefined) {
+        cjAvifImageModel.setImageBuffer(this.model.imageBuffer)
       }
       if (this.model.imagePicWidth > 0) {
         cjAvifImageModel.setImagePicWidth(this.model.imagePicWidth)
@@ -80,7 +83,7 @@ export struct AvifViewTS {
 
 export class AvifImageModel {
 
-  uri:string = "" //网络图片 本地图片
+  imageBuffer?: Uint8Array = undefined
   imagePicWidth: number = 0
   imagePicHeight: number = 0
   imageViewWidth: string = '100%'
@@ -93,9 +96,8 @@ export class AvifImageModel {
   bottomrightBorderRadius: string = '0vp'
   onCompleteCallback?: (loadingStatus: number) => void = undefined
 
-
-  public setUri(uri: string): AvifImageModel {
-    this.uri = uri
+  public setImageBuffer(imageBuffer: Uint8Array): AvifImageModel {
+    this.imageBuffer = imageBuffer
     return this
   }
 
@@ -157,20 +159,16 @@ export class AvifImageModel {
 
 export class AvifDecoderTS{
 
-  cjAvifDecoder: CJAvifDecoder = new CJAvifDecoder()
+  cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
   decodeRes:CJAvifDecoder|undefined = undefined
 
-  constructor() {
-    setGlobalContext(getContext(this))
-  }
-
-  public create(uri:string):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.create(uri)
+  public create(encoded:Uint8Array):CJAvifDecoder|undefined{
+      this.decodeRes = this.cjAvifDecoder.create(encoded)
       return this.decodeRes
   }
 
-  public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.createWithThread(uri,threads)
+  public createWithThread(encoded:Uint8Array, threads: number):CJAvifDecoder|undefined{
+      this.decodeRes = this.cjAvifDecoder.createWithThread(encoded,threads)
       return this.decodeRes
   }
 
@@ -230,9 +228,9 @@ export class AvifDecoderTS{
     }
   }
 
-  public isAvifImageffi(): number{
+  public isAvifImageffi(encoded: Uint8Array): number{
     if(this.decodeRes) {
-        return this.cjAvifDecoder.isAvifImageffi()
+        return this.cjAvifDecoder.isAvifImageffi(encoded)
     }else{
         return 0
     }
@@ -262,9 +260,9 @@ export class AvifDecoderTS{
     }
   }
 
-  public decodeffi(imageWidth: number, imageHeight: number): CJReturnValue{
+  public decodeffi(encoded: Uint8Array, imageWidth: number, imageHeight: number): CJReturnValue{
     if(this.decodeRes) {
-      return this.cjAvifDecoder.decodeffi(imageWidth,imageHeight)
+      return this.cjAvifDecoder.decodeffi(encoded,imageWidth,imageHeight)
     }else{
       return new CJReturnValue()
     }
@@ -274,14 +272,4 @@ export class AvifDecoderTS{
     this.cjAvifDecoder.release()
   }
 
-}
-
-export class GlobalUtils {
-   static setMemoryLruCacheTS(countSize:number,memorySize:number):void{
-    setMemoryLruCache(countSize,memorySize)
-  }
-
-  static setFileLruCacheTS(countSize:number,memorySize:number):void{
-    setFileLruCache(countSize,memorySize)
-  }
 }
