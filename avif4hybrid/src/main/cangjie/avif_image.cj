@@ -300,6 +300,7 @@ public class AvifImage {
                                 if (pixelMapList.size != frameCount) {
                                     for (k in 0..frameCount) {
                                         if (Thread.currentThread.hasPendingCancellation) {
+                                            j.release()
                                             return
                                         }
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
