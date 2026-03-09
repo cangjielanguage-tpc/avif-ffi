@@ -112,6 +112,8 @@ public class AvifImage {
     var isSinglePic:Bool = true
     //判断是否结束循环显示
     var isLoop:Bool = true
+    var fut:?Future<Unit> = None
+
 
     protected override func aboutToAppear() {
         if(let Some(i) <- imageBuffer){
@@ -157,10 +159,14 @@ public class AvifImage {
                             throw Exception("FrameDurations should be equal to frameCount")
                         }
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
-                        spawn {
+                        fut =  spawn {
                             while (isLoop) {
                                 if (pixelMapList.size != frameCount) {
                                      for (k in 0..frameCount) {
+                                        if (Thread.currentThread.hasPendingCancellation) {
+                                            j.release()
+                                            return
+                                        }
                                         let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
                                         j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
                                         let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
@@ -171,9 +177,14 @@ public class AvifImage {
                                         }
                                         sleep(durationList[Int64(k)] * Duration.second)
                                         pixelMapList.add(tempPixelMap)
+                                        if(pixelMapList.size == frameCount){
+                                             j.release()
+                                        }
                                     }
                                 }else{
-                                    j.release()
+                                    if (Thread.currentThread.hasPendingCancellation) {
+                                        return
+                                    }
                                     for (k in 0..pixelMapList.size) {
                                         let tempPixelMap = pixelMapList.get(k).getOrThrow()
                                         launch{
@@ -202,6 +213,9 @@ public class AvifImage {
                 this.pixelMap.release()
             }else{
                 //多帧就release list 不要release pixelmap 会导致重复release
+                if(let Some(i) <- fut){
+                    i.cancel()
+                }
                 for(i in 0..pixelMapList.size){
                     pixelMapList.get(i).getOrThrow().release()
                 }
