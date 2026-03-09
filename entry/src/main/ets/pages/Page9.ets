@@ -18,6 +18,7 @@ struct page9Test {
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
     this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    decoderTs.release()
   }
 
   aboutToDisappear(): void {

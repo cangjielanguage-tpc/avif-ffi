@@ -37,7 +37,6 @@ export declare class CJAvifDecoder {
     nextFrameIndexffi(): number
     nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
     nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
-    decodeffi(imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
     constructor ()
 }

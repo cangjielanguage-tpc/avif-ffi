@@ -243,16 +243,6 @@ export class AvifDecoderTS{
      public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
 
     /**
-     * 将动画AVIF的下一帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
-     * 
-     * 参数 imageWidth - 解码生成的图片的宽度
-     * 参数 imageHeight - 解码生成的图片的高度
-     * 
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
-     */   
-     public decodeffi(imageWidth: number, imageHeight: number): CJReturnValue
-
-    /**
      * 销毁avif图片的解码器,释放内存,以防出现资源浪费问题
      * 
      */   
@@ -415,16 +405,6 @@ public class CJAvifDecoder {
      * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */  
     public func nthFrameffi(index: Int32,imageWidth: Int32, imageHeight: Int32): CJReturnValue 
-    
-    /**
-     * 将动画AVIF的下一帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
-     * 
-     * 参数 imageWidth - 解码生成的图片的宽度
-     * 参数 imageHeight - 解码生成的图片的高度
-     * 
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
-     */   
-    public func decodeffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue 
     
      /**
      * 销毁avif图片的解码器,释放内存,以防出现资源浪费问题

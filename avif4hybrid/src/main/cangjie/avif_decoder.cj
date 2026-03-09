@@ -233,22 +233,6 @@ public class AvifDecoder {
         }
     }
 
-    public func decodeffi(encoded: Array<UInt8>, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Bool {
-        if(color.size == 0){
-            Hilog.error(0,"aviflog","the size of color array must > 0")
-            return false
-        }
-        unsafe {
-            let handlePic: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
-            let handleColor: CPointerHandle<UInt8> = acquireArrayRawData(color)
-            let format: Int32 = 2
-            var perPixelByte:Int32 = 4
-            let res =  decode(handlePic.pointer, Int32(encoded.size), handleColor.pointer, imageWidth, imageHeight,imageWidth * perPixelByte, format, 0)
-            releaseArrayRawData<UInt8>(handleColor)
-            return res
-        }
-    }
-
     public func release(): Unit {
         if (decoder != 0) {
             destroyDecoderffi(decoder)

@@ -262,13 +262,6 @@ export class AvifDecoderTS{
     }
   }
 
-  public decodeffi(imageWidth: number, imageHeight: number): CJReturnValue{
-    if(this.decodeRes) {
-      return this.cjAvifDecoder.decodeffi(imageWidth,imageHeight)
-    }else{
-      return new CJReturnValue()
-    }
-  }
 
   public release(): void{
     this.cjAvifDecoder.release()
