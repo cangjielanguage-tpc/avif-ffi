@@ -288,6 +288,16 @@ export class GlobalUtils {
      * 返回值 void 类型 
      */   
   static setFileLruCacheTS(countSize:number,memorySize:number):void
+  
+  /**
+     * 设置Context对象到仓颉
+     * 
+     * 参数 context - Context上下文对象
+     * 
+     * 返回值 void 类型 
+     */   
+  static setAvifContext(context:Context):void
+
 }
 ```
 

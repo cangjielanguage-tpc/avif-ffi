@@ -277,4 +277,8 @@ export class GlobalUtils {
   static setFileLruCacheTS(countSize:number,memorySize:number):void{
     setFileLruCache(countSize,memorySize)
   }
+
+  static setAvifContext(context:Context):void{
+     setGlobalContext(context)
+  }
 }
