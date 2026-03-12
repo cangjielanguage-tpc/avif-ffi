@@ -5,7 +5,6 @@ package ohos_app_cangjie_avif4hybrid
 
 //缓存对象
 class CacheBean {
-  var multiPixelMap:?MultiPixelMap = None
   var pixelMap:?PixelMap = None
   var picData:?Array<UInt8> = None
 
@@ -13,16 +12,8 @@ class CacheBean {
         this.picData = picData
     }
 
-    func setMultiPixelMap(multiPixelMap:?MultiPixelMap){
-        this.multiPixelMap = multiPixelMap
-    }
-
     func setPixelMap(pixelMap:?PixelMap){
         this.pixelMap = pixelMap
-    }
-
-    func getMultiPixelMap():?MultiPixelMap{
-        return multiPixelMap
     }
 
     func getPixelMap():?PixelMap{
@@ -33,8 +24,7 @@ class CacheBean {
         return picData
     }
 
-    init(multiPixelMap:?MultiPixelMap,pixelMap:?PixelMap,picData:?Array<UInt8>){
-        this.multiPixelMap = multiPixelMap
+    init(pixelMap:?PixelMap,picData:?Array<UInt8>){
         this.pixelMap = pixelMap
         this.picData = picData
     }

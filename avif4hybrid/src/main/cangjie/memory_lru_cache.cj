@@ -86,14 +86,6 @@ class MemoryLruCache {
                     let singlePixelMap = i.getPixelMap()
                     if (let Some(j) <- singlePixelMap) {
                         j.release()
-                    } else {
-                        let multiPixelMap = i.getMultiPixelMap()
-                        if (let Some(k) <- multiPixelMap) {
-                            let listPixelMap = k.getPixelMapList()
-                            for (pixelmapItem in listPixelMap) {
-                                pixelmapItem.release()
-                            }
-                        }
                     }
                 }
             }
@@ -134,19 +126,10 @@ class MemoryLruCache {
                 totalSize = Int64(i.getPixelBytesNumber())
                 i.release()
             } else {
-                //表示是多图
-                let multiMapList = cacheBean.getMultiPixelMap()
-                if (let Some(i) <- multiMapList) {
-                    let pixelMapList = i.getPixelMapList()
-                    for (item in pixelMapList) {
-                        totalSize += Int64(item.getPixelBytesNumber())
-                        item.release()
-                    }
-                }else{
-                    let arrData = cacheBean.getPicData()
-                    if(let Some(i) <- arrData){
-                        totalSize = i.size
-                    }
+                //接口单图
+                let arrData = cacheBean.getPicData()
+                if(let Some(i) <- arrData){
+                    totalSize = i.size
                 }
             }
             this.currentMemory -= totalSize
@@ -160,18 +143,10 @@ class MemoryLruCache {
             //表示是单图
             totalSize = Int64(i.getPixelBytesNumber())
         } else {
-            //表示是多图
-            let multiMapList = cacheBean.getMultiPixelMap()
-            if (let Some(i) <- multiMapList) {
-                let pixelMapList = i.getPixelMapList()
-                for (item in pixelMapList) {
-                    totalSize += Int64(item.getPixelBytesNumber())
-                }
-            }else{
-                let arrData = cacheBean.getPicData()
-                 if(let Some(i) <- arrData){
-                    totalSize = i.size
-                 }
+            //表示是接口单图
+            let arrData = cacheBean.getPicData()
+            if(let Some(i) <- arrData){
+                totalSize = i.size
             }
         }
         return totalSize

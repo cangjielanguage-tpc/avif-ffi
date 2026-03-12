@@ -137,34 +137,14 @@ public class AvifImage {
         let memPixelMap: ?CacheBean = memoryLruCache.get(key)
         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
 
+        //多图不要内存缓存逻辑
         if (let Some(map) <- memPixelMap) {
             //如果有值
             if(let Some(i) <- map.getPixelMap()){
                 pixelMap = i
                 return
-            }else{
-                //这里是多图的内存缓存逻辑了
-                var multiList :?MultiPixelMap = map.getMultiPixelMap()
-                if(let Some(j) <- multiList){
-                    //表示多图缓存有值
-                    let pixelMapList = j.getPixelMapList()
-                    let durationList = j.getFrameDurations()
-                    spawn {
-                        while (isLoop) {
-                            for (k in 0..pixelMapList.size) {
-                                let tempPixelMap = pixelMapList.get(k).getOrThrow()
-                                launch {
-                                    pixelMap = tempPixelMap
-                                }
-                                sleep(durationList[Int64(k)] * Duration.second)
-                            }
-                        }
-                    }
-                    return
-                }
             }
-          }
-
+        }
         if (fileExist) {
                 //单图文件的本地缓存
                 spawn {
@@ -208,6 +188,15 @@ public class AvifImage {
         if(let Some(i) <- fut){
             i.cancel()
         }
+        //多图情况pixelmap得释放
+        if(!isSinglePic){
+            for(i in 0..pixelMapList.size){
+                let pixelmap:?PixelMap = pixelMapList.get(i)
+                if(let Some(j) <- pixelmap){
+                    j.release()
+                }
+            }
+        }
     }
 
     private func doCompleteCallBack(cJImageComplete: CJImageComplete): Unit {
@@ -247,12 +236,13 @@ public class AvifImage {
                             launch {
                                 pixelMap = tempPixelMap
                             }
-                            //保存一份到本地存储
-                            if(this.uri.startsWith("http")){
+                            //保存一份到本地存储 单图需要本地缓存
+                            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
+                            if(!fileExist && this.uri.startsWith("http")){
                                  fileLruCache.put(key,i.size,i)
                             }
-                            //这里生成了就要保存到内存中
-                            let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap,Option<Array<UInt8>>.None)
+                            //这里生成了就要保存到内存中 单图需要内存缓存
+                            let cacheBean:CacheBean = CacheBean(tempPixelMap,Option<Array<UInt8>>.None)
                             memoryLruCache.put(key, cacheBean)
                             j.release()
                         }
@@ -261,9 +251,11 @@ public class AvifImage {
                         //多帧图
                          isSinglePic = false
                          //仅限网络情况坐下缓存,避免下载
-                         if(this.uri.startsWith("http")){
+                         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
+                         if(!fileExist && this.uri.startsWith("http")){
                             //网络图片这种情况把文件缓存下来
                             spawn{
+                                //多图需要本地缓存
                                 fileLruCache.put(key,i.size,i)
                             }
                          }
@@ -295,9 +287,7 @@ public class AvifImage {
                                         pixelMapList.add(tempPixelMap)
                                         if(pixelMapList.size == frameCount){
                                              j.release()
-                                             let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
-                                             let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None,Option<Array<UInt8>>.None)
-                                             memoryLruCache.put(key, cacheBean)
+                                             //多图不需要内存缓存
                                         }
                                     }
                                 } else {
