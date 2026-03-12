@@ -126,34 +126,34 @@ class FileLruCache {
     }
   }
 
-   // 添加缓存键值对,同时写文件,单图是特别处理过的
-  func put(key: String, value: Int64,content:Array<UInt8>,width: Int64, height: Int64): Unit {
-    synchronized(mtx) {
-        if (key.size == 0 || value < 0) {
-          throw Exception('key or value is invalid ')
-        }
-        if (!this.isInited) {
-          return
-        }
-        // 如果size满了的话，需要按照LRU的方式删除第一个
-        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
-          remove(this.lruCache.keys()[0])
-        } else if (this.lruCache.containsKey(key)) {
-          remove(key)
-        }
-        let imageInfoArr: Array<UInt8> = Array<UInt8>(4, repeat: 0)
-        imageInfoArr[0] = UInt8(width >> 8 & 0xFF)
-        imageInfoArr[1] = UInt8(width & 0xFF)
-        imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
-        imageInfoArr[3] = UInt8(height & 0xFF)
-        let pre = this.lruCache.put(key,value)
-        FileUtils.getInstance().writeDataSync(this.path + key, imageInfoArr,content)
-        if (let Some(i) <- pre) {
-          this.addMemorySize(i)
-        }
-        trimToSize()
-    }
-  }
+//   // 添加缓存键值对,同时写文件,单图是特别处理过的
+//  func put(key: String, value: Int64,content:Array<UInt8>,width: Int64, height: Int64): Unit {
+//    synchronized(mtx) {
+//        if (key.size == 0 || value < 0) {
+//          throw Exception('key or value is invalid ')
+//        }
+//        if (!this.isInited) {
+//          return
+//        }
+//        // 如果size满了的话，需要按照LRU的方式删除第一个
+//        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
+//          remove(this.lruCache.keys()[0])
+//        } else if (this.lruCache.containsKey(key)) {
+//          remove(key)
+//        }
+//        let imageInfoArr: Array<UInt8> = Array<UInt8>(4, repeat: 0)
+//        imageInfoArr[0] = UInt8(width >> 8 & 0xFF)
+//        imageInfoArr[1] = UInt8(width & 0xFF)
+//        imageInfoArr[2] = UInt8(height >> 8 & 0xFF)
+//        imageInfoArr[3] = UInt8(height & 0xFF)
+//        let pre = this.lruCache.put(key,value)
+//        FileUtils.getInstance().writeDataSync(this.path + key, imageInfoArr,content)
+//        if (let Some(i) <- pre) {
+//          this.addMemorySize(i)
+//        }
+//        trimToSize()
+//    }
+//  }
 
 
   func get(key: String): ?Array<UInt8> {

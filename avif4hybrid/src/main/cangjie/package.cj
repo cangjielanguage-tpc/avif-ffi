@@ -4,8 +4,8 @@
 
 package ohos_app_cangjie_avif4hybrid
 
-var memoryLruCache:MemoryLruCache = MemoryLruCache(512, 1024 * 1024 * 1024)
-var fileLruCache:FileLruCache = FileLruCache(512, 1024 * 1024 * 1024)
+var memoryLruCache:MemoryLruCache = MemoryLruCache(1024, 2*1024 * 1024 * 1024)
+var fileLruCache:FileLruCache = FileLruCache(1024, 2*1024 * 1024 * 1024)
 
 
 //这个key是多方因素组成

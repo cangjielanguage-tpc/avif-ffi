@@ -142,6 +142,11 @@ class MemoryLruCache {
                         totalSize += Int64(item.getPixelBytesNumber())
                         item.release()
                     }
+                }else{
+                    let arrData = cacheBean.getPicData()
+                    if(let Some(i) <- arrData){
+                        totalSize = i.size
+                    }
                 }
             }
             this.currentMemory -= totalSize
@@ -162,6 +167,11 @@ class MemoryLruCache {
                 for (item in pixelMapList) {
                     totalSize += Int64(item.getPixelBytesNumber())
                 }
+            }else{
+                let arrData = cacheBean.getPicData()
+                 if(let Some(i) <- arrData){
+                    totalSize = i.size
+                 }
             }
         }
         return totalSize

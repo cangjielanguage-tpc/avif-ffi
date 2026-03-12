@@ -136,11 +136,10 @@ public class AvifImage {
         key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
         let memPixelMap: ?CacheBean = memoryLruCache.get(key)
         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-        let multifileExist = FileUtils.getInstance().exist(fileLruCache.path + "multi" + key)
 
         if (let Some(map) <- memPixelMap) {
             //如果有值
-            if(let Some(i) <- map.pixelMap){
+            if(let Some(i) <- map.getPixelMap()){
                 pixelMap = i
                 return
             }else{
@@ -166,38 +165,17 @@ public class AvifImage {
             }
           }
 
-        if (fileExist||multifileExist) {
-            if(fileExist){
+        if (fileExist) {
                 //单图文件的本地缓存
                 spawn {
+                    //本地缓存改为原图了
                     let source:?Array<UInt8> = fileLruCache.get(key)
                     if(let Some(i) <- source){
-                        let finalWidth: Int32 = Int32(UInt16(i[0]) << 8 | UInt16(i[1]))
-                        let finalHeight: Int32 = Int32(UInt16(i[2]) << 8 | UInt16(i[3]))
-                        let colors = i[4..i.size]
-                        let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                        let tempPixelMap = createPixelMap(colors, opts)
-                        let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                        memoryLruCache.put(key, cacheBean)
-                        launch {
-                            pixelMap = tempPixelMap
-                        }
+                        dealWithBuffer(i)
                     }else{
                         Hilog.error(0, "diskcache", "获取的单图本地缓存内容为空")
                     }
                 }
-            }else{
-                //多图文件的本地缓存
-                spawn {
-                      let source:?Array<UInt8> = fileLruCache.get("multi"+key)
-                      if(let Some(i) <- source){
-                          dealWithBuffer(i)
-                      }else{
-                        Hilog.error(0, "diskcache", "获取的多图本地缓存内容为空")
-                      }
-                 }
-            }
             return
         } else {
             if (this.uri.startsWith("http")) {
@@ -270,9 +248,11 @@ public class AvifImage {
                                 pixelMap = tempPixelMap
                             }
                             //保存一份到本地存储
-                            fileLruCache.put(key,colors.size+4,colors,imageWidth,imageHeight)
+                            if(this.uri.startsWith("http")){
+                                 fileLruCache.put(key,i.size,i)
+                            }
                             //这里生成了就要保存到内存中
-                            let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
+                            let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap,Option<Array<UInt8>>.None)
                             memoryLruCache.put(key, cacheBean)
                             j.release()
                         }
@@ -284,7 +264,7 @@ public class AvifImage {
                          if(this.uri.startsWith("http")){
                             //网络图片这种情况把文件缓存下来
                             spawn{
-                                fileLruCache.put("multi" + key,i.size,i)
+                                fileLruCache.put(key,i.size,i)
                             }
                          }
                         if (j.getFrameDurations().isNone()) {
@@ -316,7 +296,7 @@ public class AvifImage {
                                         if(pixelMapList.size == frameCount){
                                              j.release()
                                              let multiPixelMap:MultiPixelMap = MultiPixelMap(pixelMapList,durationList,Int32(repeatCount))
-                                             let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None)
+                                             let cacheBean:CacheBean = CacheBean(multiPixelMap,Option<PixelMap>.None,Option<Array<UInt8>>.None)
                                              memoryLruCache.put(key, cacheBean)
                                         }
                                     }

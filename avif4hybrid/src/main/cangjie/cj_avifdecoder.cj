@@ -11,7 +11,8 @@ public class CJAvifDecoder {
     }
 
     private var decoder: Option<AvifDecoder> = None
-    var mKey = ""
+    var mMemoryKey = ""
+    var mDiskKey = ""
     var mUri = ""
     var encoded:?Array<Byte> = None
     public func create(uri: String): Option<CJAvifDecoder> {
@@ -23,11 +24,21 @@ public class CJAvifDecoder {
         //在这里将uri转化为arryauint8,并生成key
          if (uri.startsWith("http")) {
             //把数据下载下来
-           let imageBuffer = getImageFromNet(uri)
-           if(let Some(i) <- imageBuffer){
+            //网络这种才会用到缓存
+            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+            if(fileExist){
+                //如果存在,获取内容
+              let source:?Array<UInt8> = fileLruCache.get(mDiskKey)
+              if(let Some(i) <- source){
+                  return createLoginc(i,threads)
+              }
+            }
+            //下面是网络去下载
+            let imageBuffer = getImageFromNet(uri)
+            if(let Some(i) <- imageBuffer){
               return createLoginc(i,threads)
             }else{
-              Hilog.error(0, "getImageFromRawFile", "获取网络文件内容失败")
+              Hilog.error(0, "getImageFromNet", "获取网络文件内容失败")
               return Option<CJAvifDecoder>.None
             }
         }else if(uri.startsWith("rawfile://")){
@@ -153,7 +164,7 @@ public class CJAvifDecoder {
 
     public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue {
         let value:CJReturnValue = CJReturnValue()
-         if(imageWidth <= 0 || imageHeight <= 0){
+         if(imageWidth < 0 || imageHeight < 0){
             value.issuccess = false
             return value
         }
@@ -167,57 +178,49 @@ public class CJAvifDecoder {
         //先生成key
         if(count == 1){
             //单图
-            mKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+            mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+            mMemoryKey = mDiskKey + "notcomponent"
         }else{
             //多图的单张
             let index:Int32 = nextFrameIndexffi()
-            mKey = getmd5keyWithIndex(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight),index)
+            mMemoryKey = getmd5keyWithIndex(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight),index)+"notcomponent"
+            mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
         }
+
+        //如果宽高为0 则为图片的原始宽高
+        var realPicWidth = imageWidth
+        var realPicHeight = imageHeight
+        if(imageWidth == 0){
+            realPicWidth = Int32(getWidth())
+        }
+        if(imageHeight == 0){
+            realPicHeight = Int32(getHeight())
+        }
+
          //根据key判断内存中有没有
-        let memPixelMap: ?CacheBean = memoryLruCache.get(mKey)
+        let memPixelMap: ?CacheBean = memoryLruCache.get(mMemoryKey)
         if(let Some(cache) <- memPixelMap){
-            let pixelMap = cache.getPixelMap()
-            if(let Some(i) <- pixelMap){
-                let readBuffer: Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4), repeat: 0)
-                i.readPixelsToBuffer(readBuffer)
-                value.color = convertBGRAtoRGBA(readBuffer)
+            let arrData = cache.getPicData()
+            if(let Some(i) <- arrData){
+                value.color = i
                 value.issuccess = true
                 return value
             }
         }
-        //内存没取到考虑本地
-        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mKey)
-        if(fileExist){
-            //找到本地缓存了
-                let source:?Array<UInt8> = fileLruCache.get(mKey)
-                if(let Some(i) <- source){
-                    let colors = i[4..i.size]
-                    spawn{
-                        let finalWidth: Int32 = Int32(UInt16(i[0]) << 8 | UInt16(i[1]))
-                        let finalHeight: Int32 = Int32(UInt16(i[2]) << 8 | UInt16(i[3]))
-                        let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                        let tempPixelMap = createPixelMap(colors, opts)
-                        let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                        memoryLruCache.put(mKey, cacheBean)
-                    }
-                    value.color = colors
-                    value.issuccess = true
-                    return value
-                }
-        }
-        //本地也没有
-        let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
+        //内存也没有
+        let color:Array<Byte> = Array<Byte>(Int64(realPicWidth*realPicHeight*4),repeat:0)
         if (let Some(i) <- decoder) {
-            value.code =  i.nextFrameffi(color, imageWidth, imageHeight)
+            value.code =  i.nextFrameffi(color, realPicWidth, realPicHeight)
             if(value.code == 0){
                 spawn{
-                    let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                    let tempPixelMap = createPixelMap(color, opts)
-                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                    memoryLruCache.put(mKey, cacheBean)
-                    fileLruCache.put(mKey,color.size+4,color,Int64(imageWidth),Int64(imageHeight))
+                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,Option<PixelMap>.None,color)
+                    memoryLruCache.put(mMemoryKey, cacheBean)
+                    if(let Some(j) <- encoded){
+                        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                        if(!fileExist && mUri.startsWith("http")){
+                            fileLruCache.put(mDiskKey,j.size,j)
+                        }
+                    }
                 }
                 value.issuccess = true
                 value.color = color
@@ -233,7 +236,7 @@ public class CJAvifDecoder {
 
     public func nthFrameffi(index: Int32,imageWidth: Int32, imageHeight: Int32): CJReturnValue {
         let value:CJReturnValue = CJReturnValue()
-         if(imageWidth <= 0 || imageHeight <= 0){
+         if(imageWidth < 0 || imageHeight < 0){
             value.issuccess = false
             return value
         }
@@ -247,62 +250,54 @@ public class CJAvifDecoder {
         //先生成key
         if(count == 1){
             //单图
-            mKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+             mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+             mMemoryKey = mDiskKey + "notcomponent"
         }else{
             //多图的单张
-            mKey = getmd5keyWithIndex(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight),index)
+            mMemoryKey = getmd5keyWithIndex(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight),index)+ "notcomponent"
+            mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
         }
          //根据key判断内存中有没有
-        let memPixelMap: ?CacheBean = memoryLruCache.get(mKey)
+        let memPixelMap: ?CacheBean = memoryLruCache.get(mMemoryKey)
         if(let Some(cache) <- memPixelMap){
-            let pixelMap = cache.getPixelMap()
-            if(let Some(i) <- pixelMap){
-                let readBuffer: Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4), repeat: 0)
-                i.readPixelsToBuffer(readBuffer)
-                value.color = convertBGRAtoRGBA(readBuffer)
+            let arrData = cache.getPicData()
+            if(let Some(i) <- arrData){
+                value.color = i
                 value.issuccess = true
                 return value
             }
         }
-        //内存没取到考虑本地
-        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mKey)
-        if(fileExist){
-            //找到本地缓存了
-                let source:?Array<UInt8> = fileLruCache.get(mKey)
-                if(let Some(i) <- source){
-                    let colors = i[4..i.size]
-                    spawn{
-                        let finalWidth: Int32 = Int32(UInt16(i[0]) << 8 | UInt16(i[1]))
-                        let finalHeight: Int32 = Int32(UInt16(i[2]) << 8 | UInt16(i[3]))
-                        let size2: Size = Size(width: Int32(finalWidth), height: Int32(finalHeight))
-                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                        let tempPixelMap = createPixelMap(colors, opts)
-                        let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                        memoryLruCache.put(mKey, cacheBean)
-                    }
-                    value.color = colors
-                    value.issuccess = true
-                    return value
-                }
+
+        //如果宽高为0 则为图片的原始宽高
+        var realPicWidth = imageWidth
+        var realPicHeight = imageHeight
+        if(imageWidth == 0){
+            realPicWidth = Int32(getWidth())
         }
-        //本地也没有
-        let color:Array<Byte> = Array<Byte>(Int64(imageWidth*imageHeight*4),repeat:0)
+        if(imageHeight == 0){
+            realPicHeight = Int32(getHeight())
+        }
+
+        //内存没有
+        let color:Array<Byte> = Array<Byte>(Int64(realPicWidth*realPicHeight*4),repeat:0)
         if (let Some(i) <- decoder) {
             if(count == 1){
                 //单图index默认0
-                value.code =  i.nthFrameffi(0,color, imageWidth, imageHeight)
+                value.code =  i.nthFrameffi(0,color, realPicWidth, realPicHeight)
             }else{
                 //多图
-                value.code =  i.nthFrameffi(index,color, imageWidth, imageHeight)
+                value.code =  i.nthFrameffi(index,color, realPicWidth, realPicHeight)
             }
             if(value.code == 0){
                 spawn{
-                    let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                    let tempPixelMap = createPixelMap(color, opts)
-                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,tempPixelMap)
-                    memoryLruCache.put(mKey, cacheBean)
-                    fileLruCache.put(mKey,color.size+4,color,Int64(imageWidth),Int64(imageHeight))
+                    let cacheBean:CacheBean = CacheBean(Option<MultiPixelMap>.None,Option<PixelMap>.None,color)
+                    memoryLruCache.put(mMemoryKey, cacheBean)
+                    if(let Some(j) <- encoded){
+                        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                        if(!fileExist && mUri.startsWith("http")){
+                             fileLruCache.put(mDiskKey,j.size,j)
+                        }
+                    }
                 }
                 value.issuccess = true
                 value.color = color

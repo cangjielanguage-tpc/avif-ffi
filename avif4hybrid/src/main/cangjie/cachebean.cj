@@ -7,6 +7,11 @@ package ohos_app_cangjie_avif4hybrid
 class CacheBean {
   var multiPixelMap:?MultiPixelMap = None
   var pixelMap:?PixelMap = None
+  var picData:?Array<UInt8> = None
+
+    func setPicData(picData:?Array<UInt8>){
+        this.picData = picData
+    }
 
     func setMultiPixelMap(multiPixelMap:?MultiPixelMap){
         this.multiPixelMap = multiPixelMap
@@ -24,9 +29,14 @@ class CacheBean {
         return pixelMap
     }
 
-    init(multiPixelMap:?MultiPixelMap,pixelMap:?PixelMap){
+    func getPicData():?Array<UInt8>{
+        return picData
+    }
+
+    init(multiPixelMap:?MultiPixelMap,pixelMap:?PixelMap,picData:?Array<UInt8>){
         this.multiPixelMap = multiPixelMap
         this.pixelMap = pixelMap
+        this.picData = picData
     }
 
 }
