@@ -1,0 +1,12 @@
+{
+  "name": "@cangjie-tpc/avifhybrid",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@cangjie/cjhybridview": "1.0.5",
+    "libohos_app_cangjie_avif4hybrid.so": "file:./src/main/cangjie/libohos_app_cangjie_avif4hybrid"
+  }
+}
