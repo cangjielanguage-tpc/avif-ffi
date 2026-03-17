@@ -7,6 +7,8 @@ package ohos_app_cangjie_avif4hybrid
 class CacheBean {
   var pixelMap:?PixelMap = None
   var picData:?Array<UInt8> = None
+  var memoryWidth:Int64 = 0
+  var memoryHeight:Int64 = 0
 
     func setPicData(picData:?Array<UInt8>){
         this.picData = picData
@@ -23,6 +25,23 @@ class CacheBean {
     func getPicData():?Array<UInt8>{
         return picData
     }
+
+    func getMemoryWidth():Int64{
+        return memoryWidth
+    }
+
+    func getMemoryHeight():Int64{
+        return memoryHeight
+    }
+
+    func setMemoryWidth(memoryWidth:Int64){
+        this.memoryWidth = memoryWidth
+    }
+
+    func setMemoryHeight(memoryHeight:Int64){
+        this.memoryHeight = memoryHeight
+    }
+
 
     init(pixelMap:?PixelMap,picData:?Array<UInt8>){
         this.pixelMap = pixelMap

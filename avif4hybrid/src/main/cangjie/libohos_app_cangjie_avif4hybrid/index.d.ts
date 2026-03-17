@@ -4,6 +4,8 @@ export declare class CJReturnValue {
     code: number
     color: ArrayBuffer | undefined
     issuccess: boolean
+    memoryWidth: number
+    memoryHeight: number
     constructor ()
 }
 

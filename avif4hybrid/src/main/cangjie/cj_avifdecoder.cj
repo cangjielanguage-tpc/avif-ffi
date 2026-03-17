@@ -250,11 +250,15 @@ import ohos.ark_interop_macro.Interop
           let color:Array<Byte> = Array<Byte>(Int64(realPicWidth*realPicHeight*4),repeat:0)
           if (let Some(i) <- decoder) {
               value.code =  i.nextFrameffi(color, realPicWidth, realPicHeight)
+              let cacheWidth = realPicWidth
+              let cacheHeight = realPicHeight
               if(value.code == 0){
                   spawn{
                       //单图才走内存缓存
                       if(count == 1){
                           let cacheBean:CacheBean = CacheBean(Option<PixelMap>.None,color)
+                          cacheBean.setMemoryWidth(Int64(cacheWidth))
+                          cacheBean.setMemoryHeight(Int64(cacheHeight))
                           memoryLruCache.put(mMemoryKey, cacheBean)
                       }
 
@@ -337,10 +341,14 @@ import ohos.ark_interop_macro.Interop
                   //多图
                   value.code =  i.nthFrameffi(index,color, realPicWidth, realPicHeight)
               }
+              let cacheWidth = realPicWidth
+              let cacheHeight = realPicHeight
               if(value.code == 0){
                   spawn{
                       if(count == 1){
                          let cacheBean:CacheBean = CacheBean(Option<PixelMap>.None,color)
+                         cacheBean.setMemoryWidth(Int64(cacheWidth))
+                         cacheBean.setMemoryHeight(Int64(cacheHeight))
                          memoryLruCache.put(mMemoryKey, cacheBean)
                       }
                       if(let Some(j) <- encoded){

@@ -1,0 +1,313 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ */
+package ohos_app_cangjie_avif4hybrid
+
+internal import ohos.component.Image
+internal import ohos.component.ImageFit
+internal import ohos.hilog.Hilog
+import ohos.concurrency.launch
+import ohos.component.CJImageComplete
+internal import ohos.file_fs.FileFs
+internal import ohos.ark_interop.JSContext
+internal import ohos.ark_interop.JSModule
+internal import ohos.ark_interop.JSInteropType
+import ohos.state_macro_manage.Component
+import ohos.state_macro_manage.Link
+import ohos.state_macro_manage.State
+import ohos.state_macro_manage.Builder
+internal import ohos.file_fs.Stat
+internal import ohos.file_fs.OpenMode
+internal import ohos.image.PixelMap
+internal import ohos.image.PixelMapFormat
+internal import ohos.image.createPixelMap
+internal import ohos.image.InitializationOptions
+internal import ohos.image.Size
+internal import ohos.base.Length
+internal import ohos.base.LengthType
+internal import ohos.ark_interop.JSObject
+internal import std.time.DateTime
+internal import std.sort.sort
+internal import std.collection.ArrayList
+internal import std.sync.ReentrantMutex
+internal import std.convert.Parsable
+internal import ohos.device_info.DeviceInfo
+internal import ohos.base.LengthProp
+internal import stdx.net.http.ClientBuilder
+internal import stdx.net.tls.CertificateVerifyMode
+internal import stdx.net.tls.TlsClientConfig
+internal import stdx.crypto.digest.MD5
+internal import stdx.encoding.hex.toHexString
+internal import ohos.component.CustomView
+internal import ohos.state_manage.ViewStackProcessor
+internal import ohos.state_manage.ObservedProperty
+internal import ohos.resource_manager.ResourceManager
+internal import ohos.ark_interop.JSCallInfo
+internal import ohos.ark_interop.JSValue
+internal import ohos.component.Column
+internal import ohos.ark_interop.SharedObject
+internal import ohos.ark_interop.JSCurrentJSContext
+internal import ohos.ark_interop.JSArrayEx
+internal import ohos.ark_interop.JSExternal
+internal import ohos.ark_interop.JSType
+internal import ohos.component.ViewBuilder
+internal import ohos.component.If
+internal import ohos.component.ReuseParams
+internal import ohos.component.__Recycle__
+internal import ohos.component.FakeComponent
+internal import ohos.component.LegalCallCheck
+internal import ohos.state_manage.LocalStorage
+internal import ohos.state_manage.SubscriberManager
+internal import ohos.ark_interop_helper.StageContext
+internal import ohos.ark_interop_helper.arkTsValuetoNapiValue
+internal import ohos.ark_interop_helper.isStageMode
+internal import ohos.ark_interop_helper.getContextStageMode
+
+//用自定义接口去实现仓颉的组件形式
+
+@Component
+public class AvifImage2 {
+
+    //图片源数据 必传
+    @Link
+    var uri: String
+
+    //图片宽度
+    @State
+    var imagePicWidth: Int64 = 0
+
+    //图片高度
+    @State
+    var imagePicHeight: Int64 = 0
+
+    //图片控件宽度
+    @State
+    var imageViewWidth: Length = 100.percent
+
+    //图片控件高度
+    @State
+    var imageViewHeight: Length = 100.percent
+
+    //图片对齐方式
+    @State
+    var imageFit: ImageFit = ImageFit.Contain
+
+    //是否可drag
+    @State
+    var isDraggable: Bool = false
+
+    //左上
+    @State
+    var topleftBorderRadius: Length = 0.vp
+
+    //右上
+    @State
+    var toprightBorderRadius: Length = 0.vp
+
+    //左下
+    @State
+    var bottomleftBorderRadius: Length = 0.vp
+
+    //右下
+    @State
+    var bottomrightBorderRadius: Length = 0.vp
+
+    @State
+    var completeCallBack: Option<(Int32) -> Unit> = Option<(Int32) -> Unit>.None
+
+    //一开始的原始初值
+    let size: Size = Size(width: 1, height: 1)
+    let opts: InitializationOptions = InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888,
+        size: size)
+    let color: Array<UInt8> = Array<UInt8>(1 * 1 * 4, repeat: 0)
+    @State
+    var pixelMap: PixelMap = createPixelMap(color, opts)
+
+    //放在外面 利于回收
+    let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+    //判断是否是单帧 对后面释放pixelmap有用
+    var isSinglePic: Bool = true
+    //判断是否结束循环显示
+    var isLoop: Bool = true
+
+    var fut: ?Future<Unit> = None
+
+    protected override func aboutToAppear() {
+        let cjreturnValue : CJReturnValue = CJCacheCheck().getMemoryCache(this.uri, imagePicWidth, imagePicHeight)
+        if (cjreturnValue.issuccess) {
+            //表示取到了内存缓存
+            spawn {
+                let color: ?Array<UInt8> = cjreturnValue.color
+                if (let Some(i) <- color) {
+                    Hilog.error(0, "avif1", "有内存缓存")
+                    var memoryWidth:Int64 = 0
+                    var memoryHeight:Int64 = 0
+                    if(imagePicWidth == 0){
+                        memoryWidth = cjreturnValue.memoryWidth
+                    }else{
+                        memoryWidth = imagePicWidth
+                    }
+                    if(imagePicHeight == 0){
+                        memoryHeight = cjreturnValue.memoryHeight
+                    }else{
+                        memoryHeight = imagePicHeight
+                    }
+                    let size2: Size = Size(width: Int32(memoryWidth), height: Int32(memoryHeight))
+                    let opts: InitializationOptions = InitializationOptions(editable: true,
+                        pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                    let tempPixelMap = createPixelMap(i, opts)
+                    launch {
+                        pixelMap = tempPixelMap
+                    }
+                }
+            }
+            return
+        }
+
+        spawn {
+            var cjAvifDecoder: ?CJAvifDecoder = None
+            cjAvifDecoder = CJCacheCheck().getDiskCache(this.uri, imagePicWidth, imagePicHeight)
+            if(cjAvifDecoder.isNone()){
+                cjAvifDecoder =  CJAvifDecoder().create(this.uri)
+            }else{
+                Hilog.error(0,"avif1","走到本地缓存了")
+            }
+            if (let Some(decoder) <- cjAvifDecoder) {
+                let frameCount = decoder.getFrameCount()
+                var imageTempWidth = decoder.getWidth()
+                var imageTempHeight = decoder.getHeight()
+                if (imagePicWidth != 0) {
+                    imageTempWidth = imagePicWidth
+                }
+                if (imagePicHeight != 0) {
+                    imageTempHeight = imagePicHeight
+                }
+                let imageWidth = imageTempWidth
+                let imageHeight = imageTempHeight
+                if (frameCount == 1) {
+                    //单图
+                    let retValue: CJReturnValue = decoder.nextFrameffi(Int32(imagePicWidth), Int32(imagePicHeight))
+                    if (retValue.issuccess) {
+                        spawn {
+                            let color: ?Array<UInt8> = retValue.color
+                            if (let Some(i) <- color) {
+                                let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                                let opts: InitializationOptions = InitializationOptions(editable: true,
+                                    pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                                let tempPixelMap = createPixelMap(i, opts)
+                                launch {
+                                    pixelMap = tempPixelMap
+                                }
+                            }
+                        }
+                        return
+                    }
+                } else {
+                    isSinglePic = false
+                    let durationList: Array<Float64> = decoder.getFrameDurations().getOrThrow().toArray()
+                    fut = spawn {
+                        while (isLoop) {
+                            if (pixelMapList.size != frameCount) {
+                                for (k in 0..frameCount) {
+                                    if (Thread.currentThread.hasPendingCancellation) {
+                                        decoder.release()
+                                        return
+                                    }
+                                    let retValue: CJReturnValue = decoder.nthFrameffi(Int32(k), Int32(imagePicWidth),Int32(imagePicHeight))
+                                    if (retValue.issuccess) {
+                                        let color: ?Array<UInt8> = retValue.color
+                                        if (let Some(i) <- color) {
+                                            let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                                            let opts: InitializationOptions = InitializationOptions(editable: true,
+                                                pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                                            let tempPixelMap = createPixelMap(i, opts)
+                                            launch {
+                                                pixelMap = tempPixelMap
+                                            }
+                                            sleep(durationList[Int64(k)] * Duration.second)
+                                            pixelMapList.add(tempPixelMap)
+                                            if (pixelMapList.size == frameCount) {
+                                                decoder.release()
+                                                //多图不需要内存缓存
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                //这里做内存缓存处理
+                                for (k in 0..pixelMapList.size) {
+                                    if (Thread.currentThread.hasPendingCancellation) {
+                                        return
+                                    }
+                                    let tempPixelMap = pixelMapList.get(k).getOrThrow()
+                                    launch {
+                                        pixelMap = tempPixelMap
+                                    }
+                                    sleep(durationList[Int64(k)] * Duration.second)
+                                }
+                            }
+                        }
+                    }
+                    return
+                    //多图
+                }
+            }
+        }
+        return
+    }
+
+    protected override func aboutToDisappear() {
+        isLoop = false
+        if (let Some(i) <- fut) {
+            i.cancel()
+        }
+        //多图情况pixelmap得释放
+        if (!isSinglePic) {
+            for (i in 0..pixelMapList.size) {
+                let pixelmap: ?PixelMap = pixelMapList.get(i)
+                if (let Some(j) <- pixelmap) {
+                    j.release()
+                }
+            }
+        }
+    }
+
+    private func doCompleteCallBack(cJImageComplete: CJImageComplete): Unit {
+        if (let Some(i) <- completeCallBack) {
+            i(cJImageComplete.loadingStatus)
+        }
+    }
+
+
+    @Builder
+    func Image19() {
+        Image(this.pixelMap)
+            .width(imageViewWidth)
+            .height(imageViewHeight)
+            .objectFit(imageFit)
+            .borderRadius(topLeft: topleftBorderRadius, topRight: toprightBorderRadius,
+                bottomLeft: bottomleftBorderRadius, bottomRight: bottomrightBorderRadius)
+            .draggable(isDraggable)
+            .onComplete(doCompleteCallBack)
+    }
+
+    @Builder
+    func Image12() {
+        Image(this.pixelMap)
+            .width(imageViewWidth)
+            .height(imageViewHeight)
+            .interopObjectFit(imageFit)
+            .borderRadius(topLeft: topleftBorderRadius, topRight: toprightBorderRadius,
+                bottomLeft: bottomleftBorderRadius, bottomRight: bottomrightBorderRadius)
+            .interopDraggable(isDraggable)
+            .onComplete(doCompleteCallBack)
+    }
+
+    func build() {
+        if (DeviceInfo.sdkApiVersion >= 19) {
+            Image19()
+        } else {
+            Image12()
+        }
+    }
+}

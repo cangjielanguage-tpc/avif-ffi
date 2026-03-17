@@ -19,6 +19,8 @@ public class CJCacheCheck {
             let arrData:?Array<UInt8> = i.getPicData()
             if(let Some(j) <- arrData){
                     value.color = j
+                    value.memoryWidth = i.getMemoryWidth()
+                    value.memoryHeight = i.getMemoryHeight()
                     value.issuccess = true
                     return value
             }else{
