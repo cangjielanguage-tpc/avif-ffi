@@ -207,7 +207,6 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
     try {
         let cjreturnValue: CJReturnValue = CJCacheCheck().getMemoryCache(uri.toString(), 0, 0)
         if (cjreturnValue.issuccess) {
-            Hilog.error(0, "aviflog", "进了内存缓存")
             let info = dealWithMemoryCache(cjreturnValue)
             //如果内存缓存取到了
             let ret = LibC.malloc<AvifDecodeInfo>()
@@ -217,10 +216,7 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         decoder = CJCacheCheck().getDiskCache(uri.toString(), 0, 0)
         if (decoder.isNone()) {
             //没有本地缓存
-            Hilog.error(0, "aviflog", "没有缓存")
             decoder = CJAvifDecoder().create(uri.toString())
-        }else{
-            Hilog.error(0, "aviflog", "进了本地缓存")
         }
         let info = handleAvifSource(decoder.getOrThrow(), uri.toString()).getOrThrow()
         let ret = LibC.malloc<AvifDecodeInfo>()
