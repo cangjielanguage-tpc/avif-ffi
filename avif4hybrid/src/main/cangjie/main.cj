@@ -29,11 +29,14 @@ unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDe
     info.alphaPresent = decoder.getAlphaPresent()
     info.frameCount = 1
     //原图宽高未知的话传0即可，接口内部会处理
+    Hilog.error(0, "aviflog", "log6")
     let retValue: CJReturnValue = decoder.nthFrameffi(0, 0, 0)
+    Hilog.error(0, "aviflog", "log7")
     var colors: ?Array<UInt8> = None
     if (retValue.issuccess) {
         //如果成功
         if (let Some(i) <- retValue.color) {
+            Hilog.error(0, "aviflog", "log8")
             colors = i
         } else {
             info.isSuccess = false
@@ -58,6 +61,7 @@ unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDe
     //        info.errMsg = LibC.mallocCString("Avif decoder faild to get frame.")
     //        return info
     //    }
+    Hilog.error(0, "aviflog", "log9")
     info.dataColors = unsafe { LibC.malloc<CPointer<UInt8>>(count: Int64(info.frameCount)) }
     let pixelMapSize = Int64(info.width) * info.height * 4
     var dst = LibC.malloc<UInt8>(count: pixelMapSize)
@@ -65,14 +69,17 @@ unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDe
     let ret = memcpy_s(dst, UIntNative(pixelMapSize), src.pointer, UIntNative(pixelMapSize))
     releaseArrayRawData<UInt8>(src)
     if (ret != 0) {
+        Hilog.error(0, "aviflog", "log10")
         info.isSuccess = false
         LibC.free(dst)
         dst = CPointer<UInt8>()
     } else {
+        Hilog.error(0, "aviflog", "log11")
         info.dataColors.write(0, src.pointer)
         info.isSuccess = true
         info.isSinglePic = true
     }
+    Hilog.error(0, "aviflog", "log12")
     return info
 }
 
@@ -109,7 +116,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
     info.frameCount = decoder.getFrameCount()
     info.alphaPresent = decoder.getAlphaPresent()
     info.repetitionCount = Int32(decoder.getRepetitionCount())
-
+    Hilog.error(0, "aviflog", "log13")
     let frameDurations = decoder.getFrameDurations()
     if (frameDurations.isNone()) {
         info.isSuccess = false
@@ -127,6 +134,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
     for (idx in 0..info.frameDurationsLength) {
         info.frameDurations.write(idx, durations[idx])
     }
+    Hilog.error(0, "aviflog", "log14")
     let colors: Array<Array<UInt8>> = Array<Array<UInt8>>(info.frameCount, repeat: Array<UInt8>())
     for (idx in 0..info.frameCount) {
         //原图传0,底层自动会转换
@@ -146,7 +154,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
             return info
         }
     }
-
+    Hilog.error(0, "aviflog", "log15")
     info.dataColors = unsafe { LibC.malloc<CPointer<UInt8>>(count: Int64(info.frameCount)) }
     for (idx in 0..Int64(info.frameCount)) {
         let pixelMapSize = Int64(info.width * info.height * 4)
@@ -166,6 +174,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
             return info
         }
     }
+    Hilog.error(0, "aviflog", "log16")
     info.isSuccess = true
     info.isSinglePic = false
     return info
@@ -173,14 +182,18 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
 
 unsafe func handleAvifSource(decoder: CJAvifDecoder, uri: String): ?AvifDecodeInfo {
     let frameCount = decoder.getFrameCount() //图片的帧数
+    Hilog.error(0, "aviflog", "log2")
     return if (frameCount <= 0) {
+        Hilog.error(0, "aviflog", "log3")
         var info = AvifDecodeInfo()
         info.isSuccess = false
         info.errMsg = LibC.mallocCString("frame count less than 0.")
         info
     } else if (frameCount == 1) {
+        Hilog.error(0, "aviflog", "log4")
         handleAvifSinglePicture(decoder, uri)
     } else {
+        Hilog.error(0, "aviflog", "log5")
         handleAvifMultiPicture(decoder, uri)
     }
 }
@@ -237,10 +250,13 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         }else{
             Hilog.error(0, "aviflog", "进了本地缓存")
         }
+        Hilog.error(0, "aviflog", "log1")
         let info = handleAvifSource(decoder.getOrThrow(), uri.toString()).getOrThrow()
         let ret = LibC.malloc<AvifDecodeInfo>()
+        ret.write(info)
         return ret
     } catch (e: Exception) {
+        Hilog.error(0, "aviflog", "log17")
         Hilog.error(0, "AvifDecoder", "decode ${uri} failed: ${e}")
         var info = AvifDecodeInfo()
         info.isSuccess = false
@@ -249,6 +265,7 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         ret.write(info)
         ret
     } finally {
+        Hilog.error(0, "aviflog", "log18")
         decoder?.release()
     }
     //    var decoder = None<CJAvifDecoder>
