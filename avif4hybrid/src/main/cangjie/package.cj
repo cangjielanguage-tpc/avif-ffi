@@ -38,8 +38,9 @@ func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeig
 
  func getImageFromMedia(mediaName: String): ?Array<UInt8> {
     try {
+        var mediastr = mediaName.removeSuffix(".avif")
         let resourceManager = ResourceManager.getResourceManager(GlobalContext.getContext().getOrThrow())
-        let arr: Array<UInt8> = resourceManager.getMediaByName(mediaName,0)
+        let arr: Array<UInt8> = resourceManager.getMediaByName(mediastr,0)
         return arr
     } catch (e: Exception) {
         Hilog.error(0,"media","${e.toString()}")
