@@ -1,11 +1,10 @@
 {
   "src": [
     "pages/Index",
-    "pages/Page5",
-    "pages/Page8",
-    "pages/Page9",
-    "pages/Page10",
-    "pages/Page12"
-
+    "pages/Page1",
+    "pages/Page2",
+    "pages/Page3",
+    "pages/Page4",
+    "pages/Page5"
   ]
 }

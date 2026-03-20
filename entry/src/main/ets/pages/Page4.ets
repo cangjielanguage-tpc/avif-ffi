@@ -4,7 +4,7 @@ import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/li
 
 @Entry
 @Component
-struct page10Test {
+struct page4Test {
   @State pixelMap: PixelMap | undefined = undefined
   @State mWidth: number = 0
   @State mHeight: number = 0

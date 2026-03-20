@@ -21,7 +21,7 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(e => {
               // 点击动作触发该方法调用
-              router.pushUrl({ url: 'pages/Page5' })
+              router.pushUrl({ url: 'pages/Page1' })
             })
           Text("")// 宽度
             .width(10)
@@ -41,7 +41,7 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(e => {
               // 点击动作触发该方法调用
-              router.pushUrl({ url: 'pages/Page8' })
+              router.pushUrl({ url: 'pages/Page2' })
             })
           Text("")// 宽度
             .width(10)
@@ -61,7 +61,7 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(e => {
               // 点击动作触发该方法调用
-              router.pushUrl({ url: 'pages/Page9' })
+              router.pushUrl({ url: 'pages/Page3' })
             })
           Text("")// 宽度
             .width(10)
@@ -81,7 +81,7 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(e => {
               // 点击动作触发该方法调用
-              router.pushUrl({ url: 'pages/Page10' })
+              router.pushUrl({ url: 'pages/Page4' })
             })
           Text("")// 宽度
             .width(10)

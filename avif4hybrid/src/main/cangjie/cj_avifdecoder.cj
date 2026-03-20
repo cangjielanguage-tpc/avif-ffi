@@ -19,8 +19,6 @@ import ohos.ark_interop_macro.Interop
       }
 
 
-
-
       public func createWithThread(uri: String, threads: Int32): Option<CJAvifDecoder> {
           this.mUri = uri
           //在这里将uri转化为arryauint8,并生成key
@@ -32,7 +30,7 @@ import ohos.ark_interop_macro.Interop
               if(fileExist){
                     let source:?Array<UInt8> = fileLruCache.get(mDiskKey)
                     if(let Some(i) <- source){
-                        return  CJAvifDecoder().createLoginc(uri,i,0)
+                        return createLoginc(i,threads)
                     }else{
                        return  Option<CJAvifDecoder>.None
                     }
@@ -95,22 +93,6 @@ import ohos.ark_interop_macro.Interop
               return Option<CJAvifDecoder>.None
           }
       }
-
-        func createLoginc(uri: String,buffer:Array<UInt8>,threads:Int32):Option<CJAvifDecoder>{
-          this.mUri = uri
-          encoded = buffer
-          decoder = AvifDecoder(buffer, threads)
-          if(let Some(k) <- decoder){
-              if (k.decoder == 0) {
-                  return Option<CJAvifDecoder>.None
-              }
-              return this
-          }else{
-              return Option<CJAvifDecoder>.None
-          }
-      }
-
-
 
 
       public func getWidth(): Int64 {
