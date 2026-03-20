@@ -217,6 +217,7 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
             info.isSuccess = false
             info.errMsg = LibC.mallocCString("生成解码器对象失败")
             let ret = LibC.malloc<AvifDecodeInfo>()
+            ret.write(info)
             return ret
         }
     } catch (e: Exception) {
