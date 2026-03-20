@@ -9,21 +9,6 @@ export declare class CJReturnValue {
     constructor ()
 }
 
-export declare class CJAvifImageModel {
-    setUri(uri: string): void
-    setImagePicWidth(imagePicWidth: number): void
-    setImagePicHeight(imagePicHeight: number): void
-    setImageViewWidth(imageViewWidth: string): void
-    setImageViewHeight(imageViewHeight: string): void
-    setImageFit(imageFit: string): void
-    setDraggable(draggable: boolean): void
-    setTopleftBorderRadius(topleftBorderRadius: string): void
-    setToprightBorderRadius(toprightBorderRadius: string): void
-    setBottomleftBorderRadius(bottomleftBorderRadius: string): void
-    setBottomrightBorderRadius(bottomrightBorderRadius: string): void
-    setCompleteCallback(completeCallBack: (funcArg0: number) => void): void
-    constructor ()
-}
 
 export declare class CJAvifDecoder {
     create(uri: string): CJAvifDecoder | undefined
@@ -43,10 +28,14 @@ export declare class CJAvifDecoder {
     constructor ()
 }
 
+export declare class CJCacheCheck {
+    getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
+    getDiskCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJAvifDecoder | undefined
+    constructor ()
+}
+
 
 export declare function setGlobalContext(context: Context): void
-
-export declare function getLoadCJPage(model: CJAvifImageModel): void
 
 export declare function setMemoryLruCache(countSize:number,memorySize:number): void
 

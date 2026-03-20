@@ -26,14 +26,9 @@ public class GlobalContext {
 }
 
 
-func testCJ(runtime: JSContext, callInfo: JSCallInfo): JSValue {
-    let result = "Hello ${callInfo[0].toString(runtime)}"
-    runtime.string(result).toJSValue()
-}
 
 let EXPORT_MODULE = JSModule.registerModule {
-    runtime, exports => exports["testCJ"] = runtime.function(testCJ).toJSValue()
-    exports["getLoadCJPage"] = runtime.function(getLoadCJPage).toJSValue()
+    runtime, exports =>
     exports["setGlobalContext"] = runtime.function(setGlobalContext).toJSValue()
     exports["setMemoryLruCache"] = runtime.function(setMemoryLruCache).toJSValue()
     exports["setFileLruCache"] = runtime.function(setFileLruCache).toJSValue()

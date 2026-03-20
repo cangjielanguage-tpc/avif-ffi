@@ -63,14 +63,6 @@ unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDe
     return info
 }
 
-//unsafe func getFrame(decoder: CJAvifDecoder, uri: String, width: Int64, height: Int64) {
-//    var retValue: CJReturnValue = CJMemoryCheck().getMemoryCache(uri, width, height)
-//    return if (retValue.issuccess == true) {
-//        retValue
-//    } else {
-//        decoder.nthFrameffi(0, Int32(width), Int32(height))
-//    }
-//}
 
 unsafe func free(info: AvifDecodeInfo) {
     if (info.frameDurations.isNotNull()) {

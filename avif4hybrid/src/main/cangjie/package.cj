@@ -4,6 +4,42 @@
 
 package ohos_app_cangjie_avif4hybrid
 
+internal import ohos.hilog.Hilog
+import ohos.concurrency.launch
+internal import ohos.file_fs.FileFs
+internal import ohos.ark_interop.JSContext
+internal import ohos.ark_interop.JSModule
+internal import ohos.ark_interop.JSInteropType
+internal import ohos.file_fs.Stat
+internal import ohos.file_fs.OpenMode
+internal import ohos.image.PixelMap
+internal import ohos.base.Length
+internal import ohos.base.LengthType
+internal import ohos.ark_interop.JSObject
+internal import std.time.DateTime
+internal import std.sort.sort
+internal import std.collection.ArrayList
+internal import std.sync.ReentrantMutex
+internal import std.convert.Parsable
+internal import ohos.base.LengthProp
+internal import stdx.net.http.ClientBuilder
+internal import stdx.net.tls.CertificateVerifyMode
+internal import stdx.net.tls.TlsClientConfig
+internal import stdx.crypto.digest.MD5
+internal import stdx.encoding.hex.toHexString
+internal import ohos.resource_manager.ResourceManager
+internal import ohos.ark_interop.JSCallInfo
+internal import ohos.ark_interop.JSValue
+internal import ohos.ark_interop.SharedObject
+internal import ohos.ark_interop.JSCurrentJSContext
+internal import ohos.ark_interop.JSArrayEx
+internal import ohos.ark_interop.JSExternal
+internal import ohos.ark_interop.JSType
+internal import ohos.ark_interop_helper.StageContext
+internal import ohos.ark_interop_helper.arkTsValuetoNapiValue
+internal import ohos.ark_interop_helper.isStageMode
+internal import ohos.ark_interop_helper.getContextStageMode
+
 var memoryLruCache:MemoryLruCache = MemoryLruCache(1024, 2*1024 * 1024 * 1024)
 var fileLruCache:FileLruCache = FileLruCache(1024, 2*1024 * 1024 * 1024)
 
@@ -17,13 +53,6 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
     return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()
 }
 
-func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64,index:Int32): String {
-    var md5Instance = MD5()
-    md5Instance.write(buffer)
-    var md: Array<Byte> = md5Instance.finish()
-    var result: String = toHexString(md)
-    return result + "w" + imagePicWidth.toString() + "h" + imagePicHeight.toString()+"idx"+index.toString()
-}
 
  func getImageFromRawFile(rawFileName: String): ?Array<UInt8> {
     try {
@@ -80,29 +109,3 @@ func getmd5keyWithIndex(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeig
     }
 }
 
-func convertBGRAtoRGBA(bgraData: Array<UInt8>): Array<UInt8> {
-    // 校验输入数据合法性：必须是4的整数倍（每个像素4字节）
-    if (bgraData.size % 4 != 0) {
-        throw Exception("BGRA数据长度必须是4的整数倍")
-    }
-
-    // 创建与输入长度相同的输出数组
-    var rgbaData = Array<UInt8>(bgraData.size,repeat: 0)
-
-    // 遍历每个像素（步长为4，对应每个像素的4个通道）
-    for (i in 0..bgraData.size where i % 4 == 0) {
-        // 提取BGRA的四个通道值
-        let b = bgraData[i]    // 蓝通道
-        let g = bgraData[i+1]  // 绿通道
-        let r = bgraData[i+2]  // 红通道
-        let a = bgraData[i+3]  // 透明通道
-
-        // 转换为RGBA并写入输出数组
-        rgbaData[i] = r        // 红通道放到第一位
-        rgbaData[i+1] = g      // 绿通道保持第二位
-        rgbaData[i+2] = b      // 蓝通道放到第三位
-        rgbaData[i+3] = a      // 透明通道保持第四位
-    }
-
-    return rgbaData
-}

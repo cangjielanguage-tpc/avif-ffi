@@ -2,7 +2,9 @@
  * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
  */
 package ohos_app_cangjie_avif4hybrid
+import ohos.ark_interop_macro.Interop
 
+@Interop[ArkTS]
 public class CJCacheCheck {
 
     public init() {
@@ -33,7 +35,7 @@ public class CJCacheCheck {
         }
     }
 
-     public func getDiskCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):?CJAvifDecoder{
+     public func getDiskCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):Option<CJAvifDecoder>{
         let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight)
         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
         if(fileExist){
