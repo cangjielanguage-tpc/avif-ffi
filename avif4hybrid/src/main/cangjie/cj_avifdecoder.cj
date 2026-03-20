@@ -32,7 +32,6 @@ import ohos.ark_interop_macro.Interop
               if(fileExist){
                     let source:?Array<UInt8> = fileLruCache.get(mDiskKey)
                     if(let Some(i) <- source){
-                        Hilog.error(0,"aviflog","进了本地缓存")
                         return  CJAvifDecoder().createLoginc(uri,i,0)
                     }else{
                        return  Option<CJAvifDecoder>.None
