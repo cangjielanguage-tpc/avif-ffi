@@ -30,7 +30,6 @@ export declare class CJAvifDecoder {
 
 export declare class CJCacheCheck {
     getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
-    getDiskCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJAvifDecoder | undefined
     constructor ()
 }
 

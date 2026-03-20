@@ -10,6 +10,10 @@ public class CJCacheCheck {
     public init() {
     }
 
+    public func getMemoryCacheWithOrigin(uri:String):CJReturnValue{
+        return getMemoryCache(uri,0,0)
+    }
+
     //只提供单图情况 多图不要内存缓存了
     public func getMemoryCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):CJReturnValue{
         let value:CJReturnValue = CJReturnValue()
@@ -32,21 +36,6 @@ public class CJCacheCheck {
         }else{
             value.issuccess = false
             return value
-        }
-    }
-
-     public func getDiskCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):Option<CJAvifDecoder>{
-        let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight)
-        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-        if(fileExist){
-            let source:?Array<UInt8> = fileLruCache.get(key)
-            if(let Some(i) <- source){
-                return  CJAvifDecoder().createLoginc(uri,i,0)
-            }else{
-               return  Option<CJAvifDecoder>.None
-            }
-        }else{
-            return  Option<CJAvifDecoder>.None
         }
     }
 

@@ -126,11 +126,6 @@ export class CjCacheCheckTS{
   public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue{
      return this.cjCacheCheck.getMemoryCache(uri,imagePicWidth,imagePicHeight)
   }
-
-  public getDiskCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJAvifDecoder | undefined{
-    return this.cjCacheCheck.getDiskCache(uri,imagePicWidth,imagePicHeight)
-  }
-
 }
 
 export class GlobalUtils {

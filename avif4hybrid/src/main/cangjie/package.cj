@@ -45,6 +45,14 @@ var fileLruCache:FileLruCache = FileLruCache(1024, 2*1024 * 1024 * 1024)
 
 
 //这个key是多方因素组成
+func getmd5key(buffer: Array<UInt8>): String {
+    var md5Instance = MD5()
+    md5Instance.write(buffer)
+    var md: Array<Byte> = md5Instance.finish()
+    var result: String = toHexString(md)
+    return result
+}
+
 func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64): String {
     var md5Instance = MD5()
     md5Instance.write(buffer)

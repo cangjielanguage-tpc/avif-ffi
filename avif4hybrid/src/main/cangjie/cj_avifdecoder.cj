@@ -27,6 +27,17 @@ import ohos.ark_interop_macro.Interop
            if (uri.startsWith("http")) {
               //把数据下载下来
               //下面是网络去下载
+              let mDiskKey:String = getmd5key(this.mUri.toArray())
+              let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+              if(fileExist){
+                    let source:?Array<UInt8> = fileLruCache.get(mDiskKey)
+                    if(let Some(i) <- source){
+                        Hilog.error(0,"aviflog","进了本地缓存")
+                        return  CJAvifDecoder().createLoginc(uri,i,0)
+                    }else{
+                       return  Option<CJAvifDecoder>.None
+                    }
+              }
               let imageBuffer = getImageFromNet(uri)
               if(let Some(i) <- imageBuffer){
                 return createLoginc(i,threads)
@@ -214,26 +225,11 @@ import ohos.ark_interop_macro.Interop
           //单图
           //先生成key
           //多图有本地缓存，没有内存缓存
-          mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+          mDiskKey = getmd5key(this.mUri.toArray())
           if(count == 1){
               //单图不仅有本地缓存 还有内存缓存
-              mMemoryKey = mDiskKey + "notcomponent"
+              mMemoryKey =  getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
           }
-
-
-           //根据key判断内存中有没有,单图才走内存缓存逻辑
-          if(count == 1){
-              let memPixelMap: ?CacheBean = memoryLruCache.get(mMemoryKey)
-              if(let Some(cache) <- memPixelMap){
-                  let arrData = cache.getPicData()
-                  if(let Some(i) <- arrData){
-                      value.color = i
-                      value.issuccess = true
-                      return value
-                  }
-              }
-          }
-
 
            //如果宽高为0 则为图片的原始宽高
           var realPicWidth = imageWidth
@@ -299,26 +295,11 @@ import ohos.ark_interop_macro.Interop
           }
           //单图
           //先生成key
-          mDiskKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+          mDiskKey = getmd5key(this.mUri.toArray())
           if(count == 1){
               //单图
-               mMemoryKey = mDiskKey + "notcomponent"
+               mMemoryKey = getmd5key(this.mUri.toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
           }
-
-
-          //根据key判断内存中有没有,单图才判断内存缓存
-          if(count == 1){
-              let memPixelMap: ?CacheBean = memoryLruCache.get(mMemoryKey)
-              if(let Some(cache) <- memPixelMap){
-                  let arrData = cache.getPicData()
-                  if(let Some(i) <- arrData){
-                      value.color = i
-                      value.issuccess = true
-                      return value
-                  }
-              }
-          }
-
 
             //如果宽高为0 则为图片的原始宽高
           var realPicWidth = imageWidth

@@ -205,15 +205,20 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
             ret.write(info)
             return ret
         }
-        decoder = CJCacheCheck().getDiskCache(uri.toString(), 0, 0)
-        if (decoder.isNone()) {
-            //没有本地缓存
-            decoder = CJAvifDecoder().create(uri.toString())
+        //本地缓存里面实现了
+        decoder = CJAvifDecoder().create(uri.toString())
+        if(let Some(i) <- decoder){
+            let info = handleAvifSource(i, uri.toString()).getOrThrow()
+            let ret = LibC.malloc<AvifDecodeInfo>()
+            ret.write(info)
+            return ret
+        }else{
+            var info = AvifDecodeInfo()
+            info.isSuccess = false
+            info.errMsg = LibC.mallocCString("生成解码器对象失败")
+            let ret = LibC.malloc<AvifDecodeInfo>()
+            return ret
         }
-        let info = handleAvifSource(decoder.getOrThrow(), uri.toString()).getOrThrow()
-        let ret = LibC.malloc<AvifDecodeInfo>()
-        ret.write(info)
-        return ret
     } catch (e: Exception) {
         Hilog.error(0, "AvifDecoder", "decode ${uri} failed: ${e}")
         var info = AvifDecodeInfo()
