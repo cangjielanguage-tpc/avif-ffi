@@ -16,18 +16,32 @@ class CjCacheCheckTS avif内存缓存检查类
 export class CjCacheCheckTS{
 
   constructor () //构造函数
-
+  
     /**
-     * 根据uri,width和height获取图片的内存缓存（仅单图有内存缓存）
+     * 根据uri,width和height获取图片的内存缓存（仅单图有内存缓存，多图由于所占内存太大没有设置内存缓存），内存对象的宽高如果和原图一样，宽高可设置0,0,如果这样的话，
+     * 在调用public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue接口的时候,这边的宽高也要设置0，0这样才能匹配上内存缓存的key,找到内存缓存 
+     * 如果设置宽高非0，那么nextFrameffi的宽高也要一致，才能找到对应的内存换存
      * 
      * 参数 uri - 图片的uri
      * 参数 imagePicWidth - 预期的图片的宽度
      * 参数 imagePicHeight - 预期的图片的高度
      * 
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
+     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color memoryWidth memoryHeight 字段 
+     * code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象 memoryWidth表示内存缓存宽  memoryHeight表示内存缓存高 
      */ 
-  public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
-  
+   public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
+   
+   
+    **
+     * 根据uri获取图片的内存缓存（仅单图有内存缓存，多图由于所占内存太大没有设置内存缓存），该接口内存缓存宽高默认与原图一样,如果这样的话，
+     * 在调用public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue接口的时候,这边的宽高也要设置0，0这样才能匹配上内存缓存的key,找到内存缓存 
+     * 
+     * 参数 uri - 图片的uri
+     * 
+     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color memoryWidth memoryHeight 字段 
+     * code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象 memoryWidth表示内存缓存宽  memoryHeight表示内存缓存高 
+     */ 
+    public func getMemoryCacheWithOrigin(uri:String):CJReturnValue
 }
 
 ```
@@ -43,7 +57,7 @@ export class AvifDecoderTS{
      /*
      * 创建图片的解码器
      * @param 参数 uri - 图片的路径
-     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,不需要加.avif后缀
+     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,写成media://a2.avif也可
      * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
      * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
      * 网络图片直接写url即可
@@ -220,7 +234,7 @@ public class CJAvifDecoder {
      /*
      * 创建图片的解码器
      * @param 参数 uri - 图片的路径
-     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,不需要加.avif后缀
+     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,写成media://a2.avif也可
      * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
      * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
      * 网络图片直接写url即可

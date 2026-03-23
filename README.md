@@ -89,156 +89,57 @@ avif-ffi是一个对avif图片进行解码显示的库，解码后静态avif图�
 
 #### 1. 在项目中显示avif图片
 
-
-##### 1.1 用提供的自定义组件加载两个本地的resources下的media下的avif图片,一个是静态图 一个是动态图
+##### 1.1 用提供的api加载一个url下的avif图片。内存图片为原图大小
 
 示例代码如下：
 ```ets
-import { AvifViewTS, AvifImageModel } from '@cangjie-tpc/avifhybrid';
+
+import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
+import { image } from '@kit.ImageKit';
+import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
 @Component
-struct page11Test {
-  avifImageModel1: AvifImageModel = new AvifImageModel()
-  avifImageModel2: AvifImageModel = new AvifImageModel()
-  avifImageModel3: AvifImageModel = new AvifImageModel()
-  avifImageModel4: AvifImageModel = new AvifImageModel()
-  avifImageModel5: AvifImageModel = new AvifImageModel()
-  avifImageModel6: AvifImageModel = new AvifImageModel()
-
-  @State ready: boolean = false
-
-  completeCallback(status: number): void {
-    hilog.error(1, "1", 'complete')
-  }
-
-  async aboutToAppear(): Promise<void> {
-
-      this.avifImageModel1.setUri("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
-        .setImageViewWidth('600px')
-        .setImageViewHeight('400px')
-        .setTopleftBorderRadius('20vp')
-        .setToprightBorderRadius('20vp')
-        .setBottomleftBorderRadius('20vp')
-        .setBottomrightBorderRadius('20vp')
-        .setOnComplete(this.completeCallback)
-        .setDraggable(false)
-
-      this.avifImageModel2.setUri("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
-        .setImageViewWidth('600px')
-        .setImageViewHeight('400px')
-        .setTopleftBorderRadius('20vp')
-        .setToprightBorderRadius('20vp')
-        .setBottomleftBorderRadius('20vp')
-        .setBottomrightBorderRadius('20vp')
-        .setOnComplete(this.completeCallback)
-        .setDraggable(true)
-
-    this.avifImageModel3.setUri("media://a2")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel4.setUri("media://a22")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel5.setUri("rawfile://a3.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel6.setUri("rawfile://a23.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-       this.ready = true
-  }
-
-  build() {
-    Row() {
-      Scroll() {
-        Column() {
-          if (this.ready) {
-            AvifViewTS({ model: this.avifImageModel1 })
-            AvifViewTS({ model: this.avifImageModel2 })
-            AvifViewTS({ model: this.avifImageModel3 })
-            AvifViewTS({ model: this.avifImageModel4 })
-            AvifViewTS({ model: this.avifImageModel5 })
-            AvifViewTS({ model: this.avifImageModel6 })
-          }
-        }
-        .width('100%')
-      }.scrollBar(BarState.Off)
-      .height('100%')
-    }
-  }
-}
-```
-
-执行结果如下：
-图片在手机上成功展示。
-
-```shell
-正常显示图片
-```
-
-
-##### 1.2 用提供的api加载一个本地的resources下的media下的avif图片。
-
-示例代码如下：
-```ets
-
-import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
-import { image } from '@kit.ImageKit';
-import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
-
-@Entry
-@Component
-struct page8Test {
+struct page1Test {
   @State pixelMap: PixelMap | undefined = undefined
   @State mWidth: number = 0
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
-    let decoderTs = new AvifDecoderTS()
-    //这是resources/base/meida下的文件
-    //decoderTs.create("media://a2")    
-    //这是resources/rawfile下的文件   
-    //decoderTs.create("rawfile://a3.avif")
-    //这是网络图片
-    decoderTs.create("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
-    this.mWidth = decoderTs.getWidth()
-    this.mHeight = decoderTs.getHeight()
-    let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(this.mWidth, this.mHeight)
-    let validReturnValue = cjreturnValue.color ?? new Uint8Array()
-    let opts: image.InitializationOptions =
-      { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
-    this.pixelMap = await image.createPixelMap(validReturnValue, opts)
-    decoderTs.release()
+    let uri = "https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif"
+    let cacheCheck = new CjCacheCheckTS()
+    //这里的0，0表示内存缓存的宽高为原图的宽高
+    let cJReturnValue = cacheCheck.getMemoryCache(uri,0,0)
+    if(cJReturnValue.issuccess){
+      hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
+      if(cJReturnValue.color){
+        let array = new Uint8Array(cJReturnValue.color)
+        hilog.error(0,"aviflog","走的是内存缓存"+array.length)
+      }
+      this.mWidth = cJReturnValue.memoryWidth
+      this.mHeight = cJReturnValue.memoryHeight
+      let validReturnValue = cJReturnValue.color ?? new Uint8Array()
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: cJReturnValue.memoryHeight, width: cJReturnValue.memoryWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    }else{
+      let decoderTs = new AvifDecoderTS()
+      decoderTs.create(uri)
+      this.mWidth = decoderTs.getWidth()
+      this.mHeight = decoderTs.getHeight()
+      //这里的0,0表示解码图片为原图宽高,如果要用到内存缓存，不要写实际的宽高，不然内存缓存的key会匹配不上
+      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(0,0)
+      let validReturnValue = cjreturnValue.color ?? new Uint8Array()
+      if(cjreturnValue.color){
+        let array = new Uint8Array(cjreturnValue.color)
+        hilog.error(0,"aviflog","数据"+array.length)
+      }
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+      decoderTs.release()
+    }
   }
 
   aboutToDisappear(): void {
@@ -271,6 +172,88 @@ struct page8Test {
 ```shell
 正常显示图片
 ```
+
+
+##### 1.2 用提供的api加载一个url下的avif图片。内存图片为100*100
+
+示例代码如下：
+```ets
+
+import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
+import { image } from '@kit.ImageKit';
+import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+@Entry
+@Component
+struct page5Test {
+  @State pixelMap: PixelMap | undefined = undefined
+  @State mWidth: number = 0
+  @State mHeight: number = 0
+
+
+
+  async aboutToAppear(): Promise<void> {
+    let uri = "https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif"
+    let cacheCheck = new CjCacheCheckTS()
+    //这里的100，100表示内存缓存的宽高为100像素
+    let cJReturnValue = cacheCheck.getMemoryCache(uri,100,100)
+    if(cJReturnValue.issuccess){
+      hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
+      if(cJReturnValue.color){
+        let array = new Uint8Array(cJReturnValue.color)
+        hilog.error(0,"aviflog","走的是内存缓存"+array.length)
+      }
+      let validReturnValue = cJReturnValue.color ?? new Uint8Array()
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: cJReturnValue.memoryHeight, width: cJReturnValue.memoryWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    }else{
+      let decoderTs = new AvifDecoderTS()
+      decoderTs.create(uri)
+      //这里的100，100表示要解码成的图片内存大小，和上面的getMemoryCache匹配之后,即可找到对应的内存缓存
+      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(100,100)
+      let validReturnValue = cjreturnValue.color ?? new Uint8Array()
+      if(cjreturnValue.color){
+        let array = new Uint8Array(cjreturnValue.color)
+        hilog.error(0,"aviflog","数据"+array.length)
+      }
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: 100, width: 100 } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+      decoderTs.release()
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.pixelMap) {
+      this.pixelMap.release()
+    }
+  }
+
+  build() {
+    Row() {
+      Scroll() {
+        Column() {
+          Image(this.pixelMap)
+            .objectFit(ImageFit.Fill)
+        }
+        .width('100%')
+      }.scrollBar(BarState.Off)
+      .height('100%')
+    }
+  }
+}
+
+```
+
+执行结果如下：
+图片在手机上成功展示。
+
+```shell
+正常显示图片
+```
+
 
 
 ## 约束与限制
