@@ -13,6 +13,8 @@ export declare class CJReturnValue {
 export declare class CJAvifDecoder {
     create(uri: string): CJAvifDecoder | undefined
     createWithThread(uri: string, threads: number): CJAvifDecoder | undefined
+    createAsync(uri: string): CJAvifDecoder | undefined
+    createWithThreadAsync(uri: string, threads: number): CJAvifDecoder | undefined
     getWidth(): number
     getHeight(): number
     getDepth(): number
@@ -23,7 +25,9 @@ export declare class CJAvifDecoder {
     isAvifImageffi(): number
     nextFrameIndexffi(): number
     nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
+    nextFrameffiAsync(imageWidth: number, imageHeight: number): CJReturnValue
     nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+    nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
     constructor ()
 }

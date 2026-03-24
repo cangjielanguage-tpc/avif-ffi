@@ -28,8 +28,8 @@ struct page5Test {
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
       let decoderTs = new AvifDecoderTS()
-      decoderTs.create(uri)
-      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(100,100)
+      const decodeRes = await decoderTs.create(uri)
+      let cjreturnValue: CJReturnValue =await decoderTs.nextFrameffi(100,100)
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
         let array = new Uint8Array(cjreturnValue.color)

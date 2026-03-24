@@ -10,13 +10,13 @@ export class AvifDecoderTS{
     setGlobalContext(getContext(this))
   }
 
-  public create(uri:string):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.create(uri)
+  public async create(uri:string):Promise<CJAvifDecoder|undefined>{
+      this.decodeRes = await this.cjAvifDecoder.createAsync(uri)
       return this.decodeRes
   }
 
-  public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.createWithThread(uri,threads)
+  public async createWithThread(uri:string, threads: number):Promise<CJAvifDecoder|undefined>{
+      this.decodeRes = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
       return this.decodeRes
   }
 
@@ -92,19 +92,19 @@ export class AvifDecoderTS{
     }
   }
 
-  public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue{
+  public async nextFrameffi(imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-      return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
+      return await this.cjAvifDecoder.nextFrameffiAsync(imageWidth,imageHeight)
     }else{
-      return new CJReturnValue()
+      return await new CJReturnValue()
     }
   }
 
-  public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
+  public async nthFrameffi(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-       return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
+       return await this.cjAvifDecoder.nthFrameffiAsync(index,imageWidth,imageHeight)
     }else{
-       return new CJReturnValue()
+       return await new CJReturnValue()
     }
   }
 

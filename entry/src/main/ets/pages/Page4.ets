@@ -16,10 +16,10 @@ struct page4Test {
     //这是resources/rawfile下的文件   
     //decoderTs.create("rawfile://a23.avif")
     //这是网络图片
-    decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
+    const decodeRes = await decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
-    let cjreturnValue: CJReturnValue = decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
+    let cjreturnValue: CJReturnValue = await decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
     let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }

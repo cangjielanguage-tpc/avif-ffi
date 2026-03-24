@@ -10,10 +10,10 @@ struct page3Test {
 
   async aboutToAppear(): Promise<void> {
     let decoderTs = new AvifDecoderTS()
-    decoderTs.create("media://a24")
+    const decodeRes = await decoderTs.create("media://a24")
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
-    let cjreturnValue = decoderTs.nthFrameffi(3, this.mWidth, this.mHeight)
+    let cjreturnValue = await decoderTs.nthFrameffi(3, this.mWidth, this.mHeight)
     let validReturnValue:ArrayBuffer = cjreturnValue.color ?? new ArrayBuffer(0)
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }

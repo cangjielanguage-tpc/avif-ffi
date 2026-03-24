@@ -30,10 +30,10 @@ struct page1Test {
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
       let decoderTs = new AvifDecoderTS()
-      decoderTs.create(uri)
+      const decodeRes = await decoderTs.create(uri)
       this.mWidth = decoderTs.getWidth()
       this.mHeight = decoderTs.getHeight()
-      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(0,0)
+      let cjreturnValue: CJReturnValue = await decoderTs.nextFrameffi(0,0)
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
         let array = new Uint8Array(cjreturnValue.color)

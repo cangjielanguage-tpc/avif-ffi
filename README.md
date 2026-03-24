@@ -106,10 +106,11 @@ struct page1Test {
   @State mWidth: number = 0
   @State mHeight: number = 0
 
+
+
   async aboutToAppear(): Promise<void> {
     let uri = "https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif"
     let cacheCheck = new CjCacheCheckTS()
-    //这里的0，0表示内存缓存的宽高为原图的宽高
     let cJReturnValue = cacheCheck.getMemoryCache(uri,0,0)
     if(cJReturnValue.issuccess){
       hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
@@ -125,11 +126,10 @@ struct page1Test {
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
       let decoderTs = new AvifDecoderTS()
-      decoderTs.create(uri)
+      const decodeRes = await decoderTs.create(uri)
       this.mWidth = decoderTs.getWidth()
       this.mHeight = decoderTs.getHeight()
-      //这里的0,0表示解码图片为原图宽高,如果要用到内存缓存，不要写实际的宽高，不然内存缓存的key会匹配不上
-      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(0,0)
+      let cjreturnValue: CJReturnValue = await decoderTs.nextFrameffi(0,0)
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
         let array = new Uint8Array(cjreturnValue.color)
@@ -164,6 +164,9 @@ struct page1Test {
   }
 }
 
+
+
+
 ```
 
 执行结果如下：
@@ -192,11 +195,9 @@ struct page5Test {
   @State mHeight: number = 0
 
 
-
   async aboutToAppear(): Promise<void> {
     let uri = "https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif"
     let cacheCheck = new CjCacheCheckTS()
-    //这里的100，100表示内存缓存的宽高为100像素
     let cJReturnValue = cacheCheck.getMemoryCache(uri,100,100)
     if(cJReturnValue.issuccess){
       hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
@@ -210,9 +211,8 @@ struct page5Test {
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
       let decoderTs = new AvifDecoderTS()
-      decoderTs.create(uri)
-      //这里的100，100表示要解码成的图片内存大小，和上面的getMemoryCache匹配之后,即可找到对应的内存缓存
-      let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(100,100)
+      const decodeRes = await decoderTs.create(uri)
+      let cjreturnValue: CJReturnValue =await decoderTs.nextFrameffi(100,100)
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
         let array = new Uint8Array(cjreturnValue.color)
@@ -244,6 +244,8 @@ struct page5Test {
     }
   }
 }
+
+
 
 ```
 
