@@ -3,6 +3,9 @@
  */
 package ohos_app_cangjie_avif4hybrid
 
+import std.fs.File as FileStd
+import std.fs.OpenMode
+
 class FileUtils {
     static let SEPARATOR: String = "/"
     private static var sInstance: ?FileUtils = None
@@ -87,9 +90,9 @@ class FileUtils {
    */
   func writeDataSync(path: String, content: Array<UInt8>): Bool {
     try {
-      let fd = FileFs.open(path, mode:(READ_WRITE.mode | CREATE.mode | TRUNC.mode)).fd
-      FileFs.write(fd, content)
-      FileFs.close(fd)
+      let file = FileStd(path,ReadWrite)
+      file.write(content)
+      file.close()
       return true
     }catch (e: Exception) {
       Hilog.error(0, "writeDataSync", e.toString())
