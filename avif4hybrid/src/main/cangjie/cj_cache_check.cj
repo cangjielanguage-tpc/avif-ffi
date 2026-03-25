@@ -3,6 +3,9 @@
  */
 package ohos_app_cangjie_avif4hybrid
 
+ import ohos.ark_interop_macro.Interop
+
+@Interop[ArkTS]
 public class CJCacheCheck {
 
     public init() {
@@ -33,19 +36,5 @@ public class CJCacheCheck {
         }
     }
 
-     public func getDiskCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):?CJAvifDecoder{
-        let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight)
-        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-        if(fileExist){
-            let source:?Array<UInt8> = fileLruCache.get(key)
-            if(let Some(i) <- source){
-                return  CJAvifDecoder().createLoginc(uri,i,0)
-            }else{
-               return  Option<CJAvifDecoder>.None
-            }
-        }else{
-            return  Option<CJAvifDecoder>.None
-        }
-    }
 
 }

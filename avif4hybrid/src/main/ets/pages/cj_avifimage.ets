@@ -1,5 +1,6 @@
 import { NodeController, FrameNode } from '@kit.ArkUI';
-import { CJAvifImageModel,CJAvifDecoder,CJReturnValue,setGlobalContext,getLoadCJPage,setMemoryLruCache,setFileLruCache} from 'libohos_app_cangjie_avif4hybrid.so';
+import { CJAvifImageModel,CJAvifDecoder,CJReturnValue,setGlobalContext,getLoadCJPage,setMemoryLruCache,setFileLruCache,
+  CJCacheCheck} from 'libohos_app_cangjie_avif4hybrid.so';
 
 class CJNodeController extends NodeController {
   rootNode?: FrameNode = undefined
@@ -164,14 +165,14 @@ export class AvifDecoderTS{
     setGlobalContext(getContext(this))
   }
 
-  public create(uri:string):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.create(uri)
-      return this.decodeRes
+  public async create(uri:string):Promise<CJAvifDecoder|undefined>{
+    this.decodeRes = await this.cjAvifDecoder.createAsync(uri)
+    return this.decodeRes
   }
 
-  public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined{
-      this.decodeRes = this.cjAvifDecoder.createWithThread(uri,threads)
-      return this.decodeRes
+  public async createWithThread(uri:string, threads: number):Promise<CJAvifDecoder|undefined>{
+    this.decodeRes = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
+    return this.decodeRes
   }
 
   public getWidth():number{
@@ -246,25 +247,39 @@ export class AvifDecoderTS{
     }
   }
 
-  public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue{
+  public async nextFrameffi(imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-      return this.cjAvifDecoder.nextFrameffi(imageWidth,imageHeight)
+      return await this.cjAvifDecoder.nextFrameffiAsync(imageWidth,imageHeight)
     }else{
-      return new CJReturnValue()
+      return await new CJReturnValue()
     }
   }
 
-  public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue{
+  public async nthFrameffi(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-       return this.cjAvifDecoder.nthFrameffi(index,imageWidth,imageHeight)
+      return await this.cjAvifDecoder.nthFrameffiAsync(index,imageWidth,imageHeight)
     }else{
-       return new CJReturnValue()
+      return await new CJReturnValue()
     }
   }
 
 
   public release(): void{
     this.cjAvifDecoder.release()
+  }
+
+}
+
+export class CjCacheCheckTS{
+
+  cjCacheCheck: CJCacheCheck = new CJCacheCheck()
+
+  constructor() {
+    setGlobalContext(getContext(this))
+  }
+
+  public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue{
+    return this.cjCacheCheck.getMemoryCache(uri,imagePicWidth,imagePicHeight)
   }
 
 }

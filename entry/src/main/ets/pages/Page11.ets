@@ -1,99 +1,46 @@
-import { AvifViewTS, AvifImageModel } from '@cangjie-tpc/avifhybrid';
-import { hilog } from '@kit.PerformanceAnalysisKit';
+import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
+import { image } from '@kit.ImageKit';
+import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
 
 @Entry
 @Component
 struct page11Test {
-  avifImageModel1: AvifImageModel = new AvifImageModel()
-  avifImageModel2: AvifImageModel = new AvifImageModel()
-  avifImageModel3: AvifImageModel = new AvifImageModel()
-  avifImageModel4: AvifImageModel = new AvifImageModel()
-  avifImageModel5: AvifImageModel = new AvifImageModel()
-  avifImageModel6: AvifImageModel = new AvifImageModel()
-
-  @State ready: boolean = false
-
-  completeCallback(status: number): void {
-    hilog.error(1, "1", 'complete')
-  }
+  @State pixelMap: PixelMap | undefined = undefined
+  @State mWidth: number = 0
+  @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
+    let decoderTs = new AvifDecoderTS()
+    //这是resources/base/meida下的文件
+    //decoderTs.create("media://a22")
+    //这是resources/rawfile下的文件
+    //decoderTs.create("rawfile://a23.avif")
+    //这是网络图片
+    const decodeRes = await decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
+    this.mWidth = decoderTs.getWidth()
+    this.mHeight = decoderTs.getHeight()
+    let cjreturnValue: CJReturnValue = await decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
+    let validReturnValue = cjreturnValue.color ?? new Uint8Array()
+    let opts: image.InitializationOptions =
+      { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
+    this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    decoderTs.release()
+  }
 
-      this.avifImageModel1.setUri("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
-        .setImageViewWidth('600px')
-        .setImageViewHeight('400px')
-        .setTopleftBorderRadius('20vp')
-        .setToprightBorderRadius('20vp')
-        .setBottomleftBorderRadius('20vp')
-        .setBottomrightBorderRadius('20vp')
-        .setOnComplete(this.completeCallback)
-        .setDraggable(false)
-
-      this.avifImageModel2.setUri("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
-        .setImageViewWidth('600px')
-        .setImageViewHeight('400px')
-        .setTopleftBorderRadius('20vp')
-        .setToprightBorderRadius('20vp')
-        .setBottomleftBorderRadius('20vp')
-        .setBottomrightBorderRadius('20vp')
-        .setOnComplete(this.completeCallback)
-        .setDraggable(true)
-
-    this.avifImageModel3.setUri("media://a2")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel4.setUri("media://a22")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel5.setUri("rawfile://a3.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-    this.avifImageModel6.setUri("rawfile://a23.avif")
-      .setImageViewWidth('600px')
-      .setImageViewHeight('400px')
-      .setTopleftBorderRadius('20vp')
-      .setToprightBorderRadius('20vp')
-      .setBottomleftBorderRadius('20vp')
-      .setBottomrightBorderRadius('20vp')
-      .setOnComplete(this.completeCallback)
-      .setDraggable(true)
-
-       this.ready = true
+  aboutToDisappear(): void {
+    if (this.pixelMap) {
+      this.pixelMap.release()
+    }
   }
 
   build() {
     Row() {
       Scroll() {
         Column() {
-          if (this.ready) {
-            AvifViewTS({ model: this.avifImageModel1 })
-            AvifViewTS({ model: this.avifImageModel2 })
-            AvifViewTS({ model: this.avifImageModel3 })
-            AvifViewTS({ model: this.avifImageModel4 })
-            AvifViewTS({ model: this.avifImageModel5 })
-            AvifViewTS({ model: this.avifImageModel6 })
-          }
+          Image(this.pixelMap)
+            .width(this.mWidth)
+            .height(this.mHeight)
+            .objectFit(ImageFit.Fill)
         }
         .width('100%')
       }.scrollBar(BarState.Off)

@@ -162,7 +162,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create("media://cat")
+              let des = await decoderTs.create("media://cat")
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test1",isavif.toString())
               decoderTs.release()
@@ -186,7 +186,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.createWithThread("media://a3",2)
+              let des = await decoderTs.createWithThread("media://a3",2)
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test2",isavif.toString())
               decoderTs.release()
@@ -210,7 +210,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create("media://2")
+              let des = await decoderTs.create("media://2")
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test3",isavif.toString())
               decoderTs.release()
@@ -234,7 +234,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create("rawfile://a2.avif")
+              let des = await decoderTs.create("rawfile://a2.avif")
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test4",isavif.toString())
               decoderTs.release()
@@ -259,7 +259,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create("media://a26")
+              let des = await decoderTs.create("media://a26")
               let width = decoderTs.getWidth()
               let height = decoderTs.getHeight()
               let depth = decoderTs.getDepth()
@@ -291,7 +291,7 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              decoderTs.create("media://a2")
+              let des = await decoderTs.create("media://a2")
               let index1 = decoderTs.nextFrameIndexffi()
               hilog.error(0,"test14","index1="+index1)
               decoderTs.release()
@@ -396,6 +396,26 @@ struct Index {
             .onClick(e => {
               // 点击动作触发该方法调用
               router.pushUrl({ url: 'pages/Page12' })
+            })
+          Text("")// 宽度
+            .width(10)
+        }
+        .width('100%')
+
+        Row() {
+          Text("")// 宽度
+            .width(10)
+          Button("19. 展示19")
+            .height(50)// 高度
+            .layoutWeight(1)// 容器尺寸确定时，元素与兄弟节点主轴布局尺寸按照权重进行分配，忽略本身尺寸设置仅在Row/Column/Flex布局中生效
+            .fontColor(0xFFFFFFFF)// 文本颜色
+            .backgroundColor(0xFFFF0000)// 背景颜色
+            .margin({ top: 5, bottom: 5 })// 外边距
+            .align(Alignment.Center)// 内容对齐方式
+            .fontSize(14)// 字体大小
+            .onClick(e => {
+              // 点击动作触发该方法调用
+              router.pushUrl({ url: 'pages/Page13' })
             })
           Text("")// 宽度
             .width(10)

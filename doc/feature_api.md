@@ -128,6 +128,32 @@ export class AvifImageModel {
 }
 ```
 
+class CjCacheCheckTS avif内存缓存检查类
+只有单图有内存缓存，多图由于占据内存缓存会特别大，所以多图没有设置内存缓存
+
+```ets
+export class CjCacheCheckTS{
+
+  constructor () //构造函数
+  
+    /**
+     * 根据uri,width和height获取图片的内存缓存（仅单图有内存缓存，多图由于所占内存太大没有设置内存缓存），内存对象的宽高如果和原图一样，宽高可设置0,0,如果这样的话，
+     * 在调用public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue接口的时候,这边的宽高也要设置0，0这样才能匹配上内存缓存的key,找到内存缓存 
+     * 如果设置宽高非0，那么nextFrameffi的宽高也要一致，才能找到对应的内存换存
+     * 
+     * 参数 uri - 图片的uri
+     * 参数 imagePicWidth - 预期的图片的宽度
+     * 参数 imagePicHeight - 预期的图片的高度
+     * 
+     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color memoryWidth memoryHeight 字段 
+     * code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象 memoryWidth表示内存缓存宽  memoryHeight表示内存缓存高 
+     */ 
+   public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
+   
+}
+
+```
+
 
 class AvifDecoderTS avif解码器
 ```ets
@@ -136,27 +162,27 @@ export class AvifDecoderTS{
 
      constructor () //构造函数
 
-     /*
-     * 创建图片的解码器
+    /*
+     * 异步创建图片的解码器
      * @param 参数 uri - 图片的路径
-     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,不需要加.avif后缀
+     * 其中resources/base/media/a2.avif 文件写成 media://a2 即可,写成media://a2.avif也可
      * 其中resources/rawfile/a2.avif 文件写成 rawfile://a2.avif 即可,需要加.avif后缀
      * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
      * 网络图片直接写url即可
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public create(uri:string):CJAvifDecoder|undefined
+     public async create(uri:string):Promise<CJAvifDecoder|undefined>{
     
     
     /*
-     * 创建图片的解码器
+     * 异步创建图片的解码器
      * @param 参数 uri - 图片的路径
      * @param 参数 threads -  需要的线程数,小于0表示值为手机默认cpu核心数,等于0表示手机默认cpu核心数和2之间小的那个数，大于0并且不大于cpu核心数
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public createWithThread(uri:string, threads: number):CJAvifDecoder|undefined
+     public async createWithThread(uri:string, threads: number):Promise<CJAvifDecoder|undefined>{
      
     /*
      * 获取avif文件对应图片的宽度,单位像素
@@ -222,17 +248,17 @@ export class AvifDecoderTS{
      public nextFrameIndexffi(): number
       
     /**
-     * 将动画AVIF的下一帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
+     * 异步将动画AVIF的下一帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
      * 
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
      *
      * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */
-     public nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
+     public async nextFrameffi(imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
 
     /**
-     * 将动画AVIF的第index帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
+     * 异步将动画AVIF的第index帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
      * 
      * 参数 index - 要解码的第index帧
      * 参数 imageWidth - 解码生成的图片的宽度
@@ -240,7 +266,7 @@ export class AvifDecoderTS{
      * 
      * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */    
-     public nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+     public async nthFrameffi(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
 
     /**
      * 销毁avif图片的解码器,释放内存,以防出现资源浪费问题
@@ -262,6 +288,8 @@ export declare class CJReturnValue {
     code: number  //状态码
     color: ArrayBuffer | undefined  //返回的图片的颜色数据
     issuccess: boolean  //是否成功 true 表示成功  false 表示失败 
+    memoryWidth:Int64  //内存图片的宽
+    memoryHeight:Int64  //内存图片的高
 
 }
 ```

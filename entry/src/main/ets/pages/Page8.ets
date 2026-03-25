@@ -1,6 +1,7 @@
-import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
+import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
 import { image } from '@kit.ImageKit';
 import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
 @Component
@@ -9,22 +10,40 @@ struct page8Test {
   @State mWidth: number = 0
   @State mHeight: number = 0
 
+
+
   async aboutToAppear(): Promise<void> {
-    let decoderTs = new AvifDecoderTS()
-    //这是resources/base/meida下的文件
-    //decoderTs.create("media://a2")    
-    //这是resources/rawfile下的文件   
-    //decoderTs.create("rawfile://a3.avif")
-    //这是网络图片
-    decoderTs.create("https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif")
-    this.mWidth = decoderTs.getWidth()
-    this.mHeight = decoderTs.getHeight()
-    let cjreturnValue: CJReturnValue = decoderTs.nextFrameffi(this.mWidth, this.mHeight)
-    let validReturnValue = cjreturnValue.color ?? new Uint8Array()
-    let opts: image.InitializationOptions =
-      { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
-    this.pixelMap = await image.createPixelMap(validReturnValue, opts)
-    decoderTs.release()
+    let uri = "https://pic1.iqiyipic.com/image/20240622/65/fc/v_177081820_m_601_m1_592_333.avif"
+    let cacheCheck = new CjCacheCheckTS()
+    let cJReturnValue = cacheCheck.getMemoryCache(uri,0,0)
+    if(cJReturnValue.issuccess){
+      hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
+      if(cJReturnValue.color){
+        let array = new Uint8Array(cJReturnValue.color)
+        hilog.error(0,"aviflog","走的是内存缓存"+array.length)
+      }
+      this.mWidth = cJReturnValue.memoryWidth
+      this.mHeight = cJReturnValue.memoryHeight
+      let validReturnValue = cJReturnValue.color ?? new Uint8Array()
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: cJReturnValue.memoryHeight, width: cJReturnValue.memoryWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    }else{
+      let decoderTs = new AvifDecoderTS()
+      const decodeRes = await decoderTs.create(uri)
+      this.mWidth = decoderTs.getWidth()
+      this.mHeight = decoderTs.getHeight()
+      let cjreturnValue: CJReturnValue = await decoderTs.nextFrameffi(0,0)
+      let validReturnValue = cjreturnValue.color ?? new Uint8Array()
+      if(cjreturnValue.color){
+        let array = new Uint8Array(cjreturnValue.color)
+        hilog.error(0,"aviflog","数据"+array.length)
+      }
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+      decoderTs.release()
+    }
   }
 
   aboutToDisappear(): void {
@@ -48,3 +67,4 @@ struct page8Test {
     }
   }
 }
+

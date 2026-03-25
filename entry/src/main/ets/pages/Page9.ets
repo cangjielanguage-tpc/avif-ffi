@@ -1,5 +1,7 @@
-import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
+import { AvifDecoderTS,CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
 import { image } from '@kit.ImageKit';
+import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
 @Component
@@ -9,16 +11,44 @@ struct page9Test {
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
-    let decoderTs = new AvifDecoderTS()
-    decoderTs.create("media://a24")
-    this.mWidth = decoderTs.getWidth()
-    this.mHeight = decoderTs.getHeight()
-    let cjreturnValue = decoderTs.nthFrameffi(3, this.mWidth, this.mHeight)
-    let validReturnValue:ArrayBuffer = cjreturnValue.color ?? new ArrayBuffer(0)
-    let opts: image.InitializationOptions =
-      { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
-    this.pixelMap = await image.createPixelMap(validReturnValue, opts)
-    decoderTs.release()
+    let uri = "media://a2"
+    let cacheCheck = new CjCacheCheckTS()
+    let cJReturnValue = cacheCheck.getMemoryCache(uri,0,0)
+    if(cJReturnValue.issuccess){
+      hilog.error(0,"aviflog","走的是内存缓存"+cJReturnValue.memoryHeight+"---"+cJReturnValue.memoryWidth)
+      if(cJReturnValue.color){
+        let array = new Uint8Array(cJReturnValue.color)
+        hilog.error(0,"aviflog","走的是内存缓存"+array.length)
+      }
+      this.mWidth = cJReturnValue.memoryWidth
+      this.mHeight = cJReturnValue.memoryHeight
+      let validReturnValue = cJReturnValue.color ?? new Uint8Array()
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: cJReturnValue.memoryHeight, width: cJReturnValue.memoryWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+    }else{
+      let decoderTs = new AvifDecoderTS()
+      const decodeRes = await decoderTs.create(uri)
+      this.mWidth = decoderTs.getWidth()
+      this.mHeight = decoderTs.getHeight()
+      let cjreturnValue: CJReturnValue = await decoderTs.nextFrameffi(0,0)
+      let validReturnValue = cjreturnValue.color ?? new Uint8Array()
+      if(cjreturnValue.color){
+        let array = new Uint8Array(cjreturnValue.color)
+        hilog.error(0,"aviflog","数据"+array.length)
+      }
+      let opts: image.InitializationOptions =
+        { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
+      this.pixelMap = await image.createPixelMap(validReturnValue, opts)
+      decoderTs.release()
+    }
+
+
+
+
+
+
+
   }
 
   aboutToDisappear(): void {
@@ -35,8 +65,6 @@ struct page9Test {
             .width(this.mWidth)
             .height(this.mHeight)
             .objectFit(ImageFit.Fill)
-            .onClick((event: ClickEvent) => {
-            })
         }
         .width('100%')
       }.scrollBar(BarState.Off)
@@ -44,4 +72,3 @@ struct page9Test {
     }
   }
 }
-
