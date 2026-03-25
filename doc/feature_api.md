@@ -31,17 +31,6 @@ export class CjCacheCheckTS{
      */ 
    public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
    
-   
-    **
-     * 根据uri获取图片的内存缓存（仅单图有内存缓存，多图由于所占内存太大没有设置内存缓存），该接口内存缓存宽高默认与原图一样,如果这样的话，
-     * 在调用public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue接口的时候,这边的宽高也要设置0，0这样才能匹配上内存缓存的key,找到内存缓存 
-     * 
-     * 参数 uri - 图片的uri
-     * 
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color memoryWidth memoryHeight 字段 
-     * code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象 memoryWidth表示内存缓存宽  memoryHeight表示内存缓存高 
-     */ 
-    public func getMemoryCacheWithOrigin(uri:String):CJReturnValue
 }
 
 ```
