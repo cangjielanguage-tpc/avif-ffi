@@ -10,9 +10,6 @@ public class CJCacheCheck {
     public init() {
     }
 
-    public func getMemoryCacheWithOrigin(uri:String):CJReturnValue{
-        return getMemoryCache(uri,0,0)
-    }
 
     //只提供单图情况 多图不要内存缓存了
     public func getMemoryCache(uri:String,imagePicWidth:Int64,imagePicHeight:Int64):CJReturnValue{

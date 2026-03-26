@@ -90,7 +90,7 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
         let fut: Future<?Array<UInt8>> = spawn {
             var tlsConfig = TlsClientConfig()
             tlsConfig.verifyMode = TrustAll
-            let client = ClientBuilder().tlsConfig(tlsConfig).build()
+            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second*60).build()
             let ret = client.get(urlStr)
             if (let Some(v) <- ret.bodySize) {
                 let buf = Array<UInt8>(v, repeat: 0)
