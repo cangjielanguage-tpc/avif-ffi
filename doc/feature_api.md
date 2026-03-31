@@ -53,7 +53,7 @@ export class AvifDecoderTS{
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public async create(uri:string):Promise<CJAvifDecoder|undefined>{
+     public async create(uri:string):Promise<boolean>{
     
     
     /*
@@ -63,7 +63,7 @@ export class AvifDecoderTS{
      *
      * @return 返回 CJAvifDecoder|undefined 类型，如果不为undefined则创建成功,否则创建失败
      */
-     public async createWithThread(uri:string, threads: number):Promise<CJAvifDecoder|undefined>{
+     public async createWithThread(uri:string, threads: number):Promise<boolean>{
      
     /*
      * 获取avif文件对应图片的宽度,单位像素
@@ -179,7 +179,7 @@ export declare class CJReturnValue {
 export class GlobalUtils {
 
   /**
-     * 设置内存缓存的最大内存对象个数和内存之和的上限，不设置的化默认值512和1024*1024*1024
+     * 设置内存缓存的最大内存对象个数和内存之和的上限，不设置的化默认值256和40*1024*1024,强烈建立使用默认值
      * 
      * 参数 countSize - 内存对象的个数，必须大于0,小于等于65536
      * 参数 memorySize - 内存之和的上限,必须大于0，小于等于 10 * 1024 * 1024 * 1024
@@ -189,7 +189,7 @@ export class GlobalUtils {
   static setMemoryLruCacheTS(countSize:number,memorySize:number):void
   
   /**
-     * 设置文件缓存的最大文件对象个数和文件大小之和的上限，不设置的化默认值512和1024*1024*1024
+     * 设置文件缓存的最大文件对象个数和文件大小之和的上限，不设置的化默认值1500和256*1024*1024，强烈建立使用默认值
      * 
      * 参数 countSize - 文件缓存对象的个数，必须大于0，小于等于Int64最大值
      * 参数 memorySize - 文件大小之和的上限，必须大于0，小于等于10 * 1024 * 1024 * 1024
@@ -210,9 +210,9 @@ export class GlobalUtils {
 }
 ```
 
-class CJAvifDecoder 仓颉测图片解析类(带缓存逻辑)
+class AvifDecoderWrap 仓颉测图片解析类(带缓存逻辑)
 ```cj
-public class CJAvifDecoder {
+public class AvifDecoderWrap {
 
      /**
      * 构造函数
@@ -228,18 +228,18 @@ public class CJAvifDecoder {
      * 其中沙箱路径 文件写成 file://沙箱路径/a2.avif 即可 需要加file://前缀 
      * 网络图片直接写url即可
      *
-     * @return 返回 Option<CJAvifDecoder>  类型，如果不为None则创建成功,否则创建失败
+     * @return 返回 Option<AvifDecoderWrap>  类型，如果不为None则创建成功,否则创建失败
      */
-    public func create(uri: String): Option<CJAvifDecoder> 
+    public func create(uri: String): Option<AvifDecoderWrap> 
     
     /*
      * 创建图片的解码器
      * @param 参数 uri - 图片的路径
      * @param 参数 threads -  需要的线程数,小于0表示值为手机默认cpu核心数,等于0表示手机默认cpu核心数和2之间小的那个数，大于0并且不大于cpu核心数
      *
-     * @return 返回 Option<CJAvifDecoder>  类型，如果不为None则创建成功,否则创建失败
+     * @return 返回 Option<AvifDecoderWrap>  类型，如果不为None则创建成功,否则创建失败
      */
-    public func createWithThread(uri: String, threads: Int32): Option<CJAvifDecoder> 
+    public func createWithThread(uri: String, threads: Int32): Option<AvifDecoderWrap> 
     
     /*
      * 获取avif文件对应图片的宽度,单位像素
@@ -310,9 +310,9 @@ public class CJAvifDecoder {
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
      *
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
+     * 返回值 ReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */
-    public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): CJReturnValue 
+    public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): ReturnValue 
     
      /**
      * 将动画AVIF的第index帧图片的颜色像素赋值到color数组,以便于后续构造PixelMap展示
@@ -321,9 +321,9 @@ public class CJAvifDecoder {
      * 参数 imageWidth - 解码生成的图片的宽度
      * 参数 imageHeight - 解码生成的图片的高度
      * 
-     * 返回值 CJReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
+     * 返回值 ReturnValue 类型 - 里面包含code issuccess color字段code表示状态码  issuccess表示是否成功 color表示图片的颜色数据对象
      */  
-    public func nthFrameffi(index: Int32,imageWidth: Int32, imageHeight: Int32): CJReturnValue 
+    public func nthFrameffi(index: Int32,imageWidth: Int32, imageHeight: Int32): ReturnValue 
     
      /**
      * 销毁avif图片的解码器,释放内存,以防出现资源浪费问题

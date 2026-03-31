@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
- */
-
 package ohos_app_cangjie_avif4hybrid
 
 internal import ohos.hilog.Hilog
@@ -40,8 +36,8 @@ internal import ohos.ark_interop_helper.arkTsValuetoNapiValue
 internal import ohos.ark_interop_helper.isStageMode
 internal import ohos.ark_interop_helper.getContextStageMode
 
-var memoryLruCache:MemoryLruCache = MemoryLruCache(1024, 2*1024 * 1024 * 1024)
-var fileLruCache:FileLruCache = FileLruCache(1024, 2*1024 * 1024 * 1024)
+var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 40 * 1024 * 1024)
+var fileLruCache:FileLruCache = FileLruCache(1500, 256 * 1024 * 1024)
 
 
 //这个key是多方因素组成
@@ -90,7 +86,7 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
         let fut: Future<?Array<UInt8>> = spawn {
             var tlsConfig = TlsClientConfig()
             tlsConfig.verifyMode = TrustAll
-            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second*60).build()
+            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
             let ret = client.get(urlStr)
             if (let Some(v) <- ret.bodySize) {
                 let buf = Array<UInt8>(v, repeat: 0)

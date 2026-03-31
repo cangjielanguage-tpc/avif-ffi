@@ -6,15 +6,12 @@ export declare class CJReturnValue {
     issuccess: boolean
     memoryWidth: number
     memoryHeight: number
-    constructor ()
 }
 
 
 export declare class CJAvifDecoder {
-    create(uri: string): CJAvifDecoder | undefined
-    createWithThread(uri: string, threads: number): CJAvifDecoder | undefined
-    createAsync(uri: string): CJAvifDecoder | undefined
-    createWithThreadAsync(uri: string, threads: number): CJAvifDecoder | undefined
+    createAsync(uri: string): boolean
+    createWithThreadAsync(uri: string, threads: number): boolean
     getWidth(): number
     getHeight(): number
     getDepth(): number
@@ -24,22 +21,23 @@ export declare class CJAvifDecoder {
     getFrameDurations(): Array<number> | undefined
     isAvifImageffi(): number
     nextFrameIndexffi(): number
-    nextFrameffi(imageWidth: number, imageHeight: number): CJReturnValue
     nextFrameffiAsync(imageWidth: number, imageHeight: number): CJReturnValue
-    nthFrameffi(index: number, imageWidth: number, imageHeight: number): CJReturnValue
     nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): CJReturnValue
     release(): void
-    constructor ()
 }
 
 export declare class CJCacheCheck {
     getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue
-    constructor ()
 }
 
 
-export declare function setGlobalContext(context: Context): void
+export declare interface CustomLib {
+    CJAvifDecoder: {new (): CJAvifDecoder}
+    CJCacheCheck: {new (): CJCacheCheck}
+    CJReturnValue: {new (): CJReturnValue}
+    setGlobalContext(context: Context): void
+    setMemoryLruCache(countSize:number,memorySize:number):void
+    setFileLruCache(countSize:number,memorySize:number):void
+}
 
-export declare function setMemoryLruCache(countSize:number,memorySize:number): void
 
-export declare function setFileLruCache(countSize:number,memorySize:number): void

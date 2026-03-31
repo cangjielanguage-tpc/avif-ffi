@@ -1,23 +1,27 @@
-import { CJCacheCheck,CJAvifDecoder,CJReturnValue,setGlobalContext,setMemoryLruCache,setFileLruCache} from 'libohos_app_cangjie_avif4hybrid.so';
+import { requireCJLib } from 'libark_interop_loader.so'
 
+import { CustomLib,CJCacheCheck,CJAvifDecoder,CJReturnValue} from 'libohos_app_cangjie_avif4hybrid.so';
+
+
+export const global_customLib: CustomLib = requireCJLib("libohos_app_cangjie_avif4hybrid.so") as CustomLib
 
 export class AvifDecoderTS{
 
-  cjAvifDecoder: CJAvifDecoder = new CJAvifDecoder()
-  decodeRes:CJAvifDecoder|undefined = undefined
+  cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
+  decodeRes:boolean = true
 
   constructor() {
-    setGlobalContext(getContext(this))
+    global_customLib.setGlobalContext(getContext(this))
   }
 
-  public async create(uri:string):Promise<CJAvifDecoder|undefined>{
-      this.decodeRes = await this.cjAvifDecoder.createAsync(uri)
-      return this.decodeRes
+  public async create(uri:string):Promise<boolean>{
+    this.decodeRes = await this.cjAvifDecoder.createAsync(uri)
+    return this.decodeRes
   }
 
-  public async createWithThread(uri:string, threads: number):Promise<CJAvifDecoder|undefined>{
-      this.decodeRes = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
-      return this.decodeRes
+  public async createWithThread(uri:string, threads: number):Promise<boolean>{
+    this.decodeRes = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
+    return this.decodeRes
   }
 
   public getWidth():number{
@@ -96,7 +100,7 @@ export class AvifDecoderTS{
     if(this.decodeRes) {
       return await this.cjAvifDecoder.nextFrameffiAsync(imageWidth,imageHeight)
     }else{
-      return await new CJReturnValue()
+      return await new global_customLib.CJReturnValue()
     }
   }
 
@@ -104,7 +108,7 @@ export class AvifDecoderTS{
     if(this.decodeRes) {
        return await this.cjAvifDecoder.nthFrameffiAsync(index,imageWidth,imageHeight)
     }else{
-       return await new CJReturnValue()
+       return await new global_customLib.CJReturnValue()
     }
   }
 
@@ -117,10 +121,10 @@ export class AvifDecoderTS{
 
 export class CjCacheCheckTS{
 
-  cjCacheCheck: CJCacheCheck = new CJCacheCheck()
+  cjCacheCheck: CJCacheCheck = new global_customLib.CJCacheCheck()
 
   constructor() {
-    setGlobalContext(getContext(this))
+    global_customLib.setGlobalContext(getContext(this))
   }
 
   public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue{
@@ -130,14 +134,14 @@ export class CjCacheCheckTS{
 
 export class GlobalUtils {
    static setMemoryLruCacheTS(countSize:number,memorySize:number):void{
-    setMemoryLruCache(countSize,memorySize)
+     global_customLib.setMemoryLruCache(countSize,memorySize)
   }
 
   static setFileLruCacheTS(countSize:number,memorySize:number):void{
-    setFileLruCache(countSize,memorySize)
+    global_customLib.setFileLruCache(countSize,memorySize)
   }
 
   static setAvifContext(context:Context):void{
-     setGlobalContext(context)
+    global_customLib.setGlobalContext(context)
   }
 }
