@@ -21,7 +21,7 @@ public struct AvifDecodeInfo {
     public var dataColors: CPointer<CPointer<UInt8>> = CPointer<CPointer<UInt8>>() //图片的像素数据  单图长度为1 多图长度为framecount
 }
 
-unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDecodeInfo {
+unsafe func handleAvifSinglePicture(decoder: AvifDecoderWrap, uri: String): AvifDecodeInfo {
     var info = AvifDecodeInfo()
     info.width = decoder.getWidth()
     info.height = decoder.getHeight()
@@ -29,9 +29,9 @@ unsafe func handleAvifSinglePicture(decoder: CJAvifDecoder, uri: String): AvifDe
     info.alphaPresent = decoder.getAlphaPresent()
     info.frameCount = 1
     //原图宽高未知的话传0即可，接口内部会处理
-    let retValue: CJReturnValue = decoder.nthFrameffi(0, 0, 0)
+    let retValue: ReturnValue = decoder.nthFrameffi(0, 0, 0)
     var colors: ?Array<UInt8> = None
-    if (retValue.issuccess) {
+    if (retValue.isSuccess) {
         //如果成功
         if (let Some(i) <- retValue.color) {
             colors = i
@@ -80,7 +80,7 @@ unsafe func free(info: AvifDecodeInfo) {
     }
 }
 
-unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDecodeInfo {
+unsafe func handleAvifMultiPicture(decoder: AvifDecoderWrap, uri: String): AvifDecodeInfo {
     var info = AvifDecodeInfo()
     info.width = decoder.getWidth()
     info.height = decoder.getHeight()
@@ -109,7 +109,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
     for (idx in 0..info.frameCount) {
         //原图传0,底层自动会转换
         colors[idx] = if (let ret <- decoder.nthFrameffi(Int32(idx), 0, 0)) {
-            if (ret.issuccess && let Some(color) <- ret.color) {
+            if (ret.isSuccess && let Some(color) <- ret.color) {
                 color
             } else {
                 info.isSuccess = false
@@ -148,7 +148,7 @@ unsafe func handleAvifMultiPicture(decoder: CJAvifDecoder, uri: String): AvifDec
     return info
 }
 
-unsafe func handleAvifSource(decoder: CJAvifDecoder, uri: String): ?AvifDecodeInfo {
+unsafe func handleAvifSource(decoder: AvifDecoderWrap, uri: String): ?AvifDecodeInfo {
     let frameCount = decoder.getFrameCount() //图片的帧数
     return if (frameCount <= 0) {
         var info = AvifDecodeInfo()
@@ -162,12 +162,12 @@ unsafe func handleAvifSource(decoder: CJAvifDecoder, uri: String): ?AvifDecodeIn
     }
 }
 
-unsafe func dealWithMemoryCache(cjreturnValue: CJReturnValue): AvifDecodeInfo {
+unsafe func dealWithMemoryCache(returnValue: ReturnValue): AvifDecodeInfo {
     var info = AvifDecodeInfo()
-    info.width = cjreturnValue.memoryWidth
-    info.height = cjreturnValue.memoryHeight
+    info.width = returnValue.memoryWidth
+    info.height = returnValue.memoryHeight
     info.frameCount = 1
-    if (let Some(i) <- cjreturnValue.color) {
+    if (let Some(i) <- returnValue.color) {
         //表示有图片数据
         info.dataColors = unsafe { LibC.malloc<CPointer<UInt8>>(count: Int64(info.frameCount)) }
         let pixelMapSize = Int64(info.width) * info.height * 4
@@ -195,18 +195,18 @@ unsafe func dealWithMemoryCache(cjreturnValue: CJReturnValue): AvifDecodeInfo {
 @C
 public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
     //因为原图，所以宽高传0,0
-    var decoder: ?CJAvifDecoder = None
+    var decoder: ?AvifDecoderWrap = None
     try {
-        let cjreturnValue: CJReturnValue = CJCacheCheck().getMemoryCache(uri.toString(), 0, 0)
-        if (cjreturnValue.issuccess) {
-            let info = dealWithMemoryCache(cjreturnValue)
+        let returnValue: ReturnValue = CacheCheck().getMemoryCache(uri.toString(), 0, 0)
+        if (returnValue.isSuccess) {
+            let info = dealWithMemoryCache(returnValue)
             //如果内存缓存取到了
             let ret = LibC.malloc<AvifDecodeInfo>()
             ret.write(info)
             return ret
         }
         //本地缓存里面实现了
-        decoder = CJAvifDecoder().create(uri.toString())
+        decoder = AvifDecoderWrap().create(uri.toString())
         if(let Some(i) <- decoder){
             let info = handleAvifSource(i, uri.toString()).getOrThrow()
             let ret = LibC.malloc<AvifDecodeInfo>()
