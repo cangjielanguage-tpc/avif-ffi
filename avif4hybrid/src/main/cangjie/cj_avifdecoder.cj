@@ -239,6 +239,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
                         cacheBean.setMemoryWidth(Int64(cacheWidth))
                         cacheBean.setMemoryHeight(Int64(cacheHeight))
+                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
+                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
+                        cacheBean.setAlphaPresent(getAlphaPresent())
                         memoryLruCache.put(mMemoryKey, cacheBean)
                     }
 
@@ -305,6 +308,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
                         cacheBean.setMemoryWidth(Int64(cacheWidth))
                         cacheBean.setMemoryHeight(Int64(cacheHeight))
+                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
+                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
+                        cacheBean.setAlphaPresent(getAlphaPresent())
                         memoryLruCache.put(mMemoryKey, cacheBean)
                     }
 
@@ -522,6 +528,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                     obj.setProperty("memoryHeight", RET
                         .memoryHeight
                         .toJSValue(context))
+                     obj.setProperty("isAlphaPresent", RET
+                        .isAlphaPresent
+                        .toJSValue(context))
                     promise.resolve(obj.toJSValue())
                 }
             }
@@ -561,6 +570,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         .toJSValue(context))
                     obj.setProperty("memoryHeight", RET
                         .memoryHeight
+                        .toJSValue(context))
+                    obj.setProperty("isAlphaPresent", RET
+                        .isAlphaPresent
                         .toJSValue(context))
                     promise.resolve(obj.toJSValue())
                 }

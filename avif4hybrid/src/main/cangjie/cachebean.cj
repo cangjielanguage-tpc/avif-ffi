@@ -6,6 +6,7 @@ class CacheBean {
   var picData:?Array<UInt8> = None
   var memoryWidth:Int64 = 0
   var memoryHeight:Int64 = 0
+  var isAlphaPresent:Bool = false
 
     func setPicData(picData:?Array<UInt8>){
         this.picData = picData
@@ -31,6 +32,10 @@ class CacheBean {
         return memoryHeight
     }
 
+    func getAlphaPresent():Bool{
+        return isAlphaPresent
+    }
+
     func setMemoryWidth(memoryWidth:Int64){
         this.memoryWidth = memoryWidth
     }
@@ -39,6 +44,9 @@ class CacheBean {
         this.memoryHeight = memoryHeight
     }
 
+    func setAlphaPresent(isAlphaPresent:Bool){
+        this.isAlphaPresent = isAlphaPresent
+    }
 
     init(pixelMap:?PixelMap,picData:?Array<UInt8>){
         this.pixelMap = pixelMap

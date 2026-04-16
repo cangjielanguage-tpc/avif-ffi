@@ -38,6 +38,7 @@ public class CJCacheCheck <: SharedObject & JSInteropType<CJCacheCheck> {
                 value.color = j
                 value.memoryWidth = i.getMemoryWidth()
                 value.memoryHeight = i.getMemoryHeight()
+                value.isAlphaPresent = i.getAlphaPresent()
                 value.isSuccess = true
                 return value
             } else {
@@ -77,6 +78,9 @@ public class CJCacheCheck <: SharedObject & JSInteropType<CJCacheCheck> {
             .toJSValue(context))
         obj.setProperty("memoryHeight", RET
             .memoryHeight
+            .toJSValue(context))
+        obj.setProperty("isAlphaPresent", RET
+            .isAlphaPresent
             .toJSValue(context))
         JSCurrentJSContext.unset()
         obj.toJSValue()

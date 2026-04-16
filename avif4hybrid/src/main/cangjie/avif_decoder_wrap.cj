@@ -215,6 +215,9 @@ public class AvifDecoderWrap {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
                         cacheBean.setMemoryWidth(Int64(cacheWidth))
                         cacheBean.setMemoryHeight(Int64(cacheHeight))
+                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
+                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
+                        cacheBean.setAlphaPresent(getAlphaPresent())
                         memoryLruCache.put(memoryKey, cacheBean)
                     }
                     if (let Some(j) <- encoded) {
@@ -290,6 +293,9 @@ public class AvifDecoderWrap {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
                         cacheBean.setMemoryWidth(Int64(cacheWidth))
                         cacheBean.setMemoryHeight(Int64(cacheHeight))
+                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
+                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
+                        cacheBean.setAlphaPresent(getAlphaPresent())
                         memoryLruCache.put(memoryKey, cacheBean)
                     }
                     if (let Some(j) <- encoded) {

@@ -166,6 +166,9 @@ unsafe func dealWithMemoryCache(returnValue: ReturnValue): AvifDecodeInfo {
     var info = AvifDecodeInfo()
     info.width = returnValue.memoryWidth
     info.height = returnValue.memoryHeight
+    // alphaPremultiplied 已改为 AVIF_FALSE，需要正确传递 alpha 状态给上层
+    //不加这行代码，RN在获取内存缓存时候会拿不到图片的isAlphaPresent信息
+    info.alphaPresent = returnValue.isAlphaPresent
     info.frameCount = 1
     if (let Some(i) <- returnValue.color) {
         //表示有图片数据
