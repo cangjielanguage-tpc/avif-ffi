@@ -6,6 +6,7 @@ export declare class CJReturnValue {
     issuccess: boolean
     memoryWidth: number
     memoryHeight: number
+    isAlphaPresent: boolean
 }
 
 

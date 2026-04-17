@@ -20,6 +20,7 @@ public class CacheCheck {
                     value.color = j
                     value.memoryWidth = i.getMemoryWidth()
                     value.memoryHeight = i.getMemoryHeight()
+                    value.isAlphaPresent = i.getAlphaPresent()
                     value.isSuccess = true
                     return value
             }else{

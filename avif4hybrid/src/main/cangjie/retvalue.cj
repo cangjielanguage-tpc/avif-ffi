@@ -7,6 +7,8 @@ public class ReturnValue {
     //内存缓存的时候要取到图片的宽高给SIZE转pixelMap
     public var memoryWidth:Int64 = 0
     public var memoryHeight:Int64 = 0
+    public var isAlphaPresent:Bool = false
+
 
     public init() {
     }
