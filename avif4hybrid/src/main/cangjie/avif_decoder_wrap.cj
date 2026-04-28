@@ -11,8 +11,14 @@ public class AvifDecoderWrap {
     var diskKey = ""
     var uri = ""
     var encoded: ?Array<Byte> = None
+    var isNotAvif:Bool = false
+
     public func create(uri: String): Option<AvifDecoderWrap> {
         return createWithThread(uri, 1)
+    }
+
+    public func createCompatibleOtherPic(uri: String): Option<AvifDecoderWrap> {
+        return createWithThreadCompatibleOtherPic(uri, 1)
     }
 
     public func createWithThread(uri: String, threads: Int32): Option<AvifDecoderWrap> {
@@ -28,11 +34,9 @@ public class AvifDecoderWrap {
                 .getInstance()
                 .exist(fileLruCache.path + mDiskKey)
             if (fileExist) {
-                let source: ?Array<UInt8> = fileLruCache.get(mDiskKey)
+                let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
                 if (let Some(i) <- source) {
                     return createLoginc(i, threads)
-                } else {
-                    return Option<AvifDecoderWrap>.None
                 }
             }
             let imageBuffer = getImageFromNet(uri)
@@ -85,6 +89,84 @@ public class AvifDecoderWrap {
         }
     }
 
+    public func createWithThreadCompatibleOtherPic(uri: String, threads: Int32): Option<AvifDecoderWrap> {
+        this.uri = uri
+        //在这里将uri转化为arryauint8,并生成key
+        if (uri.startsWith("http")) {
+            //把数据下载下来
+            //下面是网络去下载
+            let mDiskKey: String = getmd5key(this
+                .uri
+                .toArray())
+            let fileExist = FileUtils
+                .getInstance()
+                .exist(fileLruCache.path + mDiskKey)
+            if (fileExist) {
+                let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
+                if (let Some(i) <- source) {
+                    if(i.size == 1){
+                        return createLogincCompatibleOtherPic2()
+                    }else{
+                        return createLogincCompatibleOtherPic(i, threads)
+                    }
+                }
+            }
+            let TupleData = getImageFromNet2(uri)
+             if(let Some(isAvif) <- TupleData[1]){
+                if(!isAvif){
+                    //表示不是avif图
+                    return createLogincCompatibleOtherPic2()
+                }
+             }
+            if (let Some(i) <- TupleData[0]) {
+                return createLogincCompatibleOtherPic(i, threads)
+            } else {
+                Hilog.error(0, "getImageFromNet", "获取网络文件内容失败")
+                return Option<AvifDecoderWrap>.None
+            }
+        } else if (uri.startsWith("rawfile://")) {
+            let fileName = uri.removePrefix("rawfile://")
+            let imageBuffer = getImageFromRawFile(fileName)
+            if (let Some(i) <- imageBuffer) {
+                return createLogincCompatibleOtherPic(i, threads)
+            } else {
+                Hilog.error(0, "getImageFromRawFile", "获取raw文件内容失败")
+                return Option<AvifDecoderWrap>.None
+            }
+        } else if (uri.startsWith("media://")) {
+            let mediaName = uri.removePrefix("media://")
+            let imageBuffer = getImageFromMedia(mediaName)
+            if (let Some(i) <- imageBuffer) {
+                return createLogincCompatibleOtherPic(i, threads)
+            } else {
+                Hilog.error(0, "getImageFromMedia", "获取media文件内容失败")
+                return Option<AvifDecoderWrap>.None
+            }
+        } else if (uri.startsWith("file://")) {
+            let localFilePath = uri.removePrefix("file://")
+            let imageBuffer: ?Array<UInt8> = FileUtils
+                .getInstance()
+                .readFileSync(localFilePath)
+            if (let Some(i) <- imageBuffer) {
+                return createLogincCompatibleOtherPic(i, threads)
+            } else {
+                Hilog.error(0, "readFileSync", "读取本地文件失败")
+                return Option<AvifDecoderWrap>.None
+            }
+        } else {
+            let localFilePath = uri
+            let imageBuffer: ?Array<UInt8> = FileUtils
+                .getInstance()
+                .readFileSync(localFilePath)
+            if (let Some(i) <- imageBuffer) {
+                return createLogincCompatibleOtherPic(i, threads)
+            } else {
+                Hilog.error(0, "readFileSync", "读取内容失败")
+                return Option<AvifDecoderWrap>.None
+            }
+        }
+    }
+
     func createLoginc(buffer: Array<UInt8>, threads: Int32): Option<AvifDecoderWrap> {
         encoded = buffer
         decoder = AvifDecoder(buffer, threads)
@@ -96,6 +178,37 @@ public class AvifDecoderWrap {
         } else {
             return Option<AvifDecoderWrap>.None
         }
+    }
+
+    func createLogincCompatibleOtherPic(buffer: Array<UInt8>, threads: Int32): Option<AvifDecoderWrap> {
+        encoded = buffer
+        decoder = AvifDecoder(buffer, threads)
+        if (let Some(k) <- decoder) {
+            if (k.decoder == 0) {
+                return Option<AvifDecoderWrap>.None
+            }
+            return this
+        } else {
+            return Option<AvifDecoderWrap>.None
+        }
+    }
+
+    func createLogincCompatibleOtherPic2(): Option<AvifDecoderWrap> {
+            //当不是avif图片时候进入这里,这里我把数据缓存
+            let avifDecoderWrap:AvifDecoderWrap = AvifDecoderWrap()
+            avifDecoderWrap.isNotAvif = true
+            //这里给他缓存
+            spawn {
+                  memoryKey = getmd5key(this.uri.toArray(), 0, 0) + "notcomponent"
+                  memoryLruCache.put(memoryKey, CacheBean(Option<PixelMap>.None,[0]))
+
+                 let mDiskKey: String = getmd5key(this.uri.toArray())
+                 let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                 if (!fileExist && this.uri.startsWith("http")) {
+                     fileLruCache.put(mDiskKey,1,[0])
+                 }
+            }
+            return avifDecoderWrap
     }
 
     public func getWidth(): Int64 {

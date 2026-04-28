@@ -69,12 +69,10 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 .getInstance()
                 .exist(fileLruCache.path + mDiskKey)
             if (fileExist) {
-                let source: ?Array<UInt8> = fileLruCache.get(mDiskKey)
+                let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
                 if (let Some(i) <- source) {
                     createLoginc(i, threads)
                     return true
-                } else {
-                    return false
                 }
             }
             let imageBuffer = getImageFromNet(uri)
