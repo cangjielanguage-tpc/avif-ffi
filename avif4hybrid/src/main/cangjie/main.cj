@@ -19,6 +19,7 @@ public struct AvifDecodeInfo {
     public var frameDurations: CPointer<Float64> = CPointer<Float64>() //多图的时间集合数据
     public var frameDurationsLength: Int64 = 0 //多图的时间集合数据
     public var dataColors: CPointer<CPointer<UInt8>> = CPointer<CPointer<UInt8>>() //图片的像素数据  单图长度为1 多图长度为framecount
+    public var isNotAvif: Bool = false //这个字段是对于非avif图片设置的  非avif图片这个字段会设置为true
 }
 
 unsafe func handleAvifSinglePicture(decoder: AvifDecoderWrap, uri: String): AvifDecodeInfo {
@@ -152,6 +153,7 @@ unsafe func handleAvifSource(decoder: AvifDecoderWrap, uri: String): ?AvifDecode
     let frameCount = decoder.getFrameCount() //图片的帧数
     return if (frameCount <= 0) {
         var info = AvifDecodeInfo()
+        info.isNotAvif = decoder.isNotAvif
         info.isSuccess = false
         info.errMsg = LibC.mallocCString("frame count less than 0.")
         info
@@ -172,6 +174,12 @@ unsafe func dealWithMemoryCache(returnValue: ReturnValue): AvifDecodeInfo {
     info.frameCount = 1
     if (let Some(i) <- returnValue.color) {
         //表示有图片数据
+        if(i.size == 1){
+            //表示不是avif图
+            info.isNotAvif = true
+            info.isSuccess = false
+            return info
+        }
         info.dataColors = unsafe { LibC.malloc<CPointer<UInt8>>(count: Int64(info.frameCount)) }
         let pixelMapSize = Int64(info.width) * info.height * 4
         var dst = LibC.malloc<UInt8>(count: pixelMapSize)
@@ -209,7 +217,7 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
             return ret
         }
         //本地缓存里面实现了
-        decoder = AvifDecoderWrap().create(uri.toString())
+        decoder = AvifDecoderWrap().createCompatibleOtherPic(uri.toString())
         if(let Some(i) <- decoder){
             let info = handleAvifSource(i, uri.toString()).getOrThrow()
             let ret = LibC.malloc<AvifDecodeInfo>()

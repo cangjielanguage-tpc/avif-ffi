@@ -73,10 +73,11 @@ class FileLruCache {
         // 处理数量超过size的场景，移除即将排除的文件
         if(this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(perCacheFile.fileName)){
               //返回的是value
-              let remove:?Int64 = this.lruCache.remove(this.lruCache.keys()[0])
+              let fileName = this.lruCache.keys()[0]
+              let remove:?Int64 = this.lruCache.remove(fileName)
               if(let Some(j) <- remove){
-                  FileUtils.getInstance().deleteFile(this.path+this.lruCache.keys()[0])
-                  removeMemorySize(fileSize)
+                  FileUtils.getInstance().deleteFile(this.path+fileName)
+                  removeMemorySize(j)
               }
         }
         this.lruCache.put(cachefiles[i].fileName, fileSize)
