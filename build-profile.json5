@@ -39,8 +39,8 @@
       ]
     },
     {
-      "name": "avif4hybrid",
-      "srcPath": "./avif4hybrid",
+      "name": "avif_hybrid",
+      "srcPath": "./avif_hybrid"
     }
   ]
 }

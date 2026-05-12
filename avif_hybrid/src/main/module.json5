@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "avif_hybrid",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

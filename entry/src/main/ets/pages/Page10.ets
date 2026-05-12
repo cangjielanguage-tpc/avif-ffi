@@ -1,4 +1,4 @@
-import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
+import { AvifDecoderTS } from '@cangjie-tpc/avif_hybrid';
 import { image } from '@kit.ImageKit';
 
 @Entry
@@ -9,8 +9,10 @@ struct page10Test {
   @State mHeight: number = 0
 
   async aboutToAppear(): Promise<void> {
-    let decoderTs = new AvifDecoderTS()
-    const decodeRes = await decoderTs.create("media://a24")
+    let decoderTs = await AvifDecoderTS.create("media://a24")
+    if(!decoderTs){
+      return
+    }
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
     let cjreturnValue = await decoderTs.nthFrameffi(3, this.mWidth, this.mHeight)

@@ -1,6 +1,5 @@
-import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
+import { AvifDecoderTS, CjCacheCheckTS, CJReturnValue } from '@cangjie-tpc/avif_hybrid';
 import { image } from '@kit.ImageKit';
-import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
@@ -27,8 +26,10 @@ struct page12Test {
         { editable: true, pixelFormat: 3, size: { height: cJReturnValue.memoryHeight, width: cJReturnValue.memoryWidth } }
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
-      let decoderTs = new AvifDecoderTS()
-      const decodeRes = await decoderTs.create(uri)
+      let decoderTs = await AvifDecoderTS.create(uri)
+      if(!decoderTs){
+        return
+      }
       let cjreturnValue: CJReturnValue =await decoderTs.nextFrameffi(100,100)
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
