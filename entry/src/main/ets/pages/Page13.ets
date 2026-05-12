@@ -1,6 +1,5 @@
-import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avifhybrid';
+import { AvifDecoderTS, CjCacheCheckTS } from '@cangjie-tpc/avif_hybrid';
 import { image } from '@kit.ImageKit';
-import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 
@@ -48,16 +47,8 @@ struct page13Test {
       return undefined
     }
 
-    const decoderTs = new AvifDecoderTS()
-    const decodeRes = await decoderTs.create(url)
-    if (!decodeRes) {
-      decoderTs.release()
-      return undefined
-    }
-
-    const isAvifImageffi = decoderTs.isAvifImageffi()
-    if (isAvifImageffi != 1) {
-      decoderTs.release()
+    let decoderTs = await AvifDecoderTS.create(url)
+    if(!decoderTs){
       return undefined
     }
 

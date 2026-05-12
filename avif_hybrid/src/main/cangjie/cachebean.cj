@@ -1,0 +1,93 @@
+package avif4cj
+
+//缓存对象
+class CacheBean {
+  var pixelMap:?PixelMap = None
+  var picData:?Array<UInt8> = None
+  var memoryWidth:Int64 = 0
+  var memoryHeight:Int64 = 0
+  var isAlphaPresent:Bool = false
+
+    func setPicData(picData:?Array<UInt8>){
+        this.picData = picData
+    }
+
+    func getAlphaPresent():Bool{
+        return isAlphaPresent
+    }
+
+    func setPixelMap(pixelMap:?PixelMap){
+        this.pixelMap = pixelMap
+    }
+
+    func getPixelMap():?PixelMap{
+        return pixelMap
+    }
+
+    func getPicData():?Array<UInt8>{
+        return picData
+    }
+
+    func getMemoryWidth():Int64{
+        return memoryWidth
+    }
+
+    func getMemoryHeight():Int64{
+        return memoryHeight
+    }
+
+    func setMemoryWidth(memoryWidth:Int64){
+        this.memoryWidth = memoryWidth
+    }
+
+    func setMemoryHeight(memoryHeight:Int64){
+        this.memoryHeight = memoryHeight
+    }
+
+     func setAlphaPresent(isAlphaPresent:Bool){
+         this.isAlphaPresent = isAlphaPresent
+     }
+
+    init(pixelMap:?PixelMap,picData:?Array<UInt8>){
+        this.pixelMap = pixelMap
+        this.picData = picData
+    }
+
+}
+
+//多图缓存对象
+class MultiPixelMap{
+    var frameDurations: Array<Float64> = Array<Float64>()
+    var pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+    var repetitionCount: Int32 = 0
+
+    func setFrameDurations(frameDurations:Array<Float64>){
+        this.frameDurations = frameDurations
+    }
+
+    func setPixelMapList(pixelMapList:ArrayList<PixelMap>){
+        this.pixelMapList = pixelMapList
+    }
+
+    func setRepetitionCount(repetitionCount:Int32){
+        this.repetitionCount = repetitionCount
+    }
+
+    func getFrameDurations():Array<Float64>{
+        return frameDurations
+    }
+
+    func getPixelMapList():ArrayList<PixelMap>{
+        return pixelMapList
+    }
+
+    func getRepetitionCount():Int32{
+        return repetitionCount
+    }
+
+    init(pixelMapList:ArrayList<PixelMap>,frameDurations:Array<Float64>,repetitionCount:Int32){
+        this.pixelMapList = pixelMapList
+        this.frameDurations = frameDurations
+        this.repetitionCount = repetitionCount
+    }
+}

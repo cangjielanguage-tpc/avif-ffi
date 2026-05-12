@@ -1,0 +1,6 @@
+{
+  "name": "libark_interop_api_avif.so",
+  "types": "./index.d.ts",
+  "version": "1.0.0",
+  "description": ""
+}

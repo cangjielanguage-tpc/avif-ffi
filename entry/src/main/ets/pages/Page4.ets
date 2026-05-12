@@ -1,4 +1,4 @@
-import { AvifViewTS, AvifImageModel } from '@cangjie-tpc/avifhybrid';
+import { AvifViewTS, AvifImageModel } from '@cangjie-tpc/avif_hybrid';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry

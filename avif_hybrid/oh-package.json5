@@ -1,0 +1,22 @@
+{
+  "name": "@cangjie-tpc/avif_hybrid",
+  "version": "1.0.1",
+  "description": "avif_hybrid是一个用仓颉语言编写的用于显示avif图片的库",
+  "main": "Index.ets",
+  "author": "cangjie-tpc",
+  "license": "Apache-2.0",
+  "repository": "https://gitcode.com/Cangjie-TPC/avif-ffi/tree/avif-ffi_hybrid-cangjie-plugin-5.1.1_xc",
+  "homepage": "https://gitcode.com/Cangjie-TPC",
+  "keywords": [
+    "avif",
+    "仓颉",
+    "OpenHarmony",
+    "HarmonyOS",
+    "avif_hybrid"
+  ],
+  "dependencies": {
+    "@cangjie/cjhybridview": "1.0.5",
+    "libark_interop_loader.so": "file:./src/main/cangjie/loader",
+    "libark_interop_api_avif.so": "file:./src/main/cangjie/libavif"
+  }
+}

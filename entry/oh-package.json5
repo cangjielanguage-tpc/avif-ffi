@@ -6,7 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@cangjie-tpc/avifhybrid": "file:../avif4hybrid",
+    "@cangjie-tpc/avif_hybrid": "file:../avif_hybrid"
   }
 }
 
