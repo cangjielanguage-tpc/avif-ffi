@@ -55,6 +55,11 @@ export declare interface CustomLib {
     setMemoryLruCache(countSize:number,memorySize:number):void
     setFileLruCache(countSize:number,memorySize:number):void
     getLoadCJPage(model: CJAvifImageModel): void
+    getFileMaxCountSizeTS():number
+    getFileMaxMemorySizeTS():number
+    getMemoryMaxCountSizeTS():number
+    getMemoryMaxMemorySizeTS():number
+
 }
 
 

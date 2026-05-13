@@ -96,6 +96,26 @@ func setFileLruCache(runtime: JSContext, callInfo: JSCallInfo):JSValue{
     return runtime.undefined().toJSValue()
 }
 
+func getFileMaxCountSizeTS(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let size:Int64 = fileLruCache.getFileMaxCountSize()
+    return runtime.number(Int32(size)).toJSValue()
+}
+
+func getFileMaxMemorySizeTS(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let size:Int64 = fileLruCache.getFileMaxMemorySize()
+    return runtime.number(Int32(size)).toJSValue()
+}
+
+func getMemoryMaxCountSizeTS(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let size:Int64 = memoryLruCache.getMemoryMaxCountSize()
+    return runtime.number(Int32(size)).toJSValue()
+}
+
+func getMemoryMaxMemorySizeTS(runtime: JSContext, callInfo: JSCallInfo):JSValue{
+    let size:Int64 = memoryLruCache.getMemoryMaxMemorySize()
+    return runtime.number(Int32(size)).toJSValue()
+}
+
 
 
 

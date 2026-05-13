@@ -66,7 +66,6 @@ public func fetchDataFromUrl(url: String, options!: FetchOptions = FetchOptions(
 
     httpRequest.onHeadersReceive({ data =>
         result.headers = data
-        maybeResolve()
     })
 
     httpRequest.onDataReceive({ data =>
@@ -77,7 +76,6 @@ public func fetchDataFromUrl(url: String, options!: FetchOptions = FetchOptions(
         result.result = unsafe {
             dataChunks.getRawArray()[0..dataChunks.size]
         }
-        maybeResolve()
     })
 
     try {

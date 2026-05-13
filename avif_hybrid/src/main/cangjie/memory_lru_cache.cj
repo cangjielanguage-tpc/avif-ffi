@@ -38,6 +38,16 @@ class MemoryLruCache {
         }
     }
 
+
+    func getMemoryMaxCountSize():Int64{
+        return this.maxSize
+    }
+
+    func getMemoryMaxMemorySize():Int64{
+        return this.maxMemory
+    }
+
+
     // 添加缓存键值对
     func put(key: String, value: CacheBean): Unit {
         synchronized(mtx) {

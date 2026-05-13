@@ -105,6 +105,8 @@ class CJAvifView {
                 return ImageFit.BOTTOM
             } else if (fit == "bottom_end") {
                 return ImageFit.BOTTOM_END
+            } else if (fit == "none") {
+                return ImageFit.None
             }else {
                 return ImageFit.Contain
             }
