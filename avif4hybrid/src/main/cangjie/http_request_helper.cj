@@ -67,7 +67,6 @@ public func fetchDataFromUrl(url: String, options!: FetchOptions = FetchOptions(
 
     httpRequest.onHeadersReceive({ data =>
         result.headers = data
-        maybeResolve()
     })
 
     httpRequest.onDataReceive({ data =>
@@ -78,7 +77,6 @@ public func fetchDataFromUrl(url: String, options!: FetchOptions = FetchOptions(
         result.result = unsafe {
             dataChunks.getRawArray()[0..dataChunks.size]
         }
-        maybeResolve()
     })
 
     try {
@@ -129,7 +127,6 @@ public func fetchDataFromUrlRN(url: String, options!: FetchOptions = FetchOption
 
     httpRequest.onHeadersReceive({ data =>
         result.headers = data
-        maybeResolve()
     })
 
     httpRequest.onDataReceive({ data =>
@@ -140,7 +137,6 @@ public func fetchDataFromUrlRN(url: String, options!: FetchOptions = FetchOption
                 //如果不是avif停止下载
                 result.isAvif = false
                  semp.release(amount: 1)
-                 cleanUp()
             }
         }
     })
@@ -149,7 +145,6 @@ public func fetchDataFromUrlRN(url: String, options!: FetchOptions = FetchOption
         result.result = unsafe {
             dataChunks.getRawArray()[0..dataChunks.size]
         }
-        maybeResolve()
     })
 
     try {
