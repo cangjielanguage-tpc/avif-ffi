@@ -58,7 +58,7 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setImageViewWidth(imageViewWidth: string): AvifImageModel
+     public setImageViewWidth(imageViewWidth: Length): AvifImageModel
 
     /*
      * 设置图片控件的高度
@@ -66,16 +66,15 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setImageViewHeight(imageViewHeight: string): AvifImageModel
+     public setImageViewHeight(imageViewHeight: Length): AvifImageModel
 
     /*
      * 设置图片和控件的对齐方式
-     * @param 参数 imageFit - 图片和控件的对齐方式 ，String可填"fill","contain","cover","auto","scaledown"
-     * "top_start","top","top_end","start","center","end","bottom_start","bottom","bottom_end"
+     * @param 参数 imageFit - 图片和控件的对齐方式 
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setImageFit(imageFit: string): AvifImageModel
+     public setImageFit(imageFit: ImageFit): AvifImageModel
 
     /*
      * 设置图片是否可拖拽
@@ -91,7 +90,7 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setTopleftBorderRadius(topleftBorderRadius: string): AvifImageModel
+     public setTopleftBorderRadius(topleftBorderRadius: Length): AvifImageModel
 
     /*
      * 设置图片的右上圆角
@@ -99,7 +98,7 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public  setToprightBorderRadius(toprightBorderRadius: string): AvifImageModel
+     public  setToprightBorderRadius(toprightBorderRadius: Length): AvifImageModel
      
     /*
      * 设置图片的左下圆角
@@ -107,7 +106,7 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setBottomleftBorderRadius(bottomleftBorderRadius: string): AvifImageModel
+     public setBottomleftBorderRadius(bottomleftBorderRadius: Length): AvifImageModel
 
     /*
      * 设置图片的右下圆角
@@ -115,7 +114,7 @@ export class AvifImageModel {
      *
      * @return 返回 AvifImageModel 类型，支持链式调用
      */
-     public setBottomrightBorderRadius(bottomrightBorderRadius: string): AvifImageModel
+     public setBottomrightBorderRadius(bottomrightBorderRadius: Length): AvifImageModel
 
     /*
      * 图片数据加载成功触发回调，返回图片加载成功的状态值
@@ -305,6 +304,34 @@ export class GlobalUtils {
      * 返回值 void 类型 
      */   
   static setFileLruCacheTS(countSize:number,memorySize:number):void
+  
+    /**
+     * 获取文件缓存中允许的最大文件数量
+     * 
+     * 返回值 number 类型 表示文件缓存中允许的最大文件数量
+     */   
+  static getFileMaxCountSizeTS():number
+  
+    /**
+     * 获取文件缓存中允许的所有文件的总大小
+     * 
+     * 返回值 number 类型 表示文件缓存中允许的所有文件的总大小
+     */   
+  static getFileMaxMemorySizeTS():number
+  
+    /**
+     * 获取内存缓存中允许的最大的内存对象数量
+     * 
+     * 返回值 number 表示内存缓存中允许的最大的内存对象数量
+     */   
+  static getMemoryMaxCountSizeTS():number
+  
+    /**
+     * 获取内存缓存中允许的最大的所有内存对象的总大小
+     * 
+     * 返回值 number 表示内存缓存中允许的最大的所有内存对象的总大小
+     */   
+  static getMemoryMaxMemorySizeTS():number
   
   /**
      * 设置Context对象到仓颉

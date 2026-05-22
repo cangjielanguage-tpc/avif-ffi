@@ -32,25 +32,25 @@ struct page1Test {
 
 
 
-      this.avifImageModel1.setUri(this.url1).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel1.setUri(this.url1).setImageViewWidth('50%').setImageViewHeight('50%').setImageFit(ImageFit.Cover)
 
-      this.avifImageModel2.setUri(this.url2).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel2.setUri(this.url2).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.Contain)
 
-      this.avifImageModel3.setUri(this.url3).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel3.setUri(this.url3).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.Cover)
 
-      this.avifImageModel4.setUri(this.url4).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel4.setUri(this.url4).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel5.setUri(this.url5).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel5.setUri(this.url5).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel6.setUri(this.url6).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel6.setUri(this.url6).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel7.setUri(this.url7).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel7.setUri(this.url7).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel8.setUri(this.url8).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel8.setUri(this.url8).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel9.setUri(this.url9).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel9.setUri(this.url9).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
-      this.avifImageModel10.setUri(this.url10).setImageViewWidth('600px').setImageViewHeight('400px')
+      this.avifImageModel10.setUri(this.url10).setImageViewWidth('600px').setImageViewHeight('400px').setImageFit(ImageFit.ScaleDown)
 
     this.ready = true
   }

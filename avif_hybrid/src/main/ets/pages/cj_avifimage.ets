@@ -1,4 +1,4 @@
-import { NodeController, FrameNode } from '@kit.ArkUI';
+import { NodeController, FrameNode, LengthMetrics, LengthUnit } from '@kit.ArkUI';
 import { requireCJLib } from 'libark_interop_loader.so'
 import { CustomLib,CJAvifImageModel,CJAvifDecoder,CJReturnValue,CJCacheCheck} from 'libark_interop_api_avif.so';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -81,6 +81,75 @@ export struct AvifViewTS {
 }
 
 
+function lengthToMetrics(len: Length): LengthMetrics {
+  // 1. Resource 类型无法解析，返回 0vp
+  if (typeof len !== 'number' && typeof len !== 'string') {
+    return LengthMetrics.vp(0);
+  }
+
+  // 2. 数字 → 默认 vp
+  if (typeof len === 'number') {
+    return LengthMetrics.vp(len);
+  }
+  // 3. 字符串解析（如 "100px", "50%", "20fp"）
+  const trimed = len.trim();
+  const numStr = trimed.replace(/[a-zA-Z%]/g, '');
+  const value = parseFloat(numStr);
+  if (isNaN(value)) {
+    return LengthMetrics.vp(0);
+  }
+  if (trimed.endsWith('px')) {
+    return LengthMetrics.px(value);
+  } else if (trimed.endsWith('fp')) {
+    return LengthMetrics.fp(value);
+  } else if (trimed.endsWith('lpx')) {
+    return LengthMetrics.lpx(value);
+  } else if (trimed.endsWith('%')) {
+    return LengthMetrics.percent(value);
+  } else {
+    // 无单位 → 默认 vp
+    return LengthMetrics.vp(value);
+  }
+}
+
+function lengthToString(len: Length): string {
+  const lm = lengthToMetrics(len);
+  switch (lm.unit) {
+    case LengthUnit.VP: return `${lm.value}vp`;
+    case LengthUnit.PX: return `${lm.value}px`;
+    case LengthUnit.FP: return `${lm.value}fp`;
+    case LengthUnit.LPX: return `${lm.value}lpx`;
+    case LengthUnit.PERCENT: return `${lm.value}%`;
+    default: return `${lm.value}vp`;
+  }
+}
+
+/**
+ * 将 ImageFit 枚举值转为小写字符串
+ * @param fit ImageFit 枚举值
+ * @returns 小写字符串，如 "contain" / "cover" / "top_start"
+ */
+function imageFitToLowerString(fit: ImageFit): string {
+  switch (fit) {
+    case ImageFit.Contain: return "contain";
+    case ImageFit.Cover: return "cover";
+    case ImageFit.Auto: return "auto";
+    case ImageFit.Fill: return "fill";
+    case ImageFit.ScaleDown: return "scaledown";
+    case ImageFit.None: return "none";
+    case ImageFit.TOP_START: return "top_start";
+    case ImageFit.TOP: return "top";
+    case ImageFit.TOP_END: return "top_end";
+    case ImageFit.START: return "start";
+    case ImageFit.CENTER: return "center";
+    case ImageFit.END: return "end";
+    case ImageFit.BOTTOM_START: return "bottom_start";
+    case ImageFit.BOTTOM: return "bottom";
+    case ImageFit.BOTTOM_END: return "bottom_end";
+    case ImageFit.MATRIX: return "matrix";
+    default: return "contain";
+  }
+}
 
 export class AvifImageModel {
 
@@ -113,18 +182,18 @@ export class AvifImageModel {
     return this
   }
 
-  public setImageViewWidth(imageViewWidth: string): AvifImageModel {
-    this.imageViewWidth = imageViewWidth
+  public setImageViewWidth(imageViewWidth: Length): AvifImageModel {
+    this.imageViewWidth = lengthToString(imageViewWidth)
     return this
 
   }
-  public setImageViewHeight(imageViewHeight: string): AvifImageModel {
-    this.imageViewHeight = imageViewHeight
+  public setImageViewHeight(imageViewHeight: Length): AvifImageModel {
+    this.imageViewHeight = lengthToString(imageViewHeight)
     return this
   }
 
-  public setImageFit(imageFit: string): AvifImageModel {
-    this.imageFit = imageFit
+  public setImageFit(imageFit: ImageFit): AvifImageModel {
+    this.imageFit = imageFitToLowerString(imageFit)
     return this
   }
 
@@ -133,23 +202,23 @@ export class AvifImageModel {
     return this
   }
 
-  public  setTopleftBorderRadius(topleftBorderRadius: string): AvifImageModel {
-    this.topleftBorderRadius = topleftBorderRadius
+  public  setTopleftBorderRadius(topleftBorderRadius: Length): AvifImageModel {
+    this.topleftBorderRadius = lengthToString(topleftBorderRadius)
     return this
   }
 
-  public  setToprightBorderRadius(toprightBorderRadius: string): AvifImageModel {
-    this.toprightBorderRadius = toprightBorderRadius
+  public  setToprightBorderRadius(toprightBorderRadius: Length): AvifImageModel {
+    this.toprightBorderRadius = lengthToString(toprightBorderRadius)
     return this
   }
 
-  public  setBottomleftBorderRadius(bottomleftBorderRadius: string): AvifImageModel {
-    this.bottomleftBorderRadius = bottomleftBorderRadius
+  public  setBottomleftBorderRadius(bottomleftBorderRadius: Length): AvifImageModel {
+    this.bottomleftBorderRadius = lengthToString(bottomleftBorderRadius)
     return this
   }
 
-  public  setBottomrightBorderRadius(bottomrightBorderRadius: string): AvifImageModel {
-    this.bottomrightBorderRadius = bottomrightBorderRadius
+  public  setBottomrightBorderRadius(bottomrightBorderRadius: Length): AvifImageModel {
+    this.bottomrightBorderRadius = lengthToString(bottomrightBorderRadius)
     return this
   }
 
@@ -293,6 +362,22 @@ export class GlobalUtils {
 
   static setFileLruCacheTS(countSize:number,memorySize:number):void{
     global_customLib.setFileLruCache(countSize,memorySize)
+  }
+
+  static getFileMaxCountSizeTS():number{
+    return global_customLib.getFileMaxCountSizeTS()
+  }
+
+  static getFileMaxMemorySizeTS():number{
+    return global_customLib.getFileMaxMemorySizeTS()
+  }
+
+  static getMemoryMaxCountSizeTS():number{
+    return global_customLib.getMemoryMaxCountSizeTS()
+  }
+
+  static getMemoryMaxMemorySizeTS():number{
+    return global_customLib.getMemoryMaxMemorySizeTS()
   }
 
   static setAvifContext(context:Context):void{

@@ -37,5 +37,9 @@ let EXPORT_MODULE = JSModule.registerModule {
     exports["setGlobalContext"] = runtime.function(setGlobalContext).toJSValue()
     exports["setMemoryLruCache"] = runtime.function(setMemoryLruCache).toJSValue()
     exports["setFileLruCache"] = runtime.function(setFileLruCache).toJSValue()
+    exports["getFileMaxCountSizeTS"] = runtime.function(getFileMaxCountSizeTS).toJSValue()
+    exports["getFileMaxMemorySizeTS"] = runtime.function(getFileMaxMemorySizeTS).toJSValue()
+    exports["getMemoryMaxCountSizeTS"] = runtime.function(getMemoryMaxCountSizeTS).toJSValue()
+    exports["getMemoryMaxMemorySizeTS"] = runtime.function(getMemoryMaxMemorySizeTS).toJSValue()
 
 }

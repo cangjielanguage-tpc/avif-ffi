@@ -1,5 +1,5 @@
 import { router } from '@kit.ArkUI';
-import {AvifDecoderTS } from '@cangjie-tpc/avif_hybrid';
+import {AvifDecoderTS, GlobalUtils } from '@cangjie-tpc/avif_hybrid';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
@@ -205,10 +205,11 @@ struct Index {
             .fontSize(14)// 字体大小
             .onClick(async e => {
               // 点击动作触发该方法调用
-              // 读成 Uint8Array
-              const uint8Array: Uint8Array = await getContext().resourceManager.getMediaContent($r('app.media.2'));
-              let isavif = AvifDecoderTS.isAvifImageffi(uint8Array.buffer as ArrayBuffer)
-              hilog.error(0,"test3",isavif.toString())
+              let size1 = GlobalUtils.getFileMaxCountSizeTS()
+              let size2 = GlobalUtils.getFileMaxMemorySizeTS()
+              let size3 = GlobalUtils.getMemoryMaxCountSizeTS()
+              let size4 = GlobalUtils.getMemoryMaxMemorySizeTS()
+              hilog.error(0,"fileAndmemorysize",size1+"---"+size2+"---"+size3+"---"+size4+"---")
             })
           Text("")// 宽度
             .width(10)

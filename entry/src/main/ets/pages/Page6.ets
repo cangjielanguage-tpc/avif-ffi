@@ -21,7 +21,7 @@ struct page6Test {
   }
 
   async aboutToAppear(): Promise<void> {
-      this.avifImageModel2.setUri("media://a2").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(false)
+      this.avifImageModel2.setUri("media://a2").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('50%').setToprightBorderRadius('50%').setBottomleftBorderRadius('50%').setBottomrightBorderRadius('50%').setOnComplete(this.completeCallback).setDraggable(false)
       this.avifImageModel3.setUri("media://a3").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
       this.avifImageModel5.setUri("media://a5").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)
       this.avifImageModel6.setUri("media://a6").setImageViewWidth('600px').setImageViewHeight('400px').setTopleftBorderRadius('20vp').setToprightBorderRadius('20vp').setBottomleftBorderRadius('20vp').setBottomrightBorderRadius('20vp').setOnComplete(this.completeCallback).setDraggable(true)

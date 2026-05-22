@@ -44,6 +44,15 @@ class FileLruCache {
         }
     }
 
+
+    func getFileMaxCountSize():Int64{
+        return this.maxFileSize
+    }
+
+    func getFileMaxMemorySize():Int64{
+        return this.maxMemorySize
+    }
+
     /**
    * 遍历缓存文件目录，初始化缓存
    */
