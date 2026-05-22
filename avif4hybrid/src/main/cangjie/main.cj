@@ -232,7 +232,7 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
             return ret
         }
     } catch (e: Exception) {
-        Hilog.error(0, "AvifDecoder", "decode ${uri} failed: ${e}")
+        Hilog.error(0, "AvifDecoder", "decode failed: ${e}")
         var info = AvifDecodeInfo()
         info.isSuccess = false
         info.errMsg = LibC.mallocCString(e.message)
