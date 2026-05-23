@@ -3,7 +3,7 @@ import { requireCJLib } from 'libark_interop_loader.so'
 import { CustomLib,CJAvifImageModel,CJAvifDecoder,CJReturnValue,CJCacheCheck} from 'libark_interop_api_avif.so';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
-export const global_customLib: CustomLib = requireCJLib("libavif4cj.so") as CustomLib
+export let global_customLib: CustomLib | undefined = undefined
 
 class CJNodeController extends NodeController {
   rootNode?: FrameNode = undefined
@@ -17,7 +17,9 @@ class CJNodeController extends NodeController {
   makeNode(ctx: UIContext): FrameNode | null {
     if (this.rootNode === undefined) {
       this.rootNode = new FrameNode(ctx)
-      global_customLib.getLoadCJPage(this.model)
+      if (global_customLib !== undefined) {
+        global_customLib.getLoadCJPage(this.model)
+      }
     }
     return this.rootNode
   }
@@ -28,16 +30,41 @@ class CJNodeController extends NodeController {
 export struct AvifViewTS {
   private avifImageNode: CJNodeController | null = null
   @State model?: AvifImageModel = undefined
+  @Prop useCangjieComponent?: boolean = true
+  @BuilderParam customContains: () => void = this.defaultTextBuilder
+
+  @Builder
+  defaultTextBuilder() {
+    if (!this.useCangjieComponent) {
+      Column() {
+        Image($r('app.media.default'))
+      }
+    }
+  }
 
   async aboutToAppear(): Promise<void> {
-    this.avifImageNode = new CJNodeController(await this.getModel())
+    if (this.useCangjieComponent === true) {
+      if (global_customLib === undefined) {
+        global_customLib = requireCJLib("libavif4cj.so") as CustomLib
+      }
+      this.avifImageNode = new CJNodeController(await this.getModel())
+    } else {
+      global_customLib = undefined
+    }
   }
 
   build() {
-    NodeContainer(this.avifImageNode)
+    if (this.useCangjieComponent) {
+      NodeContainer(this.avifImageNode)
+    } else {
+      this.customContains()
+    }
   }
 
-  async getModel(): Promise<CJAvifImageModel> {
+  async getModel(): Promise<CJAvifImageModel|undefined> {
+    if (global_customLib === undefined) {
+       return undefined
+    }
     let cjAvifImageModel: CJAvifImageModel = new global_customLib.CJAvifImageModel()
     if (this.model !== undefined) {
       if (this.model.uri != '') {
@@ -230,16 +257,24 @@ export class AvifImageModel {
 
 export class AvifDecoderTS{
 
-  cjAvifDecoder: CJAvifDecoder = new global_customLib.CJAvifDecoder()
+  cjAvifDecoder: CJAvifDecoder | undefined = undefined
   decodeRes:boolean = true
 
   private constructor() {
+    if (global_customLib === undefined) {
+      global_customLib = requireCJLib("libavif4cj.so") as CustomLib
+    }
+    this.cjAvifDecoder = new global_customLib.CJAvifDecoder()
     global_customLib.setGlobalContext(getContext(this))
   }
 
 
   public static async create(uri: string, threads: number=1): Promise<AvifDecoderTS|undefined> {
     let newDecoder = new AvifDecoderTS();
+    if (newDecoder.cjAvifDecoder === undefined) {
+      newDecoder.release()
+      return undefined
+    }
     newDecoder.decodeRes = await newDecoder.cjAvifDecoder.createWithThreadAsync(uri, threads);
     if (newDecoder.decodeRes) {
       return newDecoder;
@@ -251,15 +286,15 @@ export class AvifDecoderTS{
 
   public getWidth():number{
     if(this.decodeRes){
-        return this.cjAvifDecoder.getWidth()
+      return this.cjAvifDecoder?.getWidth() ?? 0
     }else{
-        return 0
+      return 0
     }
   }
 
   public getHeight():number{
     if(this.decodeRes){
-      return this.cjAvifDecoder.getHeight()
+      return this.cjAvifDecoder?.getHeight() ?? 0
     }else{
       return 0
     }
@@ -267,7 +302,7 @@ export class AvifDecoderTS{
 
   public getDepth():number{
     if(this.decodeRes){
-      return this.cjAvifDecoder.getDepth()
+      return this.cjAvifDecoder?.getDepth() ?? 0
     }else{
       return 0
     }
@@ -275,7 +310,7 @@ export class AvifDecoderTS{
 
   public getAlphaPresent():boolean{
     if(this.decodeRes){
-      return this.cjAvifDecoder.getAlphaPresent()
+      return this.cjAvifDecoder?.getAlphaPresent() ?? false
     }else{
       return false
     }
@@ -283,7 +318,7 @@ export class AvifDecoderTS{
 
   public getFrameCount():number{
     if(this.decodeRes){
-      return this.cjAvifDecoder.getFrameCount()
+      return this.cjAvifDecoder?.getFrameCount() ?? 0
     }else{
       return 0
     }
@@ -291,7 +326,7 @@ export class AvifDecoderTS{
 
   public getRepetitionCount():number{
     if(this.decodeRes) {
-       return this.cjAvifDecoder.getRepetitionCount()
+      return this.cjAvifDecoder?.getRepetitionCount() ?? 0
     }else{
        return 0
     }
@@ -299,20 +334,20 @@ export class AvifDecoderTS{
 
   public getFrameDurations(): Array<number> | undefined{
     if(this.decodeRes) {
-        return this.cjAvifDecoder.getFrameDurations()
+      return this.cjAvifDecoder?.getFrameDurations()??undefined
     }else{
-        return undefined
+      return undefined
     }
   }
 
   public static isAvifImageffi(buffer:ArrayBuffer): number {
-     let newDecoder = new AvifDecoderTS();
-    　return newDecoder.cjAvifDecoder.isAvifImageffi(buffer)
+    let newDecoder = new AvifDecoderTS();
+    return newDecoder.cjAvifDecoder?.isAvifImageffi(buffer) ?? 0
   }
 
   public nextFrameIndexffi(): number{
     if(this.decodeRes) {
-       return this.cjAvifDecoder.nextFrameIndexffi()
+      return this.cjAvifDecoder?.nextFrameIndexffi()  ?? -1
     }else{
        return -1
     }
@@ -320,67 +355,71 @@ export class AvifDecoderTS{
 
   public async nextFrameffi(imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-      return  this.cjAvifDecoder.nextFrameffiAsync(imageWidth,imageHeight)
+      return  this.cjAvifDecoder?.nextFrameffiAsync(imageWidth,imageHeight) ?? new CJReturnValue()
     }else{
-      return  new global_customLib.CJReturnValue()
+      return  new CJReturnValue()
     }
   }
 
   public async nthFrameffi(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>{
     if(this.decodeRes) {
-      return  this.cjAvifDecoder.nthFrameffiAsync(index,imageWidth,imageHeight)
+      return  this.cjAvifDecoder?.nthFrameffiAsync(index,imageWidth,imageHeight) ?? new CJReturnValue()
     }else{
-      return  new global_customLib.CJReturnValue()
+      return  new CJReturnValue()
     }
   }
 
 
   public release(): void{
-    this.cjAvifDecoder.release()
+    this.cjAvifDecoder?.release()
   }
 
 }
 
 export class CjCacheCheckTS{
 
-  cjCacheCheck: CJCacheCheck = new global_customLib.CJCacheCheck()
+  cjCacheCheck: CJCacheCheck | undefined = undefined
 
   constructor() {
+    if (global_customLib === undefined) {
+      global_customLib = requireCJLib("libavif4cj.so") as CustomLib
+    }
+    this.cjCacheCheck = new global_customLib.CJCacheCheck()
     global_customLib.setGlobalContext(getContext(this))
   }
 
   public getMemoryCache(uri:string,imagePicWidth:number,imagePicHeight:number):CJReturnValue{
-    return this.cjCacheCheck.getMemoryCache(uri,imagePicWidth,imagePicHeight)
+    return this.cjCacheCheck?.getMemoryCache(uri,imagePicWidth,imagePicHeight) ?? new CJReturnValue()
   }
 
 }
 
 export class GlobalUtils {
    static setMemoryLruCacheTS(countSize:number,memorySize:number):void{
-     global_customLib.setMemoryLruCache(countSize,memorySize)
+     global_customLib?.setMemoryLruCache(countSize,memorySize)
   }
 
   static setFileLruCacheTS(countSize:number,memorySize:number):void{
-    global_customLib.setFileLruCache(countSize,memorySize)
+    global_customLib?.setFileLruCache(countSize,memorySize)
   }
 
   static getFileMaxCountSizeTS():number{
-    return global_customLib.getFileMaxCountSizeTS()
+    return global_customLib?.getFileMaxCountSizeTS()??0
   }
 
   static getFileMaxMemorySizeTS():number{
-    return global_customLib.getFileMaxMemorySizeTS()
+    return global_customLib?.getFileMaxMemorySizeTS()??0
   }
 
   static getMemoryMaxCountSizeTS():number{
-    return global_customLib.getMemoryMaxCountSizeTS()
+    return global_customLib?.getMemoryMaxCountSizeTS()??0
   }
 
   static getMemoryMaxMemorySizeTS():number{
-    return global_customLib.getMemoryMaxMemorySizeTS()
+    return global_customLib?.getMemoryMaxMemorySizeTS()??0
   }
 
   static setAvifContext(context:Context):void{
-    global_customLib.setGlobalContext(context)
+    global_customLib?.setGlobalContext(context)
   }
 }
