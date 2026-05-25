@@ -421,6 +421,27 @@ struct Index {
         .width('100%')
 
 
+        Row() {
+          Text("")// 宽度
+            .width(10)
+          Button("20. 展示20")
+            .height(50)// 高度
+            .layoutWeight(1)// 容器尺寸确定时，元素与兄弟节点主轴布局尺寸按照权重进行分配，忽略本身尺寸设置仅在Row/Column/Flex布局中生效
+            .fontColor(0xFFFFFFFF)// 文本颜色
+            .backgroundColor(0xFFFF0000)// 背景颜色
+            .margin({ top: 5, bottom: 5 })// 外边距
+            .align(Alignment.Center)// 内容对齐方式
+            .fontSize(14)// 字体大小
+            .onClick(e => {
+              // 点击动作触发该方法调用
+              router.pushUrl({ url: 'pages/Page14' })
+            })
+          Text("")// 宽度
+            .width(10)
+        }
+        .width('100%')
+
+
       }
       .width('100%')
       .alignItems(HorizontalAlign.Start)
