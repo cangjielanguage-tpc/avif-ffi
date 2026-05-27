@@ -43,7 +43,7 @@ class LruCache<V> {
     }
 
 
-    public func keys() {
+    public func keys():Array<String> {
         Array<String>(size()) {
             i => list[i].key
         }
