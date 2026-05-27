@@ -12,7 +12,7 @@ public class CacheFileInfo <: Comparable<CacheFileInfo>{
         this.fileSize = fileSize
     }
 
-     public func compare(r: CacheFileInfo) {
+     public func compare(r: CacheFileInfo):Ordering {
         let tValue: Int64 = this.cTime
         let rValue: Int64 = r.cTime
         if (tValue > rValue) {
