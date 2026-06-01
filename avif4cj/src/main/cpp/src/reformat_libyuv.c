@@ -1079,34 +1079,11 @@ int getThreadCount(int threads) {
   return threads;
 }
 
-char * versionString(){
-      char codec_versions[256];
-      avifCodecVersions(codec_versions);
-      char libyuv_version[64];
-      if (avifLibYUVVersion() > 0) {
-        snprintf(libyuv_version, sizeof(libyuv_version), " libyuv: %u.",
-                 avifLibYUVVersion());
-      } else {
-        libyuv_version[0] = '\0';
-      }
-      char version_string[512];
-      snprintf(version_string, sizeof(version_string), "libavif: %s. Codecs: %s.%s",
-               avifVersion(), codec_versions, libyuv_version);
-//      return env->NewStringUTF(version_string);
-       return version_string;
-
-//      char* version_string = (char*)malloc(512);
-//      snprintf(version_string, sizeof(version_string), "libavif: %s. Codecs: %s.%s",
-//               avifVersion(), codec_versions, libyuv_version);
-//      return version_string;
-
-}
-
-char * resultToString(int result){
-   return avifResultToString((avifResult)result);
-}
 
 avifBool isAvifImage(uint8_t *address, int length){
+    if (length <= 0){
+        return false;
+    } 
     avifROData avif = {address, (size_t)length};
     return avifPeekCompatibleFileType(&avif);
 }
@@ -1116,13 +1093,15 @@ avifBool isAvifImage(uint8_t *address, int length){
      AvifDecoderWrapper decoder;
 
      if (!CreateDecoderAndParse(&decoder, address, length, /*threads=*/1)) {
+        if(decoder.decoder != NULL){
+            avifDecoderDestroy(decoder.decoder);
+        }
+        decoder.decoder = NULL;
         return false;
      }
-    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- CreateDecoderAndParse true");
      InfoCpp *info = malloc(sizeof(InfoCpp));
      info -> width = decoder.crop.width;
      info -> height = decoder.crop.height;
-    //%{public}d", errorCode
      info -> depth = decoder.decoder->image->depth;
      if(decoder.decoder->alphaPresent == 0){
          info->alphaPresent = false;
@@ -1133,27 +1112,33 @@ avifBool isAvifImage(uint8_t *address, int length){
      info -> frameCount = decoder.decoder->imageCount;
      info -> repetitionCount = decoder.decoder->repetitionCount;
 
-    //给时间数组赋值---------------------------------------
      double* native_durations = NULL;
      // 分配内存
      if (info ->frameCount > 0) {
          native_durations = (double*)malloc(sizeof(double) * info ->frameCount);
      }
     if (native_durations == NULL) {
+        free(info);
+        if(decoder.decoder != NULL){
+            avifDecoderDestroy(decoder.decoder);
+        }
+        decoder.decoder = NULL;
         return 0;
     }
     for (int i = 0; i < info ->frameCount; ++i) {
         avifImageTiming timing;
         if (avifDecoderNthImageTiming(decoder.decoder, i, &timing) !=AVIF_RESULT_OK) {
-          return 0;
+            free(native_durations);
+            free(info);
+            if(decoder.decoder != NULL){
+                 avifDecoderDestroy(decoder.decoder);
+            }
+            decoder.decoder = NULL;
+            return 0;
         }
         native_durations[i] = timing.duration;
-        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----a duration %{public}f ",native_durations[i]);
     }
     info ->frameDurations = native_durations;
-    //给时间数组赋值---------------------------------------
-     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- width %{public}d height %{public}d depth %{public}d",decoder.crop.width,decoder.crop.height,decoder.decoder->image->depth);
-     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- info width %{public}d height %{public}d depth %{public}d",info -> width ,info -> height, info -> depth);
     return info;
 }
 
@@ -1171,19 +1156,20 @@ void encoded3Free(double* doubleinfo) {
 
 
 AvifDecoderCpp* createDecoder(uint8_t *address,int length, int threads){
-     //std::unique_ptr<AvifDecoderWrapper> decoder(new (std::nothrow)AvifDecoderWrapper());
      AvifDecoderWrapper *decoder = (AvifDecoderWrapper*)malloc(sizeof(AvifDecoderWrapper));
      if (decoder == NULL) {
         return NULL;
      }
     
      int finalThread = getThreadCount(threads);
-     //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- cpucount1 %{public}d ",finalThread);
 
      if (!CreateDecoderAndParse(decoder, address, length,finalThread)) {
+        if(decoder->decoder != NULL){
+            avifDecoderDestroy(decoder->decoder);
+        }
+        free(decoder);
         return NULL;
      }
-     //AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
      InfoCpp *info = malloc(sizeof(InfoCpp));
 
      info -> width = decoder->crop.width;
@@ -1197,30 +1183,34 @@ AvifDecoderCpp* createDecoder(uint8_t *address,int length, int threads){
      info ->frameCount = decoder->decoder->imageCount;
      info ->repetitionCount = decoder->decoder->repetitionCount;
      
-    //给时间数组赋值---------------------------------------
      double* native_durations = NULL;
      // 分配内存
      if (info ->frameCount > 0) {
          native_durations = (double*)malloc(sizeof(double) * info ->frameCount);
      }
     if (native_durations == NULL) {
+        free(info);
+        if(decoder->decoder != NULL){
+           avifDecoderDestroy(decoder->decoder);
+        }
+        free(decoder);
         return NULL;
     }
     for (int i = 0; i < info ->frameCount; ++i) {
         avifImageTiming timing;
         if (avifDecoderNthImageTiming(decoder->decoder, i, &timing) !=AVIF_RESULT_OK) {
-          return NULL;
+            free(native_durations);
+            free(info);
+            if(decoder->decoder != NULL){
+                avifDecoderDestroy(decoder->decoder);
+            }
+            free(decoder);
+            return NULL;
         }
-        //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- duration %{public}f ",timing.duration);
         native_durations[i] = timing.duration;
     }
     info ->frameDurations = native_durations;
-    //给时间数组赋值---------------------------------------
-
-    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- width %{public}d height %{public}d depth %{public}d",decoderCpp -> width,decoderCpp -> height,decoderCpp -> depth);
-    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "----- alphaPresent %{public}d frameCount %{public}d repetitionCount %{public}d",decoder->decoder->alphaPresent,decoderCpp ->frameCount,decoderCpp ->repetitionCount);
-    //TODO DURATION[]
-
+    
      AvifDecoderCpp *decoderCpp = malloc(sizeof(AvifDecoderCpp));
      decoderCpp->address = (int64_t)decoder;
      decoderCpp->info = info;
@@ -1246,7 +1236,6 @@ int32_t nextFrameIndex(int64_t decoder){
 
 
 int32_t nextFrame(int64_t decoder,uint8_t *pixels,uint32_t picwidth,uint32_t picheight,uint32_t stride,uint32_t formatvalue){
-    //OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_DOMAIN, "avif", "-----  aaaaaaa ");
     AvifDecoderWrapper* const decoderWrapper = (AvifDecoderWrapper*)decoder;
     return DecodeNextImage(decoderWrapper,pixels,picwidth,picheight,stride,formatvalue);
 }
@@ -1273,17 +1262,6 @@ bool decode(uint8_t *address,int length,uint8_t *pixels,uint32_t picwidth,uint32
       decoder.decoder = NULL;
       return result;
 }
-
-//FUNC(jboolean, decode, jobject encoded, int length, jobject bitmap,jint threads) {
-//  IGNORE_UNUSED_JNI_PARAMETERS;
-//  const uint8_t* const buffer =static_cast<const uint8_t*>(env->GetDirectBufferAddress(encoded));
-//  AvifDecoderWrapper decoder;
-//  if (!CreateDecoderAndParse(&decoder, buffer, length,
-//                             getThreadCount(threads))) {
-//    return false;
-//  }
-//  return DecodeNextImage(env, &decoder, bitmap) == AVIF_RESULT_OK;
-//}
 
 
 
