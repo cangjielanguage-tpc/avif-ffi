@@ -1,0 +1,18 @@
+[constants]
+ohos_llvm_bin = 'D:/DevecoStudio51/DevEcoStudio/sdk/default/openharmony/native/llvm/bin'
+
+[binaries]
+c = ohos_llvm_bin / 'clang'
+cpp = ohos_llvm_bin / 'clang++'
+ar = ohos_llvm_bin / 'llvm-ar'
+strip = ohos_llvm_bin / 'llvm-strip'
+
+[properties]
+c_args = '-target aarch64-linux-ohos'
+c_link_args = '-target aarch64-linux-ohos'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'
