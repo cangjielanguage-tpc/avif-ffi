@@ -4,11 +4,6 @@
 package avif4cj
 
 
-@FastNative
-foreign func versionString(): CString
-
-@FastNative
-foreign func resultToString(result: Int32): CString
 
 @FastNative
 foreign func isAvifImage(result: CPointer<UInt8>, length: Int32): Int32
@@ -169,32 +164,54 @@ public class AvifDecoder {
         unsafe {
             let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
             let res: Int32 = isAvifImage(handle.pointer, Int32(encoded.size))
+            releaseArrayRawData<UInt8>(handle)
             return res
         }
     }
 
-    public func getInfoffi(encoded: Array<UInt8>): Cjinfo {
+     public func getInfoffi(encoded: Array<UInt8>): Cjinfo {
         unsafe {
-            let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
-            var result: CPointer<Info> = getInfo(handle.pointer, Int32(encoded.size))
-            var res: Info = result.read()
-            let cjinfo:Cjinfo = Cjinfo(0,0,0,false,0,0,Array<Float64>())
-            cjinfo.width = res.width
-            cjinfo.height = res.height
-            cjinfo.depth = res.depth
-            cjinfo.alphaPresent = res.alphaPresent
-            cjinfo.frameCount = res.frameCount
-            cjinfo.repetitionCount = res.repetitionCount
-            let durationsPoint: CPointer<Float64> = res.frameDurations
-            var array:Array<Float64> = Array<Float64>(Int64(res.frameCount),repeat: 0.0)
-            for(i in 0..Int64(res.frameCount)){
-                let duration:Float64 = durationsPoint.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-                array[i] = duration
-            }
-            cjinfo.frameDurations = array
-            encoded3Free(durationsPoint)
-            encodedFree(result)
-            return cjinfo
+                let cjinfo:Cjinfo = Cjinfo(0,0,0,false,0,0,Array<Float64>())
+                if(encoded.size <= 0){
+                    return cjinfo
+                }
+                let handle: CPointerHandle<UInt8> = acquireArrayRawData(encoded)
+                var result: CPointer<Info> = getInfo(handle.pointer, Int32(encoded.size))
+                // 判空
+                if (result.isNull()) {
+                    releaseArrayRawData<UInt8>(handle)
+                    return cjinfo
+                }
+                var durationsPoint: ?CPointer<Float64> = None
+                try{
+                    var res: Info = result.read()
+                    cjinfo.width = res.width
+                    cjinfo.height = res.height
+                    cjinfo.depth = res.depth
+                    cjinfo.alphaPresent = res.alphaPresent
+                    cjinfo.frameCount = res.frameCount
+                    cjinfo.repetitionCount = res.repetitionCount
+                    durationsPoint = res.frameDurations
+                    var array:Array<Float64> = Array<Float64>(Int64(res.frameCount),repeat: 0.0)
+                    if(let Some(point) <- durationsPoint){
+                        for(i in 0..Int64(res.frameCount)){
+                            let duration:Float64 = point.read(Int64(i))  //对象直接read() 数组read(0) read(1) read(2) read(3) ...
+                            array[i] = duration
+                        }
+                    }
+                    cjinfo.frameDurations = array
+                    return cjinfo
+                }finally{
+                    releaseArrayRawData<UInt8>(handle)
+                    if(let Some(i) <- durationsPoint){
+                        if(!i.isNull()){
+                            encoded3Free(i)
+                        }
+                    }
+                    if(!result.isNull()){
+                        encodedFree(result)
+                    }
+                }
         }
     }
 
@@ -255,19 +272,5 @@ public class AvifDecoder {
             destroyDecoderffi(decoder)
         }
         decoder = 0
-    }
-
-    func versionStringffi(): String {
-        unsafe {
-            let cstr: CString = versionString()
-            return cstr.toString()
-        }
-    }
-
-    func resultToStringffi(result: Int32): String {
-        unsafe {
-            let cstr: CString = resultToString(result)
-            return cstr.toString()
-        }
     }
 }
