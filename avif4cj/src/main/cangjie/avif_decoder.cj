@@ -4,11 +4,8 @@
 package avif4cj
 
 
-@FastNative
-foreign func versionString(): CString
 
-@FastNative
-foreign func resultToString(result: Int32): CString
+
 
 @FastNative
 foreign func isAvifImage(result: CPointer<UInt8>, length: Int32): Int32
@@ -257,17 +254,4 @@ public class AvifDecoder {
         decoder = 0
     }
 
-    func versionStringffi(): String {
-        unsafe {
-            let cstr: CString = versionString()
-            return cstr.toString()
-        }
-    }
-
-    func resultToStringffi(result: Int32): String {
-        unsafe {
-            let cstr: CString = resultToString(result)
-            return cstr.toString()
-        }
-    }
 }
