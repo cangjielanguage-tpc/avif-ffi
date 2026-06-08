@@ -33,9 +33,6 @@ internal import std.sync.ReentrantMutex
 internal import std.convert.Parsable
 internal import ohos.device_info.DeviceInfo
 internal import ohos.base.LengthProp
-internal import stdx.net.http.ClientBuilder
-internal import stdx.net.tls.CertificateVerifyMode
-internal import stdx.net.tls.TlsClientConfig
 internal import stdx.crypto.digest.MD5
 internal import stdx.encoding.hex.toHexString
 internal import ohos.component.CustomView
