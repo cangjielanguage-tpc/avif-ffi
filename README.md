@@ -390,6 +390,62 @@ struct page5Test {
   |----|---------------|----------|
   | 1  | stdx          | v1.1.3.1 |
 
+
+1、三方库静态链接和动态链接区别
+
+- 静态链接：在编译期间，将所有依赖stdx的库函数和代码会被链接到最终的可执行文件中；生成的so中包含了所有需要的代码，不需要再依赖外部的stdx库。
+
+  **缺点**： 由于静态链接将所有代码（包括库函数）都包含进最终的可执行文件，因此生成的可执行文件会比动态链接的文件要大。
+
+- 动态链接：编译的har包中，会将所有使用到的stdx的二进制so添加到har的libs文件夹内；动态链接程序依赖于共享库（例如 .dll、.so），这些库在程序启动时或者运行时被加载到内存中。
+
+  **缺点**：由于stdx版本之前存在不兼容，因此三方库和hap包依赖的stdx版本不一致情况下，存在运行crash情况。
+
+当前三方库默认通过静态链接方式，如果有动态链接需求可以通过修改库代码中的cjpm.toml文件链接到stdx动态链接库目录，
+
+```
+ [target.aarch64-linux-ohos]
+   compile-option = "-lace_napi.z -B \"${DEVECO_CANGJIE_HOME}/build-tools/third_party/llvm/bin\" -B \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/aarch64-linux-ohos\" -L \"${DEVECO_CANGJIE_HOME}/build/linux_ohos_aarch64_llvm/openssl\" --sysroot \"${DEVECO_OH_NATIVE_HOME}/sysroot\""
+ [target.aarch64-linux-ohos.bin-dependencies]
+   path-option = ["${AARCH64_LIBS}", "${AARCH64_MACRO_LIBS}", "${AARCH64_KIT_LIBS}","../stdx_bin/linux_ohos_aarch64_cjnative/static/stdx"]
+   package-option = {}
+
+
+ [target.x86_64-linux-ohos]
+   compile-option = "-lace_napi.z -B \"${DEVECO_CANGJIE_HOME}/build-tools/third_party/llvm/bin\" -B \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/clang/15.0.4/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/x86_64-linux-ohos\" -L \"${DEVECO_CANGJIE_HOME}/build/linux_ohos_x86_64_llvm/openssl\" --sysroot \"${DEVECO_OH_NATIVE_HOME}/sysroot\""
+ [target.x86_64-linux-ohos.bin-dependencies]
+   path-option = ["${X86_64_OHOS_LIBS}", "${X86_64_OHOS_MACRO_LIBS}", "${X86_64_OHOS_KIT_LIBS}", "../stdx_bin/linux_ohos_x86_64_cjnative/static/stdx"]
+
+
+ [target.x86_64-unknown-windows-gnu.bin-dependencies]
+   path-option = ["${X86_64_LIBS}", "${X86_64_MACRO_LIBS}"]
+   package-option = {}
+
+```
+
+修改如下：
+
+```
+ [target.aarch64-linux-ohos]
+   compile-option = "-lace_napi.z -B \"${DEVECO_CANGJIE_HOME}/build-tools/third_party/llvm/bin\" -B \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/aarch64-linux-ohos\" -L \"${DEVECO_CANGJIE_HOME}/build/linux_ohos_aarch64_llvm/openssl\" --sysroot \"${DEVECO_OH_NATIVE_HOME}/sysroot\""
+ [target.aarch64-linux-ohos.bin-dependencies]
+   path-option = ["${AARCH64_LIBS}", "${AARCH64_MACRO_LIBS}", "${AARCH64_KIT_LIBS}","../stdx_bin/linux_ohos_aarch64_cjnative/dynamic/stdx"]
+   package-option = {}
+
+
+ [target.x86_64-linux-ohos]
+   compile-option = "-lace_napi.z -B \"${DEVECO_CANGJIE_HOME}/build-tools/third_party/llvm/bin\" -B \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/clang/15.0.4/lib/x86_64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/x86_64-linux-ohos\" -L \"${DEVECO_CANGJIE_HOME}/build/linux_ohos_x86_64_llvm/openssl\" --sysroot \"${DEVECO_OH_NATIVE_HOME}/sysroot\""
+ [target.x86_64-linux-ohos.bin-dependencies]
+   path-option = ["${X86_64_OHOS_LIBS}", "${X86_64_OHOS_MACRO_LIBS}", "${X86_64_OHOS_KIT_LIBS}", "../stdx_bin/linux_ohos_x86_64_cjnative/dynamic/stdx"]
+
+
+ [target.x86_64-unknown-windows-gnu.bin-dependencies]
+   path-option = ["${X86_64_LIBS}", "${X86_64_MACRO_LIBS}"]
+   package-option = {}
+
+```
+
+
 ## 开源协议
 
 本项目基于 [Apache-2.0 License](https://gitcode.com/Cangjie-TPC/avif-ffi/blob/avif-ffi_hybrid-cangjie-plugin-5.1.1_xc/LICENSE)，请自由的享受和参与开源。
