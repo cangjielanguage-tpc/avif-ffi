@@ -247,6 +247,22 @@ public class AvifDecoder {
         }
     }
 
+    public func nthFrameffi(index: Int32, pixels: CPointer<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
+        unsafe {
+            let format: Int32 = 2
+            let perPixelByte: Int32 = 4
+            return nthFrame(decoder, index, pixels, imageWidth, imageHeight, imageWidth * perPixelByte, format)
+        }
+    }
+
+    public func nextFrameffi(pixels: CPointer<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
+        unsafe {
+            let format: Int32 = 2
+            let perPixelByte: Int32 = 4
+            return nextFrame(decoder, pixels, imageWidth, imageHeight, imageWidth * perPixelByte, format)
+        }
+    }
+
     public func release(): Unit {
         if (decoder != 0) {
             destroyDecoderffi(decoder)
