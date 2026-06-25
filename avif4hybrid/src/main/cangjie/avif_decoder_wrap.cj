@@ -280,6 +280,7 @@ public class AvifDecoderWrap {
         return 0
     }
 
+    // 废弃
     public func nextFrameffi(imageWidth: Int32, imageHeight: Int32): ReturnValue {
         let value: ReturnValue = ReturnValue()
         if (imageWidth < 0 || imageHeight < 0) {
@@ -354,6 +355,7 @@ public class AvifDecoderWrap {
         }
     }
 
+    // 废弃了
     public func nthFrameffi(index: Int32, imageWidth: Int32, imageHeight: Int32): ReturnValue {
         let value: ReturnValue = ReturnValue()
         if (imageWidth < 0 || imageHeight < 0) {
@@ -436,5 +438,32 @@ public class AvifDecoderWrap {
         if (let Some(i) <- decoder) {
             return i.release()
         }
+    }
+
+    public func nthFrameffi(index: Int32, pixels: CPointer<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
+        if (imageWidth < 0 || imageHeight < 0) {
+            return -1
+        }
+        if (getFrameCount() <= 0) {
+            return -1
+        }
+        if (let Some(i) <- decoder) {
+            let ret = i.nthFrameffi(index, pixels, imageWidth, imageHeight)
+            if (ret == 0) {
+                let mDiskKey: String = getmd5key(this.uri.toArray())
+                spawn {
+                    if (let Some(j) <- encoded) {
+                        let fileExist = FileUtils
+                            .getInstance()
+                            .exist(fileLruCache.path + mDiskKey)
+                        if (!fileExist && this.uri.startsWith("http")) {
+                            fileLruCache.put(mDiskKey, j.size, j)
+                        }
+                    }
+                }
+            }
+            return ret
+        }
+        return -1
     }
 }
