@@ -32,7 +32,9 @@ internal import ohos.ark_interop_helper.StageContext
 internal import ohos.ark_interop_helper.arkTsValuetoNapiValue
 internal import ohos.ark_interop_helper.isStageMode
 internal import ohos.ark_interop_helper.getContextStageMode
-
+internal import stdx.net.http.ClientBuilder
+internal import stdx.net.tls.CertificateVerifyMode
+internal import stdx.net.tls.TlsClientConfig
 
 var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 40 * 1024 * 1024)
 var fileLruCache:FileLruCache = FileLruCache(1500, 256 * 1024 * 1024)
@@ -79,50 +81,101 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
     }
 }
 
-func getImageFromNet(urlStr: String):?Array<UInt8> {
-    let res:FetchResult = fetchDataFromUrl(urlStr)
-    let responseCode = res.responseCode
-    if(let Some(i) <- responseCode){
-        if(i == 200){
-            //表示成功
-           let resData:?Array<Byte> = res.result
-           if(let Some(j) <- resData){
-              return j
-           }else{
-              return None
-           }
+
+
+ func getImageFromNet(urlStr: String): ?Array<UInt8> {
+    try {
+        let fut: Future<?Array<UInt8>> = spawn {
+            var tlsConfig = TlsClientConfig()
+            tlsConfig.verifyMode = TrustAll
+            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
+            try{
+                let ret = client.get(urlStr)
+                if (let Some(v) <- ret.bodySize) {
+                    let buf = Array<UInt8>(v, repeat: 0)
+                    var readNumAll = 0
+                    while (readNumAll < v) {
+                        let readNum = ret.body.read(buf[readNumAll..v])
+                        if (readNum <= 0) {
+                            break
+                        }
+                        readNumAll += readNum
+                    }
+                    return buf
+                } else {
+                    return None
+                }
+            }catch (e:Exception){
+                return None
+            }finally {
+                client.close()
+            }
         }
-        return None
-    }else{
-        //如果没有responseCode
+        let result: ?Array<UInt8>  = fut.get()
+        return result
+    } catch (e: Exception) {
+        Hilog.error(0,"getImageFromNet","${e.toString()}")
         return None
     }
 }
 
-//(?Array<UInt8>,Bool) 第一个参数表述返回的图片字节数据，第二个参数false表示下载的图片是非avif图片
-func getImageFromNet2(urlStr: String):(?Array<UInt8>,?Bool) {
 
-    let res:FetchResult = fetchDataFromUrlRN(urlStr)
-    let responseCode = res.responseCode
-    if(let Some(i) <- responseCode){
-        if(i == 200){
-            //表示成功
-           let resData:?Array<Byte> = res.result
-           if(let Some(j) <- resData){
-              return (j,true)
-           }else{
-              return (None,None)
-           }
+
+ func getImageFromNet2(urlStr: String): (?Array<UInt8>,?Bool){
+    try {
+        let fut: Future<(?Array<UInt8>,?Bool)> = spawn {
+            let hasCheckAvif = HasCheckAvif()
+            var tlsConfig = TlsClientConfig()
+            tlsConfig.verifyMode = TrustAll
+            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
+            try{
+                let ret = client.get(urlStr)
+                if (let Some(v) <- ret.bodySize) {
+                    let buf = Array<UInt8>(v, repeat: 0)
+                    var readNumAll = 0
+                    while (readNumAll < v) {
+                        let readNum = ret.body.read(buf[readNumAll..v])
+                        if (readNum <= 0) {
+                            break
+                        }
+                        readNumAll += readNum
+                        if(!hasCheckAvif.hasCheck && readNumAll >= 12){
+                            hasCheckAvif.hasCheck = true
+                            let checkBuf = buf.slice(0,12)
+                            if(!isPicAvif(checkBuf)){
+                                //如果不是avif停止下载
+                                hasCheckAvif.isAvif = false
+                                break
+                            }
+                        }
+                    }
+                    if(let Some(i) <- hasCheckAvif.isAvif){
+                        //如果有值，必然false
+                        return (None,false)
+                    }else{
+                        hasCheckAvif.isAvif = true
+                        return (buf,true)
+                    }
+                } else {
+                    return (None,None)
+                }
+            }catch (e:Exception){
+                return (None,None)
+            }finally {
+                client.close()
+            }
         }
+        let result: (?Array<UInt8>,?Bool) = fut.get()
+        return result
+    } catch (e: Exception) {
+        Hilog.error(0,"getImageFromNet","${e.toString()}")
         return (None,None)
-    }else{
-        //如果没有responseCode
-        return (None,false)
     }
 }
+
 
 //102, 116, 121, 112, 97, 118, 105, 102
-func isPicAvif(fileData:ArrayList<UInt8>):Bool{
+func isPicAvif(fileData:Array<UInt8>):Bool{
     if(fileData.size >= 12){
         return fileData[4] == 102 && fileData[5] == 116 && fileData[6] == 121  && fileData[7] == 112 && fileData[8] == 97 && fileData[9] == 118 &&
         fileData[10] == 105  && (fileData[11] == 102 || fileData[11] == 115)
