@@ -26,6 +26,11 @@ unsafe func handleAvifSinglePicture(decoder: AvifDecoderWrap, uri: String): Avif
     var info = AvifDecodeInfo()
     info.width = decoder.getWidth()
     info.height = decoder.getHeight()
+    if (info.width == 0 || info.height == 0) {
+        info.isSuccess = false
+        info.errMsg = LibC.mallocCString("width and height is invalid.")
+        return info
+    }
     info.depth = decoder.getDepth()
     info.alphaPresent = decoder.getAlphaPresent()
     info.frameCount = 1
@@ -84,6 +89,11 @@ unsafe func handleAvifMultiPicture(decoder: AvifDecoderWrap, uri: String): AvifD
     var info = AvifDecodeInfo()
     info.width = decoder.getWidth()
     info.height = decoder.getHeight()
+    if (info.width == 0 || info.height == 0) {
+        info.isSuccess = false
+        info.errMsg = LibC.mallocCString("width and height is invalid.")
+        return info
+    }
     info.depth = decoder.getDepth()
     info.frameCount = decoder.getFrameCount()
     info.alphaPresent = decoder.getAlphaPresent()
@@ -167,58 +177,6 @@ unsafe func handleAvifSource(decoder: AvifDecoderWrap, uri: String): ?AvifDecode
     }
 }
 
-unsafe func dealWithMemoryCache(returnValue: ReturnValue): AvifDecodeInfo {
-    var info = AvifDecodeInfo()
-    info.width = returnValue.memoryWidth
-    info.height = returnValue.memoryHeight
-    // alphaPremultiplied 已改为 AVIF_FALSE，需要正确传递 alpha 状态给上层
-    //不加这行代码，RN在获取内存缓存时候会拿不到图片的isAlphaPresent信息
-    info.alphaPresent = returnValue.isAlphaPresent
-    info.frameCount = 1
-    if (let Some(i) <- returnValue.color) {
-        //表示有图片数据
-        if(i.size == 1){
-            //表示不是avif图
-            info.isNotAvif = true
-            info.isSuccess = false
-            return info
-        }
-        info.dataColors = unsafe { LibC.malloc<CPointer<UInt8>>(count: Int64(info.frameCount)) }
-        if (info.dataColors.isNull()) {
-            info.isSuccess = false
-            info.errMsg = LibC.mallocCString("malloc dataColors failed.")
-            return info
-        }
-        let pixelMapSize = Int64(info.width) * info.height * 4
-        var dst = LibC.malloc<UInt8>(count: pixelMapSize)
-        if (dst.isNull()) {
-            LibC.free(info.dataColors)
-            info.dataColors = CPointer<CPointer<UInt8>>()
-            info.isSuccess = false
-            info.errMsg = LibC.mallocCString("malloc dst failed.")
-            return info
-        }
-        let src = acquireArrayRawData(i)
-        let ret = memcpy_s(dst, UIntNative(pixelMapSize), src.pointer, UIntNative(pixelMapSize))
-        releaseArrayRawData<UInt8>(src)
-        if (ret != 0) {
-            info.isSuccess = false
-            LibC.free(dst)
-            dst = CPointer<UInt8>()
-            LibC.free(info.dataColors)
-            info.dataColors = CPointer<CPointer<UInt8>>()
-        } else {
-            info.dataColors.write(0, dst)
-            info.isSuccess = true
-            info.isSinglePic = true
-        }
-        return info
-    } else {
-        info.isSuccess = false
-        info.errMsg = LibC.mallocCString("Avif decoder failed to get colors.")
-        return info
-    }
-}
 
 @C
 public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
@@ -228,15 +186,22 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         // 对avif 图片没用，只缓存了非avif 图片
         let returnValue: ReturnValue = CacheCheck().getMemoryCache(uri.toString(), 0, 0)
         if (returnValue.isSuccess) {
-            let info = dealWithMemoryCache(returnValue)
-            //如果内存缓存取到了
-            let ret = LibC.malloc<AvifDecodeInfo>()
-            if (ret.isNull()) {
-                free(info)
-                return CPointer<AvifDecodeInfo>()
+            if (let Some(i) <- returnValue.color) {
+                //表示有图片数据
+                if(i.size == 1){
+                    var info = AvifDecodeInfo()
+                    //表示不是avif图
+                    info.isNotAvif = true
+                    info.isSuccess = false
+                    let ret = LibC.malloc<AvifDecodeInfo>()
+                    if (ret.isNull()) {
+                        free(info)
+                        return CPointer<AvifDecodeInfo>()
+                    }
+                    ret.write(info)
+                    return ret
+                }
             }
-            ret.write(info)
-            return ret
         }
         //本地缓存里面实现了
         decoder = AvifDecoderWrap().createCompatibleOtherPic(uri.toString())
