@@ -158,23 +158,23 @@ public class AvifImage {
                 }
             return
         } else {
-            if (this.uri.startsWith("http")) {
+            if (this.uri.toAsciiLower().startsWith("http")) {
                 //把数据下载下来
                 spawn {
                     let imageBuffer = getImageFromNet(this.uri)
                     dealWithBuffer(imageBuffer)
                 }
                 return
-            } else if(this.uri.startsWith("rawfile://")){
-                let fileName = this.uri.removePrefix("rawfile://")
+            } else if(this.uri.toAsciiLower().startsWith("rawfile://")){
+                let fileName = String(this.uri.toRuneArray().slice(10,this.uri.size-10))
                 let imageBuffer = getImageFromRawFile(fileName)
                 dealWithBuffer(imageBuffer)
-            } else if(this.uri.startsWith("media://")){
-                let mediaName = this.uri.removePrefix("media://")
+            } else if(this.uri.toAsciiLower().startsWith("media://")){
+                let mediaName = String(this.uri.toRuneArray().slice(8,this.uri.size-8))
                 let imageBuffer = getImageFromMedia(mediaName)
                 dealWithBuffer(imageBuffer)
-            } else if(this.uri.startsWith("file://")){
-                let localFilePath = this.uri.removePrefix("file://")
+            } else if(this.uri.toAsciiLower().startsWith("file://")){
+                let localFilePath = String(this.uri.toRuneArray().slice(7,this.uri.size-7))
                 let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
                 dealWithBuffer(imageBuffer)
             }else{
@@ -240,7 +240,7 @@ public class AvifImage {
                             }
                             //保存一份到本地存储 单图需要本地缓存
                             let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-                            if(!fileExist && this.uri.startsWith("http")){
+                            if(!fileExist && this.uri.toAsciiLower().startsWith("http")){
                                  fileLruCache.put(key,i.size,i)
                             }
                             //这里生成了就要保存到内存中 单图需要内存缓存
@@ -254,7 +254,7 @@ public class AvifImage {
                          isSinglePic = false
                          //仅限网络情况坐下缓存,避免下载
                          let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-                         if(!fileExist && this.uri.startsWith("http")){
+                         if(!fileExist && this.uri.toAsciiLower().startsWith("http")){
                             //网络图片这种情况把文件缓存下来
                             spawn{
                                 //多图需要本地缓存
