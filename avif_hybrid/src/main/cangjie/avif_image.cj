@@ -224,7 +224,7 @@ public class AvifImage {
                 let imageWidth = imageTempWidth
                 let imageHeight = imageTempHeight
                 if (frameCount <= 0) {
-                    throw Exception("frameCount can not be <= 0")
+                    Hilog.error(0, "aviflog","frameCount can not be <= 0")
                 } else {
                     if (frameCount == 1) {
                         //单帧图
@@ -262,10 +262,12 @@ public class AvifImage {
                             }
                          }
                         if (j.getFrameDurations().isNone()) {
-                            throw Exception("FrameDurations can not be None")
+                            Hilog.error(0, "aviflog","FrameDurations can not be None")
+                            return
                         }
                         if (j.getFrameDurations().getOrThrow().size != frameCount) {
-                            throw Exception("FrameDurations should be equal to frameCount")
+                            Hilog.error(0, "aviflog","FrameDurations should be equal to frameCount")
+                            return
                         }
                         let repeatCount:Int64 = j.getRepetitionCount()
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
@@ -315,7 +317,7 @@ public class AvifImage {
                     "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
             }
         } else {
-            throw Exception("imageBuffer can not be none")
+            Hilog.error(0, "aviflog", "imageBuffer can not be none")
         }
     }
 
