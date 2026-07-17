@@ -35,6 +35,8 @@ internal import ohos.ark_interop_helper.getContextStageMode
 internal import stdx.net.http.ClientBuilder
 internal import stdx.net.tls.CertificateVerifyMode
 internal import stdx.net.tls.TlsClientConfig
+import stdx.encoding.url.URL
+import stdx.net.http.HttpRequestBuilder
 
 var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 40 * 1024 * 1024)
 var fileLruCache:FileLruCache = FileLruCache(1500, 256 * 1024 * 1024)
@@ -90,7 +92,11 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
             tlsConfig.verifyMode = TrustAll
             let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
             try{
-                let ret = client.get(urlStr)
+                let ret = client.send(HttpRequestBuilder().get().url(fixUrlForStdx(urlStr)).build())
+                if (ret.status < 200 || ret.status >= 400) {
+                    Hilog.error(0,"getImageFromNet","getImageFromNet failed, url is ：${urlStr}, error is : ${ret}")
+                    return None
+                }
                 if (let Some(v) <- ret.bodySize) {
                     let buf = Array<UInt8>(v, repeat: 0)
                     var readNumAll = 0
@@ -103,6 +109,7 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                     }
                     return buf
                 } else {
+                    Hilog.info(0,"getImageFromNet","bodySize is empty, url is ：${urlStr}, code is: ${ret.status}")
                     return None
                 }
             }catch (e:Exception){
@@ -129,7 +136,11 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
             tlsConfig.verifyMode = TrustAll
             let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
             try{
-                let ret = client.get(urlStr)
+                let ret = client.send(HttpRequestBuilder().get().url(fixUrlForStdx(urlStr)).build())
+                if (ret.status < 200 || ret.status >= 400) {
+                    Hilog.error(0,"getImageFromNet2","getImageFromNet2 failed, url is ：${urlStr}, error is: ${ret}")
+                    return (None,None)
+                }
                 if (let Some(v) <- ret.bodySize) {
                     let buf = Array<UInt8>(v, repeat: 0)
                     var readNumAll = 0
@@ -151,15 +162,18 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                     }
                     if(let Some(i) <- hasCheckAvif.isAvif){
                         //如果有值，必然false
+                        Hilog.info(0,"getImageFromNet2","Non Avif images, url is ：${urlStr}，code is: ${ret.status}")
                         return (None,false)
                     }else{
                         hasCheckAvif.isAvif = true
                         return (buf,true)
                     }
                 } else {
+                    Hilog.info(0,"getImageFromNet2","bodySize is empty, url is ：${urlStr}, code is: ${ret.status}")
                     return (None,None)
                 }
             }catch (e:Exception){
+                Hilog.error(0,"getImageFromNet2","getImageFromNet2 failed, error is ：${e.toString()}, message is: ${e.message}")
                 return (None,None)
             }finally {
                 client.close()
@@ -168,11 +182,16 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
         let result: (?Array<UInt8>,?Bool) = fut.get()
         return result
     } catch (e: Exception) {
-        Hilog.error(0,"getImageFromNet","${e.toString()}")
+        Hilog.error(0,"getImageFromNet2","getImageFromNet2 error is ${e.toString()}")
         return (None,None)
     }
 }
 
+func fixUrlForStdx(rawUrl: String): URL {
+    let url = URL.parse(rawUrl)
+    let url1 = url.replace(path:url.path, query:url.query)
+    return url.replace(path:url1.rawPath, query:url1.rawQuery)
+}
 
 //102, 116, 121, 112, 97, 118, 105, 102
 func isPicAvif(fileData:Array<UInt8>):Bool{
