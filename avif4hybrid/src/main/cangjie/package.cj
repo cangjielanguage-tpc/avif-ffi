@@ -113,6 +113,7 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                     return None
                 }
             }catch (e:Exception){
+                Hilog.error(0,"getImageFromNet","getImageFromNet failed, error is ：${e.toString()}")
                 return None
             }finally {
                 client.close()
