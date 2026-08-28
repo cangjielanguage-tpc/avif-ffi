@@ -49,8 +49,9 @@ struct page6Test {
     }
 
     const decoderTs = new AvifDecoderTS()
-    const decodeRes = await decoderTs.create(url)
-    if (!decodeRes) {
+    const createResult = await decoderTs.create(url)
+    if (!createResult.issuccess) {
+      hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
       decoderTs.release()
       return undefined
     }
@@ -67,8 +68,11 @@ struct page6Test {
     if (cjreturnValue == undefined
       || cjreturnValue == null
       || !cjreturnValue.issuccess) {
-      decoderTs.release();
-      return undefined;
+      if (cjreturnValue != undefined && cjreturnValue != null) {
+        hilog.error(0, "aviflog", `解码当前帧失败，code=${cjreturnValue.code}，message=${cjreturnValue.codeMessage}`)
+      }
+      decoderTs.release()
+      return undefined
     }
     let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =

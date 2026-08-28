@@ -55,78 +55,101 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         return thisObject.toJSValue()
     }
 
-    public func createAsync(uri: String): Bool {
+    public func createAsync(uri: String): ReturnValue {
         return createWithThreadAsync(uri, 1)
     }
 
-    public func createWithThreadAsync(uri: String, threads: Int32): Bool {
-        this.mUri = uri
-        if (uri.startsWith("http")) {
-            let mDiskKey: String = getmd5key(this
-                .mUri
-                .toArray())
-            let fileExist = FileUtils
-                .getInstance()
-                .exist(fileLruCache.path + mDiskKey)
-            if (fileExist) {
-                let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
-                if (let Some(i) <- source) {
-                    createLoginc(i, threads)
-                    return true
+    public func createWithThreadAsync(uri: String, threads: Int32): ReturnValue {
+        try {
+            this.mUri = uri
+            if (uri.toAsciiLower().startsWith("http")) {
+                let mDiskKey: String = getmd5key(this
+                    .mUri
+                    .toArray())
+                let fileExist = FileUtils
+                    .getInstance()
+                    .exist(fileLruCache.path + mDiskKey)
+                if (fileExist) {
+                    let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
+                    if (let Some(i) <- source) {
+                        let created = createLoginc(i, threads)
+                        if (let Some(_) <- created) {
+                            return ReturnValue(0, "success", true)
+                        }
+                    }
+                }
+                let (imageBuffer, networkCode, networkMessage) = getImageFromNet(uri)
+                if (let Some(i) <- imageBuffer) {
+                    let created = createLoginc(i, threads)
+                    if (let Some(_) <- created) {
+                        return ReturnValue(0, "success", true)
+                    }
+                    return ReturnValue(1011, "创建解码器失败", false)
+                } else {
+                    Hilog.error(0, "getImageFromNet", networkMessage)
+                    return ReturnValue(networkCode, networkMessage, false)
+                }
+            } else if (uri.startsWith("rawfile://")) {
+                let fileName = uri.removePrefix("rawfile://")
+                let imageBuffer = getImageFromRawFile(fileName)
+                if (let Some(i) <- imageBuffer) {
+                    let created = createLoginc(i, threads)
+                    if (let Some(_) <- created) {
+                        return ReturnValue(0, "success", true)
+                    }
+                    return ReturnValue(1011, "创建解码器失败", false)
+                } else {
+                    Hilog.error(0, "getImageFromRawFile", "获取raw文件内容失败")
+                    return ReturnValue(1007, "获取raw文件内容失败", false)
+                }
+            } else if (uri.startsWith("media://")) {
+                let mediaName = uri.removePrefix("media://")
+                let imageBuffer = getImageFromMedia(mediaName)
+                if (let Some(i) <- imageBuffer) {
+                    let created = createLoginc(i, threads)
+                    if (let Some(_) <- created) {
+                        return ReturnValue(0, "success", true)
+                    }
+                    return ReturnValue(1011, "创建解码器失败", false)
+                } else {
+                    Hilog.error(0, "getImageFromMedia", "获取media文件内容失败")
+                    return ReturnValue(1008, "获取media文件内容失败", false)
+                }
+            } else if (uri.startsWith("file://")) {
+                let localFilePath = uri.removePrefix("file://")
+                let imageBuffer: ?Array<UInt8> = FileUtils
+                    .getInstance()
+                    .readFileSync(localFilePath)
+                if (let Some(i) <- imageBuffer) {
+                    let created = createLoginc(i, threads)
+                    if (let Some(_) <- created) {
+                        return ReturnValue(0, "success", true)
+                    }
+                    return ReturnValue(1011, "创建解码器失败", false)
+                } else {
+                    Hilog.error(0, "readFileSync", "读取本地文件失败")
+                    return ReturnValue(1009, "读取本地文件失败", false)
+                }
+            } else {
+                let localFilePath = uri
+                let imageBuffer: ?Array<UInt8> = FileUtils
+                    .getInstance()
+                    .readFileSync(localFilePath)
+                if (let Some(i) <- imageBuffer) {
+                    let created = createLoginc(i, threads)
+                    if (let Some(_) <- created) {
+                        return ReturnValue(0, "success", true)
+                    }
+                    return ReturnValue(1011, "创建解码器失败", false)
+                } else {
+                    Hilog.error(0, "readFileSync", "读取内容失败")
+                    return ReturnValue(1010, "读取内容失败", false)
                 }
             }
-            let imageBuffer = getImageFromNet(uri)
-            if (let Some(i) <- imageBuffer) {
-                createLoginc(i, threads)
-                return true
-            } else {
-                Hilog.error(0, "getImageFromNet", "获取网络文件内容失败")
-                return false
-            }
-        } else if (uri.startsWith("rawfile://")) {
-            let fileName = uri.removePrefix("rawfile://")
-            let imageBuffer = getImageFromRawFile(fileName)
-            if (let Some(i) <- imageBuffer) {
-                createLoginc(i, threads)
-                return true
-            } else {
-                Hilog.error(0, "getImageFromRawFile", "获取raw文件内容失败")
-                return false
-            }
-        } else if (uri.startsWith("media://")) {
-            let mediaName = uri.removePrefix("media://")
-            let imageBuffer = getImageFromMedia(mediaName)
-            if (let Some(i) <- imageBuffer) {
-                createLoginc(i, threads)
-                return true
-            } else {
-                Hilog.error(0, "getImageFromMedia", "获取media文件内容失败")
-                return false
-            }
-        } else if (uri.startsWith("file://")) {
-            let localFilePath = uri.removePrefix("file://")
-            let imageBuffer: ?Array<UInt8> = FileUtils
-                .getInstance()
-                .readFileSync(localFilePath)
-            if (let Some(i) <- imageBuffer) {
-                createLoginc(i, threads)
-                return true
-            } else {
-                Hilog.error(0, "readFileSync", "读取本地文件失败")
-                return false
-            }
-        } else {
-            let localFilePath = uri
-            let imageBuffer: ?Array<UInt8> = FileUtils
-                .getInstance()
-                .readFileSync(localFilePath)
-            if (let Some(i) <- imageBuffer) {
-                createLoginc(i, threads)
-                return true
-            } else {
-                Hilog.error(0, "readFileSync", "读取内容失败")
-                return false
-            }
+        } catch (e: Exception) {
+            return ReturnValue(9000, e.toString(), false)
+        } catch (e: Error) {
+            return ReturnValue(9000, e.toString(), false)
         }
     }
 
@@ -200,15 +223,22 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
     }
 
     public func nextFrameffiAsync(imageWidth: Int32, imageHeight: Int32): ReturnValue {
-        let value: ReturnValue = ReturnValue()
+        try {
+            return nextFrameffiAsyncInternal(imageWidth, imageHeight)
+        } catch (e: Exception) {
+            return ReturnValue(9000, e.toString(), false)
+        } catch (e: Error) {
+            return ReturnValue(9000, e.toString(), false)
+        }
+    }
+
+    private func nextFrameffiAsyncInternal(imageWidth: Int32, imageHeight: Int32): ReturnValue {
         if (imageWidth < 0 || imageHeight < 0) {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1001, "图片宽高参数非法", false)
         }
         let count: Int64 = getFrameCount()
         if (count <= 0) {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1003, "图片帧数非法或无法获取", false)
         }
         mDiskKey = getmd5key(this
             .mUri
@@ -226,12 +256,13 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (imageHeight == 0) {
             realPicHeight = Int32(getHeight())
         }
-        let color: Array<Byte> = Array<Byte>(Int64(realPicWidth * realPicHeight * 4), repeat: 0)
+        let colorSize: Int64 = Int64(realPicWidth) * Int64(realPicHeight) * 4
+        let color: Array<Byte> = Array<Byte>(colorSize, repeat: 0)
         if (let Some(i) <- decoder) {
-            value.code = i.nextFrameffi(color, realPicWidth, realPicHeight)
+            let code = i.nextFrameffi(color, realPicWidth, realPicHeight)
             let cacheWidth = realPicWidth
             let cacheHeight = realPicHeight
-            if (value.code == 0) {
+            if (code == 0) {
                 spawn {
                     if (count == 1) {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
@@ -247,33 +278,41 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let fileExist = FileUtils
                             .getInstance()
                             .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.startsWith("http")) {
+                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
                             fileLruCache.put(mDiskKey, j.size, j)
                         }
                     }
                 }
-                value.isSuccess = true
-                value.color = color
+                return ReturnValue(code, "success", true, color,
+                    Int64(cacheWidth), Int64(cacheHeight), getAlphaPresent())
             } else {
-                value.isSuccess = false
+                return ReturnValue(code, "当前帧解码失败", false)
             }
-            return value
         } else {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1002, "解码器未初始化", false)
         }
     }
 
     public func nthFrameffiAsync(index: Int32, imageWidth: Int32, imageHeight: Int32): ReturnValue {
-        let value: ReturnValue = ReturnValue()
+        try {
+            return nthFrameffiAsyncInternal(index, imageWidth, imageHeight)
+        } catch (e: Exception) {
+            return ReturnValue(9000, e.toString(), false)
+        } catch (e: Error) {
+            return ReturnValue(9000, e.toString(), false)
+        }
+    }
+
+    private func nthFrameffiAsyncInternal(index: Int32, imageWidth: Int32, imageHeight: Int32): ReturnValue {
         if (imageWidth < 0 || imageHeight < 0) {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1001, "图片宽高参数非法", false)
+        }
+        if (index < 0 || Int64(index) >= getFrameCount()) {
+            return ReturnValue(1012, "帧索引非法", false)
         }
         let count: Int64 = getFrameCount()
         if (count <= 0) {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1003, "图片帧数非法或无法获取", false)
         }
         mDiskKey = getmd5key(this
             .mUri
@@ -291,16 +330,17 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (imageHeight == 0) {
             realPicHeight = Int32(getHeight())
         }
-        let color: Array<Byte> = Array<Byte>(Int64(realPicWidth * realPicHeight * 4), repeat: 0)
+        let colorSize: Int64 = Int64(realPicWidth) * Int64(realPicHeight) * 4
+        let color: Array<Byte> = Array<Byte>(colorSize, repeat: 0)
         if (let Some(i) <- decoder) {
-            if (count == 1) {
-                value.code = i.nthFrameffi(0, color, realPicWidth, realPicHeight)
+            let code: Int32 = if (count == 1) {
+                i.nthFrameffi(0, color, realPicWidth, realPicHeight)
             } else {
-                value.code = i.nthFrameffi(index, color, realPicWidth, realPicHeight)
+                i.nthFrameffi(index, color, realPicWidth, realPicHeight)
             }
             let cacheWidth = realPicWidth
             let cacheHeight = realPicHeight
-            if (value.code == 0) {
+            if (code == 0) {
                 spawn {
                     if (count == 1) {
                         let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
@@ -316,20 +356,18 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let fileExist = FileUtils
                             .getInstance()
                             .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.startsWith("http")) {
+                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
                             fileLruCache.put(mDiskKey, j.size, j)
                         }
                     }
                 }
-                value.isSuccess = true
-                value.color = color
+                return ReturnValue(code, "success", true, color,
+                    Int64(cacheWidth), Int64(cacheHeight), getAlphaPresent())
             } else {
-                value.isSuccess = false
+                return ReturnValue(code, "指定帧解码失败", false)
             }
-            return value
         } else {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1002, "解码器未初始化", false)
         }
     }
 
@@ -354,7 +392,17 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
             let RET = clazz.createAsync(arg1774848261264216600)
             context.postJSTask {
                 newScope(context) {
-                    promise.resolve(RET.toJSValue(context))
+                    let obj = context.object()
+                    obj.setProperty("code", RET
+                        .code
+                        .toJSValue(context))
+                    obj.setProperty("codeMessage", RET
+                        .codeMessage
+                        .toJSValue(context))
+                    obj.setProperty("issuccess", RET
+                        .isSuccess
+                        .toJSValue(context))
+                    promise.resolve(obj.toJSValue())
                 }
             }
         }
@@ -378,7 +426,17 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
             let RET = clazz.createWithThreadAsync(arg1774848261265021900, arg1774848261265048800)
             context.postJSTask {
                 newScope(context) {
-                    promise.resolve(RET.toJSValue(context))
+                    let obj = context.object()
+                    obj.setProperty("code", RET
+                        .code
+                        .toJSValue(context))
+                    obj.setProperty("codeMessage", RET
+                        .codeMessage
+                        .toJSValue(context))
+                    obj.setProperty("issuccess", RET
+                        .isSuccess
+                        .toJSValue(context))
+                    promise.resolve(obj.toJSValue())
                 }
             }
         }
@@ -514,6 +572,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                     obj.setProperty("code", RET
                         .code
                         .toJSValue(context))
+                    obj.setProperty("codeMessage", RET
+                        .codeMessage
+                        .toJSValue(context))
                     obj.setProperty("color", RET
                         .color
                         .toJSValue(context))
@@ -556,6 +617,9 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                     let obj = context.object()
                     obj.setProperty("code", RET
                         .code
+                        .toJSValue(context))
+                    obj.setProperty("codeMessage", RET
+                        .codeMessage
                         .toJSValue(context))
                     obj.setProperty("color", RET
                         .color

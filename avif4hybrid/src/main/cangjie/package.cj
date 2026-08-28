@@ -85,17 +85,20 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
 
 
 
- func getImageFromNet(urlStr: String): ?Array<UInt8> {
+
+
+func getImageFromNet(urlStr: String): (?Array<UInt8>, Int32, String) {
     try {
-        let fut: Future<?Array<UInt8>> = spawn {
+        let fut: Future<(?Array<UInt8>, Int32, String)> = spawn {
             var tlsConfig = TlsClientConfig()
             tlsConfig.verifyMode = TrustAll
             let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
-            try{
+            try {
                 let ret = client.send(HttpRequestBuilder().get().url(fixUrlForStdx(urlStr)).build())
                 if (ret.status < 200 || ret.status >= 400) {
-                    Hilog.error(0,"getImageFromNet","getImageFromNet failed, url is ：${urlStr}, error is : ${ret}")
-                    return None
+                    let message = "网络响应状态异常，status=${ret.status}"
+                    Hilog.error(0, "getImageFromNet", "${message}, url is: ${urlStr}")
+                    return (None, 1014, message)
                 }
                 if (let Some(v) <- ret.bodySize) {
                     let buf = Array<UInt8>(v, repeat: 0)
@@ -107,23 +110,30 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                         }
                         readNumAll += readNum
                     }
-                    return buf
+                    if (readNumAll < v) {
+                        let message = "网络响应数据不完整，已读取${readNumAll}/${v}"
+                        Hilog.error(0, "getImageFromNet", "${message}, url is: ${urlStr}")
+                        return (None, 1015, message)
+                    }
+                    return (buf, 0, "success")
                 } else {
-                    Hilog.info(0,"getImageFromNet","bodySize is empty, url is ：${urlStr}, code is: ${ret.status}")
-                    return None
+                    let message = "网络响应内容为空，status=${ret.status}"
+                    Hilog.info(0, "getImageFromNet", "${message}, url is: ${urlStr}")
+                    return (None, 1006, message)
                 }
-            }catch (e:Exception){
-                Hilog.error(0,"getImageFromNet","getImageFromNet failed, error is ：${e.toString()}")
-                return None
-            }finally {
+            } catch (e: Exception) {
+                let message = "网络请求异常：${e.toString()}，message=${e.message}"
+                Hilog.error(0, "getImageFromNet", message)
+                return (None, 1006, message)
+            } finally {
                 client.close()
             }
         }
-        let result: ?Array<UInt8>  = fut.get()
-        return result
+        return fut.get()
     } catch (e: Exception) {
-        Hilog.error(0,"getImageFromNet","${e.toString()}")
-        return None
+        let message = "网络任务异常：${e.toString()}，message=${e.message}"
+        Hilog.error(0, "getImageFromNet", message)
+        return (None, 1006, message)
     }
 }
 
@@ -145,6 +155,7 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                 if (let Some(v) <- ret.bodySize) {
                     let buf = Array<UInt8>(v, repeat: 0)
                     var readNumAll = 0
+                    var stoppedByNonAvif = false
                     while (readNumAll < v) {
                         let readNum = ret.body.read(buf[readNumAll..v])
                         if (readNum <= 0) {
@@ -157,9 +168,21 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
                             if(!isPicAvif(checkBuf)){
                                 //如果不是avif停止下载
                                 hasCheckAvif.isAvif = false
+                                stoppedByNonAvif = true
                                 break
                             }
                         }
+                    }
+                    if (stoppedByNonAvif) {
+                        // 主动终止：确认非 AVIF，语义是「不是 avif 图」
+                        Hilog.info(0,"getImageFromNet2","Non Avif images, url is ：${urlStr}，code is: ${ret.status}")
+                        return (None,false)
+                    }
+                    // 宁可失败，不可残缺：EOF/网络中断导致读不满 bodySize 时，
+                    // 尾部是 0 填充的残缺 buf，禁止返回（会污染缓存且解码异常）
+                    if (readNumAll < v) {
+                        Hilog.error(0,"getImageFromNet2","incomplete body, read ${readNumAll}/${v}, url is ：${urlStr}")
+                        return (None,None)
                     }
                     if(let Some(i) <- hasCheckAvif.isAvif){
                         //如果有值，必然false

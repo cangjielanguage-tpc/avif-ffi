@@ -2,6 +2,7 @@ import { Context } from "@kit.AbilityKit"
 
 export declare class CJReturnValue {
     code: number
+    codeMessage: string
     color: ArrayBuffer | undefined
     issuccess: boolean
     memoryWidth: number
@@ -11,8 +12,8 @@ export declare class CJReturnValue {
 
 
 export declare class CJAvifDecoder {
-    createAsync(uri: string): boolean
-    createWithThreadAsync(uri: string, threads: number): boolean
+    createAsync(uri: string): Promise<CJReturnValue>
+    createWithThreadAsync(uri: string, threads: number): Promise<CJReturnValue>
     getWidth(): number
     getHeight(): number
     getDepth(): number
@@ -22,8 +23,8 @@ export declare class CJAvifDecoder {
     getFrameDurations(): Array<number> | undefined
     isAvifImageffi(): number
     nextFrameIndexffi(): number
-    nextFrameffiAsync(imageWidth: number, imageHeight: number): CJReturnValue
-    nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+    nextFrameffiAsync(imageWidth: number, imageHeight: number): Promise<CJReturnValue>
+    nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>
     release(): void
 }
 
