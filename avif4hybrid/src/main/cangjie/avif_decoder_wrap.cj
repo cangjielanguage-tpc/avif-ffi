@@ -38,7 +38,11 @@ public class AvifDecoderWrap {
                     if(i.size == 1){
                         return createLogincCompatibleOtherPic2()
                     }else{
-                        return createLogincCompatibleOtherPic(i, threads)
+                        let decoderWrap = createLogincCompatibleOtherPic(i, threads)
+                        if(let Some(res) <- decoderWrap){
+                            //如果正常avif文件解析成功就返回，否则去执行下载
+                            return res
+                        }
                     }
                 }
             }
@@ -98,18 +102,6 @@ public class AvifDecoderWrap {
         }
     }
 
-    func createLoginc(buffer: Array<UInt8>, threads: Int32): Option<AvifDecoderWrap> {
-        encoded = buffer
-        decoder = AvifDecoder(buffer, threads)
-        if (let Some(k) <- decoder) {
-            if (k.decoder == 0) {
-                return Option<AvifDecoderWrap>.None
-            }
-            return this
-        } else {
-            return Option<AvifDecoderWrap>.None
-        }
-    }
 
     func createLogincCompatibleOtherPic(buffer: Array<UInt8>, threads: Int32): Option<AvifDecoderWrap> {
         encoded = buffer
