@@ -29,25 +29,18 @@ public class CJCacheCheck <: SharedObject & JSInteropType<CJCacheCheck> {
     }
 
     public func getMemoryCache(uri: String, imagePicWidth: Int64, imagePicHeight: Int64): ReturnValue {
-        let value: ReturnValue = ReturnValue()
         let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight) + "notcomponent"
         let memCache: ?CacheBean = memoryLruCache.get(key)
         if (let Some(i) <- memCache) {
             let arrData: ?Array<UInt8> = i.getPicData()
             if (let Some(j) <- arrData) {
-                value.color = j
-                value.memoryWidth = i.getMemoryWidth()
-                value.memoryHeight = i.getMemoryHeight()
-                value.isAlphaPresent = i.getAlphaPresent()
-                value.isSuccess = true
-                return value
+                return ReturnValue(0, "success", true, j,
+                    i.getMemoryWidth(), i.getMemoryHeight(), i.getAlphaPresent())
             } else {
-                value.isSuccess = false
-                return value
+                return ReturnValue(1004, "缓存数据为空", false)
             }
         } else {
-            value.isSuccess = false
-            return value
+            return ReturnValue(1016, "无内存缓存", false)
         }
     }
 
@@ -66,6 +59,9 @@ public class CJCacheCheck <: SharedObject & JSInteropType<CJCacheCheck> {
         let obj = context.object()
         obj.setProperty("code", RET
             .code
+            .toJSValue(context))
+        obj.setProperty("codeMessage", RET
+            .codeMessage
             .toJSValue(context))
         obj.setProperty("color", RET
             .color

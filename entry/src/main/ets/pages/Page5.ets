@@ -28,8 +28,18 @@ struct page5Test {
       this.pixelMap = await image.createPixelMap(validReturnValue, opts)
     }else{
       let decoderTs = new AvifDecoderTS()
-      const decodeRes = await decoderTs.create(uri)
-      let cjreturnValue: CJReturnValue =await decoderTs.nextFrameffi(100,100)
+      const createResult = await decoderTs.create(uri)
+      if (!createResult.issuccess) {
+        hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+        decoderTs.release()
+        return
+      }
+      let cjreturnValue: CJReturnValue = await decoderTs.nextFrameffi(100,100)
+      if (!cjreturnValue.issuccess) {
+        hilog.error(0, "aviflog", `解码当前帧失败，code=${cjreturnValue.code}，message=${cjreturnValue.codeMessage}`)
+        decoderTs.release()
+        return
+      }
       let validReturnValue = cjreturnValue.color ?? new Uint8Array()
       if(cjreturnValue.color){
         let array = new Uint8Array(cjreturnValue.color)

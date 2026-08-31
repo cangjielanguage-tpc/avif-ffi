@@ -14,14 +14,16 @@ export class AvifDecoderTS{
     global_customLib.setGlobalContext(getContext(this))
   }
 
-  public async create(uri:string):Promise<boolean>{
-    this.decodeRes = await this.cjAvifDecoder.createAsync(uri)
-    return this.decodeRes
+  public async create(uri:string):Promise<CJReturnValue>{
+    const result = await this.cjAvifDecoder.createAsync(uri)
+    this.decodeRes = result.issuccess
+    return result
   }
 
-  public async createWithThread(uri:string, threads: number):Promise<boolean>{
-    this.decodeRes = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
-    return this.decodeRes
+  public async createWithThread(uri:string, threads: number):Promise<CJReturnValue>{
+    const result = await this.cjAvifDecoder.createWithThreadAsync(uri,threads)
+    this.decodeRes = result.issuccess
+    return result
   }
 
   public getWidth():number{

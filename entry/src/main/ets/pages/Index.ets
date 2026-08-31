@@ -142,7 +142,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.create("media://cat")
+              const createResult = await decoderTs.create("media://cat")
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test1",isavif.toString())
               decoderTs.release()
@@ -166,7 +171,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.createWithThread("media://a3",2)
+              const createResult = await decoderTs.createWithThread("media://a3",2)
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `带线程创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test2",isavif.toString())
               decoderTs.release()
@@ -190,7 +200,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.create("media://2")
+              const createResult = await decoderTs.create("media://2")
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test3",isavif.toString())
               decoderTs.release()
@@ -214,7 +229,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.create("rawfile://a2.avif")
+              const createResult = await decoderTs.create("rawfile://a2.avif")
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let isavif = decoderTs.isAvifImageffi()
               hilog.error(0,"test4",isavif.toString())
               decoderTs.release()
@@ -239,7 +259,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.create("media://a26")
+              const createResult = await decoderTs.create("media://a26")
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let width = decoderTs.getWidth()
               let height = decoderTs.getHeight()
               let depth = decoderTs.getDepth()
@@ -271,7 +296,12 @@ struct Index {
             .onClick(async e => {
               // 点击动作触发该方法调用
               let decoderTs = new AvifDecoderTS()
-              let des = await decoderTs.create("media://a2")
+              const createResult = await decoderTs.create("media://2")
+              if (!createResult.issuccess) {
+                hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+                decoderTs.release()
+                return
+              }
               let index1 = decoderTs.nextFrameIndexffi()
               hilog.error(0,"test14","index1="+index1)
               decoderTs.release()

@@ -5,6 +5,7 @@ import ohos.ark_interop_macro.Interop
 @Interop[ArkTS]
 public class CJReturnValue {
     public var code: Int32 = 0
+    public var codeMessage: String = ""
     public var color: Option<Array<Byte>> = None
     public var issuccess: Bool = false
     //内存缓存的时候要取到图片的宽高给SIZE转pixelMap

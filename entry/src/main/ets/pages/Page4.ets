@@ -1,7 +1,7 @@
 import { AvifDecoderTS } from '@cangjie-tpc/avifhybrid';
 import { image } from '@kit.ImageKit';
 import { CJReturnValue } from '@cangjie-tpc/avifhybrid/src/main/cangjie/types/libohos_app_cangjie_avif4hybrid/Index';
-
+import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct page4Test {
@@ -16,10 +16,20 @@ struct page4Test {
     //这是resources/rawfile下的文件   
     //decoderTs.create("rawfile://a23.avif")
     //这是网络图片
-    const decodeRes = await decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
+    const createResult = await decoderTs.create("https://pic8.iqiyipic.com/animated/20250806/3f/9e/5830642737316600_1754449128430_720_405.avif")
+    if (!createResult.issuccess) {
+      hilog.error(0, "aviflog", `创建解码器失败，code=${createResult.code}，message=${createResult.codeMessage}`)
+      decoderTs.release()
+      return
+    }
     this.mWidth = decoderTs.getWidth()
     this.mHeight = decoderTs.getHeight()
     let cjreturnValue: CJReturnValue = await decoderTs.nthFrameffi(2,this.mWidth, this.mHeight)
+    if (!cjreturnValue.issuccess) {
+      hilog.error(0, "aviflog", `解码指定帧失败，code=${cjreturnValue.code}，message=${cjreturnValue.codeMessage}`)
+      decoderTs.release()
+      return
+    }
     let validReturnValue = cjreturnValue.color ?? new Uint8Array()
     let opts: image.InitializationOptions =
       { editable: true, pixelFormat: 3, size: { height: this.mHeight, width: this.mWidth } }
