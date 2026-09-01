@@ -12,15 +12,26 @@ public class AvifDecoderWrap {
     var uri = ""
     var encoded: ?Array<Byte> = None
     var isNotAvif:Bool = false
+    var isSuccess:Bool = true
+    var codeMessage:String = ""
 
+    public init(isSuccess: Bool,codeMessage: String) {
+        this.codeMessage = codeMessage
+        this.isSuccess = isSuccess
+    }
 
+    public init(isSuccess: Bool, isNotAvif:Bool, codeMessage: String) {
+        this.codeMessage = codeMessage
+        this.isSuccess = isSuccess
+        this.isNotAvif = isNotAvif
+    }
 
-    public func createCompatibleOtherPic(uri: String): Option<AvifDecoderWrap> {
+    public func createCompatibleOtherPic(uri: String): AvifDecoderWrap{
         return createWithThreadCompatibleOtherPic(uri, 1)
     }
 
 
-    public func createWithThreadCompatibleOtherPic(uri: String, threads: Int32): Option<AvifDecoderWrap> {
+    public func createWithThreadCompatibleOtherPic(uri: String, threads: Int32): AvifDecoderWrap {
         this.uri = uri
         //在这里将uri转化为arryauint8,并生成key
         if (uri.toAsciiLower().startsWith("http")) {
@@ -39,25 +50,25 @@ public class AvifDecoderWrap {
                         return createLogincCompatibleOtherPic2()
                     }else{
                         let decoderWrap = createLogincCompatibleOtherPic(i, threads)
-                        if(let Some(res) <- decoderWrap){
+                        if(decoderWrap.isSuccess){
                             //如果正常avif文件解析成功就返回，否则去执行下载
-                            return res
+                            return decoderWrap
                         }
                     }
                 }
             }
-            let TupleData = getImageFromNet2(uri)
-             if(let Some(isAvif) <- TupleData[1]){
-                if(!isAvif){
+            let (imageBuffer, isAvif, errorCode, errorMessage)  = getImageFromNet(uri)
+             if(let Some(avif) <- isAvif){
+                if(!avif){
                     //表示不是avif图
                     return createLogincCompatibleOtherPic2()
                 }
              }
-            if (let Some(i) <- TupleData[0]) {
+            if (let Some(i) <- imageBuffer) {
                 return createLogincCompatibleOtherPic(i, threads)
             } else {
-                Hilog.error(0, "getImageFromNet", "获取网络文件内容失败")
-                return Option<AvifDecoderWrap>.None
+                Hilog.error(0, "getImageFromNet", errorMessage)
+                return AvifDecoderWrap(false, errorMessage)
             }
         } else if (uri.startsWith("rawfile://")) {
             let fileName = uri.removePrefix("rawfile://")
@@ -65,8 +76,9 @@ public class AvifDecoderWrap {
             if (let Some(i) <- imageBuffer) {
                 return createLogincCompatibleOtherPic(i, threads)
             } else {
-                Hilog.error(0, "getImageFromRawFile", "获取raw文件内容失败")
-                return Option<AvifDecoderWrap>.None
+                let message = "获取raw文件内容失败"
+                Hilog.error(0, "getImageFromRawFile", message)
+                return AvifDecoderWrap(false, message)
             }
         } else if (uri.startsWith("media://")) {
             let mediaName = uri.removePrefix("media://")
@@ -74,8 +86,9 @@ public class AvifDecoderWrap {
             if (let Some(i) <- imageBuffer) {
                 return createLogincCompatibleOtherPic(i, threads)
             } else {
-                Hilog.error(0, "getImageFromMedia", "获取media文件内容失败")
-                return Option<AvifDecoderWrap>.None
+                let message = "获取media文件内容失败"
+                Hilog.error(0, "getImageFromMedia", message)
+                return AvifDecoderWrap(false, message)
             }
         } else if (uri.startsWith("file://")) {
             let localFilePath = uri.removePrefix("file://")
@@ -85,8 +98,9 @@ public class AvifDecoderWrap {
             if (let Some(i) <- imageBuffer) {
                 return createLogincCompatibleOtherPic(i, threads)
             } else {
-                Hilog.error(0, "readFileSync", "读取本地文件失败")
-                return Option<AvifDecoderWrap>.None
+                let message = "读取本地文件失败"
+                Hilog.error(0, "readFileSync", message)
+                return AvifDecoderWrap(false, message)
             }
         } else {
             let localFilePath = uri
@@ -96,30 +110,29 @@ public class AvifDecoderWrap {
             if (let Some(i) <- imageBuffer) {
                 return createLogincCompatibleOtherPic(i, threads)
             } else {
-                Hilog.error(0, "readFileSync", "读取内容失败")
-                return Option<AvifDecoderWrap>.None
+                let message = "读取内容失败"
+                Hilog.error(0, "readFileSync", message)
+                return AvifDecoderWrap(false, message)
             }
         }
     }
 
 
-    func createLogincCompatibleOtherPic(buffer: Array<UInt8>, threads: Int32): Option<AvifDecoderWrap> {
+    func createLogincCompatibleOtherPic(buffer: Array<UInt8>, threads: Int32): AvifDecoderWrap {
         encoded = buffer
         decoder = AvifDecoder(buffer, threads)
         if (let Some(k) <- decoder) {
             if (k.decoder == 0) {
-                return Option<AvifDecoderWrap>.None
+                return AvifDecoderWrap(false, "创建解码器失败")
             }
             return this
         } else {
-            return Option<AvifDecoderWrap>.None
+            return AvifDecoderWrap(false, "创建解码器失败")
         }
     }
 
-    func createLogincCompatibleOtherPic2(): Option<AvifDecoderWrap> {
+    func createLogincCompatibleOtherPic2(): AvifDecoderWrap {
             //当不是avif图片时候进入这里,这里我把数据缓存
-            let avifDecoderWrap:AvifDecoderWrap = AvifDecoderWrap()
-            avifDecoderWrap.isNotAvif = true
             //这里给他缓存
             spawn {
                   memoryKey = getmd5key(this.uri.toArray(), 0, 0) + "notcomponent"
@@ -131,7 +144,7 @@ public class AvifDecoderWrap {
                      fileLruCache.put(mDiskKey,1,[0])
                  }
             }
-            return avifDecoderWrap
+            return AvifDecoderWrap(false,true,"非avif图片")
     }
 
     public func getWidth(): Int64 {

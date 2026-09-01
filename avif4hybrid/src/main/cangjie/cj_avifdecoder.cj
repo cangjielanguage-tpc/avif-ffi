@@ -78,7 +78,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         }
                     }
                 }
-                let (imageBuffer, networkCode, networkMessage) = getImageFromNet(uri)
+                let (imageBuffer, isAvif, errorCode,errorMessage) = getImageFromNet(uri)
                 if (let Some(i) <- imageBuffer) {
                     let created = createLoginc(i, threads)
                     if (let Some(_) <- created) {
@@ -86,8 +86,8 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                     }
                     return ReturnValue(1011, "创建解码器失败", false)
                 } else {
-                    Hilog.error(0, "getImageFromNet", networkMessage)
-                    return ReturnValue(networkCode, networkMessage, false)
+                    Hilog.error(0, "getImageFromNet", errorMessage)
+                    return ReturnValue(errorCode, errorMessage, false)
                 }
             } else if (uri.startsWith("rawfile://")) {
                 let fileName = uri.removePrefix("rawfile://")
