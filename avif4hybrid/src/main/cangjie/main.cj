@@ -181,7 +181,7 @@ unsafe func handleAvifSource(decoder: AvifDecoderWrap, uri: String): ?AvifDecode
 @C
 public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
     //因为原图，所以宽高传0,0
-    var decoder: ?AvifDecoderWrap = None
+    var decoder: AvifDecoderWrap = AvifDecoderWrap()
     try {
         // 对avif 图片没用，只缓存了非avif 图片
         let returnValue: ReturnValue = CacheCheck().getMemoryCache(uri.toString(), 0, 0)
@@ -205,8 +205,8 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         }
         //本地缓存里面实现了
         decoder = AvifDecoderWrap().createCompatibleOtherPic(uri.toString())
-        if(let Some(i) <- decoder){
-            let info = handleAvifSource(i, uri.toString()).getOrThrow()
+        if(decoder.isSuccess){
+            let info = handleAvifSource(decoder, uri.toString()).getOrThrow()
             let ret = LibC.malloc<AvifDecodeInfo>()
             if (ret.isNull()) {
                 free(info)
@@ -217,7 +217,8 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         }else{
             var info = AvifDecodeInfo()
             info.isSuccess = false
-            info.errMsg = LibC.mallocCString("生成解码器对象失败")
+            info.isNotAvif = decoder.isNotAvif
+            info.errMsg = LibC.mallocCString("生成解码器对象失败: " + decoder.codeMessage)
             let ret = LibC.malloc<AvifDecodeInfo>()
             if (ret.isNull()) {
                 free(info)
@@ -239,6 +240,6 @@ public unsafe func decodeURI(uri: CString): CPointer<AvifDecodeInfo> {
         ret.write(info)
         ret
     } finally {
-        decoder?.release()
+        decoder.release()
     }
 }

@@ -87,9 +87,9 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
 
 
 
-func getImageFromNet(urlStr: String): (?Array<UInt8>, Int32, String) {
+func getImageFromNet(urlStr: String): (?Array<UInt8>, ?Bool, Int32, String) {
     try {
-        let fut: Future<(?Array<UInt8>, Int32, String)> = spawn {
+        let fut: Future<(?Array<UInt8>, ?Bool, Int32, String)> = spawn {
             var tlsConfig = TlsClientConfig()
             tlsConfig.verifyMode = TrustAll
             let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
@@ -98,33 +98,54 @@ func getImageFromNet(urlStr: String): (?Array<UInt8>, Int32, String) {
                 if (ret.status < 200 || ret.status >= 400) {
                     let message = "网络响应状态异常，status=${ret.status}"
                     Hilog.error(0, "getImageFromNet", "${message}, url is: ${urlStr}")
-                    return (None, 1014, message)
+                    return (None, None, 1014, message)
                 }
                 if (let Some(v) <- ret.bodySize) {
                     let buf = Array<UInt8>(v, repeat: 0)
                     var readNumAll = 0
+                    var hasCheckIsAvif = false
                     while (readNumAll < v) {
                         let readNum = ret.body.read(buf[readNumAll..v])
                         if (readNum <= 0) {
                             break
                         }
                         readNumAll += readNum
+                        if(!hasCheckIsAvif && readNumAll >= 12){
+                            hasCheckIsAvif = true
+                            let checkBuf = buf.slice(0,12)
+                            let (isAvif,message) = isPicAvif(checkBuf)
+                            if (let Some(avif) <- isAvif){
+                                if(!avif){
+                                    Hilog.info(0,"getImageFromNet","${message}, url is ：${urlStr}，code is: ${ret.status}")
+                                    return (None, false, 1017, message)
+                                }
+                            } else {
+                                    Hilog.info(0,"getImageFromNet","${message}, url is ：${urlStr}，code is: ${ret.status}")
+                                    return (None, None, 1017, message)
+                            }
+                        }
+                    }
+                    if(readNumAll< 12){
+                        // 异常数据
+                        let message = "非图片数据, ${buf[0..readNumAll]}"
+                        Hilog.info(0,"getImageFromNet","${message}, url is ：${urlStr}，code is: ${ret.status}")
+                        return (None, None, 1017, "${message}")
                     }
                     if (readNumAll < v) {
                         let message = "网络响应数据不完整，已读取${readNumAll}/${v}"
                         Hilog.error(0, "getImageFromNet", "${message}, url is: ${urlStr}")
-                        return (None, 1015, message)
+                        return (None, None, 1015, message)
                     }
-                    return (buf, 0, "success")
+                    return (buf, true, 0, "success")
                 } else {
                     let message = "网络响应内容为空，status=${ret.status}"
                     Hilog.info(0, "getImageFromNet", "${message}, url is: ${urlStr}")
-                    return (None, 1006, message)
+                    return (None, None, 1006, message)
                 }
             } catch (e: Exception) {
                 let message = "网络请求异常：${e.toString()}，message=${e.message}"
                 Hilog.error(0, "getImageFromNet", message)
-                return (None, 1006, message)
+                return (None, None, 1006, message)
             } finally {
                 client.close()
             }
@@ -133,83 +154,10 @@ func getImageFromNet(urlStr: String): (?Array<UInt8>, Int32, String) {
     } catch (e: Exception) {
         let message = "网络任务异常：${e.toString()}，message=${e.message}"
         Hilog.error(0, "getImageFromNet", message)
-        return (None, 1006, message)
+        return (None, None, 1006, message)
     }
 }
 
-
-
- func getImageFromNet2(urlStr: String): (?Array<UInt8>,?Bool){
-    try {
-        let fut: Future<(?Array<UInt8>,?Bool)> = spawn {
-            let hasCheckAvif = HasCheckAvif()
-            var tlsConfig = TlsClientConfig()
-            tlsConfig.verifyMode = TrustAll
-            let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
-            try{
-                let ret = client.send(HttpRequestBuilder().get().url(fixUrlForStdx(urlStr)).build())
-                if (ret.status < 200 || ret.status >= 400) {
-                    Hilog.error(0,"getImageFromNet2","getImageFromNet2 failed, url is ：${urlStr}, error is: ${ret}")
-                    return (None,None)
-                }
-                if (let Some(v) <- ret.bodySize) {
-                    let buf = Array<UInt8>(v, repeat: 0)
-                    var readNumAll = 0
-                    var stoppedByNonAvif = false
-                    while (readNumAll < v) {
-                        let readNum = ret.body.read(buf[readNumAll..v])
-                        if (readNum <= 0) {
-                            break
-                        }
-                        readNumAll += readNum
-                        if(!hasCheckAvif.hasCheck && readNumAll >= 12){
-                            hasCheckAvif.hasCheck = true
-                            let checkBuf = buf.slice(0,12)
-                            if(!isPicAvif(checkBuf)){
-                                //如果不是avif停止下载
-                                hasCheckAvif.isAvif = false
-                                stoppedByNonAvif = true
-                                break
-                            }
-                        }
-                    }
-                    if (stoppedByNonAvif) {
-                        // 主动终止：确认非 AVIF，语义是「不是 avif 图」
-                        Hilog.info(0,"getImageFromNet2","Non Avif images, url is ：${urlStr}，code is: ${ret.status}")
-                        return (None,false)
-                    }
-                    // 宁可失败，不可残缺：EOF/网络中断导致读不满 bodySize 时，
-                    // 尾部是 0 填充的残缺 buf，禁止返回（会污染缓存且解码异常）
-                    if (readNumAll < v) {
-                        Hilog.error(0,"getImageFromNet2","incomplete body, read ${readNumAll}/${v}, url is ：${urlStr}")
-                        return (None,None)
-                    }
-                    if(let Some(i) <- hasCheckAvif.isAvif){
-                        //如果有值，必然false
-                        Hilog.info(0,"getImageFromNet2","Non Avif images, url is ：${urlStr}，code is: ${ret.status}")
-                        return (None,false)
-                    }else{
-                        hasCheckAvif.isAvif = true
-                        return (buf,true)
-                    }
-                } else {
-                    Hilog.info(0,"getImageFromNet2","bodySize is empty, url is ：${urlStr}, code is: ${ret.status}")
-                    return (None,None)
-                }
-            }catch (e:Exception){
-                Hilog.error(0,"getImageFromNet2","getImageFromNet2 failed, error is ：${e.toString()}, message is: ${e.message}")
-                return (None,None)
-            }finally {
-                client.close()
-            }
-        }
-        let result: (?Array<UInt8>,?Bool) = fut.get()
-        return result
-    } catch (e: Exception) {
-        Hilog.error(0,"getImageFromNet2","getImageFromNet2 error is ${e.toString()}")
-        return (None,None)
-    }
-}
 
 func fixUrlForStdx(rawUrl: String): URL {
     let url = URL.parse(rawUrl)
@@ -218,12 +166,18 @@ func fixUrlForStdx(rawUrl: String): URL {
 }
 
 //102, 116, 121, 112, 97, 118, 105, 102
-func isPicAvif(fileData:Array<UInt8>):Bool{
+func isPicAvif(fileData:Array<UInt8>):(?Bool,String){
     if(fileData.size >= 12){
-        return fileData[4] == 102 && fileData[5] == 116 && fileData[6] == 121  && fileData[7] == 112 && fileData[8] == 97 && fileData[9] == 118 &&
-        fileData[10] == 105  && (fileData[11] == 102 || fileData[11] == 115)
+        if (fileData[4] == 102 && fileData[5] == 116 && fileData[6] == 121  && fileData[7] == 112 && fileData[8] == 97 && fileData[9] == 118 &&
+        fileData[10] == 105  && (fileData[11] == 102 || fileData[11] == 115)){
+            return (true, "avif图片")
+        }
+        if(fileData[0] == 60){
+            return (None, "非图片数据:${fileData}")
+        }
+        return (false, "非avif图片")
     }else{
-        return false
+        return (None, "非图片数据:${fileData}")
     }
 }
 
