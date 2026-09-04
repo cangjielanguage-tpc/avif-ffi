@@ -109,16 +109,20 @@ class FileLruCache {
         if (!this.isInited) {
           return
         }
-        // 如果size满了的话，需要按照LRU的方式删除第一个
-        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
+        // 如果size满了的话，需要按照LRU的方式删除第一个 (>= 兼容运行期调小上限的场景)
+        if (this.lruCache.size() >= this.maxFileSize && !this.lruCache.containsKey(key)) {
           remove(this.lruCache.keys()[0])
         } else if (this.lruCache.containsKey(key)) {
           remove(key)
         }
-        let pre = this.lruCache.put(key,value)
-        FileUtils.getInstance().writeDataSync(this.path + key, content)
-        if (let Some(i) <- pre) {
-          this.addMemorySize(i)
+        // 注意: 走到这里 key 必然不在 lruCache 中(上面两个分支已 remove),
+        // lruCache.put 返回的旧值恒为 None, 不能依赖它做字节记账,
+        // 必须直接把新 value 的 size 计入 currentMemorySize
+        this.lruCache.put(key, value)
+        if(FileUtils.getInstance().writeDataSync(this.path + key, content)){
+            this.addMemorySize(value)
+        }else{
+            this.lruCache.remove(key)
         }
         trimToSize()
     }
@@ -202,7 +206,7 @@ class FileLruCache {
   private func addMemorySize(value:Int64): Unit {
       synchronized(mtx) {
           this.currentMemorySize += value
-          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+          Hilog.info(0,"currentMemorySize", "FileCache addMemorySize:${value} currentMemory: ${this.currentMemorySize}")
       }
   }
 
