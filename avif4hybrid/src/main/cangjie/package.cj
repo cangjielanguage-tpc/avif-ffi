@@ -87,6 +87,11 @@ func getmd5key(buffer: Array<UInt8>, imagePicWidth: Int64, imagePicHeight: Int64
 
 
 
+//网络图片下载的最大体积上限(8MB)。防止恶意/异常服务器声明超大Content-Length时
+//直接按bodySize可能会预分配超大缓冲导致OOM崩溃(修复P-03/P-26)。如业务确有超大图需求可调整该值。
+let MAX_DOWNLOAD_SIZE: Int64 = 8 * 1024 * 1024
+
+
 func getImageFromNet(urlStr: String): (?Array<UInt8>, ?Bool, Int32, String) {
     try {
         let fut: Future<(?Array<UInt8>, ?Bool, Int32, String)> = spawn {
@@ -101,6 +106,12 @@ func getImageFromNet(urlStr: String): (?Array<UInt8>, ?Bool, Int32, String) {
                     return (None, None, 1014, message)
                 }
                 if (let Some(v) <- ret.bodySize) {
+                    // 下载体积上限校验：超限直接返回，不再按bodySize预分配缓冲(防OOM)
+                    if (v > MAX_DOWNLOAD_SIZE) {
+                        let message = "网络响应数据过大，size=${v}，超过上限${MAX_DOWNLOAD_SIZE}"
+                        Hilog.error(0, "getImageFromNet", "${message}, url is: ${urlStr}")
+                        return (None, None, 1018, message)
+                    }
                     let buf = Array<UInt8>(v, repeat: 0)
                     var readNumAll = 0
                     var hasCheckIsAvif = false

@@ -236,6 +236,11 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (imageWidth < 0 || imageHeight < 0) {
             return ReturnValue(1001, "图片宽高参数非法", false)
         }
+        // use-after-release防护(修复P-34)：release()后decoder已置None，必须先校验再取元数据，
+        // 避免拿着已销毁的native句柄(或句柄0)进FFI导致崩溃
+        if (decoder.isNone()) {
+            return ReturnValue(1002, "解码器未初始化", false)
+        }
         let count: Int64 = getFrameCount()
         if (count <= 0) {
             return ReturnValue(1003, "图片帧数非法或无法获取", false)
@@ -307,6 +312,11 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (imageWidth < 0 || imageHeight < 0) {
             return ReturnValue(1001, "图片宽高参数非法", false)
         }
+        // use-after-release防护(修复P-34)：release()后decoder已置None，必须先校验再取元数据，
+        // 避免拿着已销毁的native句柄(或句柄0)进FFI导致崩溃
+        if (decoder.isNone()) {
+            return ReturnValue(1002, "解码器未初始化", false)
+        }
         if (index < 0 || Int64(index) >= getFrameCount()) {
             return ReturnValue(1012, "帧索引非法", false)
         }
@@ -373,8 +383,12 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
 
     public func release(): Unit {
         if (let Some(i) <- decoder) {
-            return i.release()
+            i.release()
         }
+        // use-after-release防护(修复P-34)：release后必须置None并清空缓存的编码数据，
+        // 否则后续nextFrameffiAsync/nthFrameffiAsync会拿着已销毁的native句柄(或句柄0)进FFI导致崩溃
+        decoder = None
+        encoded = None
     }
 
     @When[arch == "aarch64"]
