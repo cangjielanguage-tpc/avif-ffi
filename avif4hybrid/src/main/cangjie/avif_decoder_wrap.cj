@@ -218,12 +218,20 @@ public class AvifDecoderWrap {
 
     public func release(): Unit {
         if (let Some(i) <- decoder) {
-            return i.release()
+            i.release()
         }
+        // use-after-release防护(修复P-34)：release后必须置None并清空缓存的编码数据，
+        // 否则后续nthFrameffi会拿着已销毁的native句柄(或句柄0)进FFI导致崩溃
+        decoder = None
+        encoded = None
     }
 
     public func nthFrameffi(index: Int32, pixels: CPointer<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
         if (imageWidth < 0 || imageHeight < 0) {
+            return -1
+        }
+        // use-after-release防护(修复P-34)：release()后decoder已置None，先校验再取元数据
+        if (decoder.isNone()) {
             return -1
         }
         if (getFrameCount() <= 0) {

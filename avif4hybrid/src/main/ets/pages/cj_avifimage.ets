@@ -117,6 +117,9 @@ export class AvifDecoderTS{
 
   public release(): void{
     this.cjAvifDecoder.release()
+    // use-after-release防护(修复P-34)：release后置decodeRes=false，
+    // 阻断后续所有getter/帧解码调用直接返回默认值，不再触达已销毁的native解码器
+    this.decodeRes = false
   }
 
 }
