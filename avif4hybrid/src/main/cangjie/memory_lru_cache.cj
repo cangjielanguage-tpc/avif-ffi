@@ -46,7 +46,7 @@ class MemoryLruCache {
                 return
             }
             // 如果size满了的话，需要按照LRU的方式删除第一个
-            if (this.lruCache.size() == this.maxSize && !this.lruCache.containsKey(key)) {
+            if (this.lruCache.size() >= this.maxSize && !this.lruCache.containsKey(key)) {
                 remove(this.lruCache.keys()[0])
             } else if (this.lruCache.containsKey(key)) {
                 remove(key)

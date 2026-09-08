@@ -53,6 +53,11 @@ public class AvifDecoderWrap {
                         if(decoderWrap.isSuccess){
                             //如果正常avif文件解析成功就返回，否则去执行下载
                             return decoderWrap
+                        }else {
+                            // 坏缓存自愈: remove 清 LRU 记账+删文件(场景A); deleteFile 兜底
+                            // 删"不在 LRU 的孤儿残缺文件"(场景B, put 写失败回滚的遗留)。幂等安全。
+                            fileLruCache.remove(mDiskKey)
+                            FileUtils.getInstance().deleteFile(fileLruCache.path + mDiskKey)
                         }
                     }
                 }
