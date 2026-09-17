@@ -13,7 +13,6 @@ internal import ohos.base.Length
 internal import ohos.base.LengthType
 internal import ohos.ark_interop.JSObject
 internal import std.time.DateTime
-internal import std.sort.sort
 internal import std.collection.ArrayList
 internal import std.sync.ReentrantMutex
 internal import std.convert.Parsable

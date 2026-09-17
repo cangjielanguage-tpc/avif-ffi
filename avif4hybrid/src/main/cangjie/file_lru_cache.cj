@@ -1,4 +1,5 @@
 package ohos_app_cangjie_avif4hybrid
+import ohos_app_cangjie_avif4hybrid.sort.sort
 
 class FileLruCache {
 
