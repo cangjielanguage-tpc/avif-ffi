@@ -9,3 +9,6 @@
 ark_interop_api
 /src/main/cangjie/types
 /src/main/cangjie/IDL_Custom_Type_Whitelist~
+/oh-package-lock.json5
+/cjpm.lock
+/BuildProfile.ets
