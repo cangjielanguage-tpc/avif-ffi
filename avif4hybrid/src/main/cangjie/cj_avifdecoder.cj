@@ -396,7 +396,6 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         encoded = None
     }
 
-    @When[arch == "aarch64"]
     public static func createAsync_ArkTS_Interop_Identifier(context: JSContext, callInfo: JSCallInfo): JSValue {
         let thisArg = callInfo.thisArg
         let thisObject = thisArg.asObject(context)
@@ -429,7 +428,6 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         promise.toJSValue()
     }
 
-    @When[arch == "aarch64"]
     public static func createWithThreadAsync_ArkTS_Interop_Identifier(context: JSContext, callInfo: JSCallInfo): JSValue {
         let thisArg = callInfo.thisArg
         let thisObject = thisArg.asObject(context)
@@ -571,7 +569,6 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         RET.toJSValue(context)
     }
 
-    @When[arch == "aarch64"]
     public static func nextFrameffiAsync_ArkTS_Interop_Identifier(context: JSContext, callInfo: JSCallInfo): JSValue {
         let thisArg = callInfo.thisArg
         let thisObject = thisArg.asObject(context)
@@ -617,7 +614,6 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         promise.toJSValue()
     }
 
-    @When[arch == "aarch64"]
     public static func nthFrameffiAsync_ArkTS_Interop_Identifier(context: JSContext, callInfo: JSCallInfo): JSValue {
         let thisArg = callInfo.thisArg
         let thisObject = thisArg.asObject(context)
