@@ -12,3 +12,4 @@ ark_interop_api
 /oh-package-lock.json5
 /cjpm.lock
 /BuildProfile.ets
+/stdx_bin
