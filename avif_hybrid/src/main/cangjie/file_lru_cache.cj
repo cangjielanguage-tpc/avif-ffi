@@ -1,4 +1,6 @@
 package avif4cj
+import avif4cj.sort.sort
+
 
 class FileLruCache {
 
@@ -212,7 +214,7 @@ class FileLruCache {
   private func addMemorySize(value:Int64): Unit {
       synchronized(mtx) {
           this.currentMemorySize += value
-          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+          Hilog.info(0,"currentMemorySize", "FileCache addMemorySize:${value} currentMemory: ${this.currentMemorySize}")
       }
   }
 
