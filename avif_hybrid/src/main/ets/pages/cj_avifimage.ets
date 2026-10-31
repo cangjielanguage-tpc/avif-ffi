@@ -275,7 +275,7 @@ export class AvifDecoderTS{
       newDecoder.release()
       return undefined
     }
-    newDecoder.decodeRes = newDecoder.cjAvifDecoder.createWithThreadAsync(uri, threads);
+    newDecoder.decodeRes =  await newDecoder.cjAvifDecoder.createWithThreadAsync(uri, threads);
     if (newDecoder.decodeRes) {
       return newDecoder;
     } else {

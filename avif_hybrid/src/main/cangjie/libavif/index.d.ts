@@ -26,7 +26,7 @@ export declare class CJAvifImageModel {
 
 export declare class CJAvifDecoder {
     createAsync(uri: string): boolean
-    createWithThreadAsync(uri: string, threads: number): boolean
+    createWithThreadAsync(uri: string, threads: number): Promise<boolean>
     getWidth(): number
     getHeight(): number
     getDepth(): number
@@ -36,8 +36,8 @@ export declare class CJAvifDecoder {
     getFrameDurations(): Array<number> | undefined
     isAvifImageffi(array:ArrayBuffer): number
     nextFrameIndexffi(): number
-    nextFrameffiAsync(imageWidth: number, imageHeight: number): CJReturnValue
-    nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): CJReturnValue
+    nextFrameffiAsync(imageWidth: number, imageHeight: number): Promise<CJReturnValue>
+    nthFrameffiAsync(index: number, imageWidth: number, imageHeight: number): Promise<CJReturnValue>
     release(): void
 }
 

@@ -218,7 +218,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight
@@ -283,7 +283,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight
