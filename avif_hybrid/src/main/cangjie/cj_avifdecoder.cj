@@ -72,7 +72,14 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
                 if (let Some(i) <- source) {
                     let res = createLoginc(i, threads)
-                    return res.isSome()
+                    if(res.isSome()){
+                        return true
+                    }else{
+                         // 坏缓存自愈: remove 清 LRU 记账+删文件(场景A); deleteFile 兜底
+                         // 删"不在 LRU 的孤儿残缺文件"(场景B, put 写失败回滚的遗留)。幂等安全。
+                         fileLruCache.remove(mDiskKey)
+                         FileUtils.getInstance().deleteFile(fileLruCache.path + mDiskKey)
+                    }
                 }
             }
             let imageBuffer = getImageFromNet(uri)
@@ -211,7 +218,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight
@@ -276,7 +283,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight

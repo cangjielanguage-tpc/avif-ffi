@@ -1,4 +1,6 @@
 package avif4cj
+import avif4cj.sort.sort
+
 
 class FileLruCache {
 
@@ -80,7 +82,7 @@ class FileLruCache {
         let perCacheFile:CacheFileInfo = cachefiles.get(i).getOrThrow()
         let fileSize:Int64 = perCacheFile.fileSize
         // 处理数量超过size的场景，移除即将排除的文件
-        if(this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(perCacheFile.fileName)){
+        if(this.lruCache.size() > 0 && this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(perCacheFile.fileName)) {
               //返回的是value
               let fileName = this.lruCache.keys()[0]
  	          let remove:?Int64 = this.lruCache.remove(fileName)
@@ -119,7 +121,7 @@ class FileLruCache {
           return
         }
         // 如果size满了的话，需要按照LRU的方式删除第一个
-        if (this.lruCache.size() >= this.maxFileSize && !this.lruCache.containsKey(key)) {
+        if (this.lruCache.size() >= this.maxFileSize && this.lruCache.size() > 0 && !this.lruCache.containsKey(key)) {
           remove(this.lruCache.keys()[0])
         } else if (this.lruCache.containsKey(key)) {
           remove(key)
@@ -212,7 +214,7 @@ class FileLruCache {
   private func addMemorySize(value:Int64): Unit {
       synchronized(mtx) {
           this.currentMemorySize += value
-          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+          Hilog.info(0,"currentMemorySize", "FileCache addMemorySize:${value} currentMemory: ${this.currentMemorySize}")
       }
   }
 
