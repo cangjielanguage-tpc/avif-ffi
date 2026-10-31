@@ -61,7 +61,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
 
     public func createWithThreadAsync(uri: String, threads: Int32): Bool {
         this.mUri = uri
-        if (uri.startsWith("http")) {
+        if (uri.toAsciiLower().startsWith("http")) {
             let mDiskKey: String = getmd5key(this
                 .mUri
                 .toArray())
@@ -72,7 +72,14 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 let source: ?Array<UInt8> = FileUtils.getInstance().readFileSync(fileLruCache.path + mDiskKey)
                 if (let Some(i) <- source) {
                     let res = createLoginc(i, threads)
-                    return res.isSome()
+                    if(res.isSome()){
+                        return true
+                    }else{
+                         // 坏缓存自愈: remove 清 LRU 记账+删文件(场景A); deleteFile 兜底
+                         // 删"不在 LRU 的孤儿残缺文件"(场景B, put 写失败回滚的遗留)。幂等安全。
+                         fileLruCache.remove(mDiskKey)
+                         FileUtils.getInstance().deleteFile(fileLruCache.path + mDiskKey)
+                    }
                 }
             }
             let imageBuffer = getImageFromNet(uri)
@@ -83,8 +90,8 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 Hilog.error(0, "getImageFromNet", "获取网络文件内容失败")
                 return false
             }
-        } else if (uri.startsWith("rawfile://")) {
-            let fileName = uri.removePrefix("rawfile://")
+        } else if (uri.toAsciiLower().startsWith("rawfile://")) {
+            let fileName = String(uri.toRuneArray().slice(10,uri.size-10))
             let imageBuffer = getImageFromRawFile(fileName)
             if (let Some(i) <- imageBuffer) {
                 let res = createLoginc(i, threads)
@@ -93,8 +100,8 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 Hilog.error(0, "getImageFromRawFile", "获取raw文件内容失败")
                 return false
             }
-        } else if (uri.startsWith("media://")) {
-            let mediaName = uri.removePrefix("media://")
+        } else if (uri.toAsciiLower().startsWith("media://")) {
+            let mediaName = String(uri.toRuneArray().slice(8,uri.size-8))
             let imageBuffer = getImageFromMedia(mediaName)
             if (let Some(i) <- imageBuffer) {
                 let res = createLoginc(i, threads)
@@ -103,8 +110,8 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 Hilog.error(0, "getImageFromMedia", "获取media文件内容失败")
                 return false
             }
-        } else if (uri.startsWith("file://")) {
-            let localFilePath = uri.removePrefix("file://")
+        } else if (uri.toAsciiLower().startsWith("file://")) {
+            let localFilePath = String(uri.toRuneArray().slice(7,uri.size-7))
             let imageBuffer: ?Array<UInt8> = FileUtils
                 .getInstance()
                 .readFileSync(localFilePath)
@@ -211,7 +218,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight
@@ -242,7 +249,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let fileExist = FileUtils
                             .getInstance()
                             .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.startsWith("http")) {
+                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
                             fileLruCache.put(mDiskKey, j.size, j)
                         }
                     }
@@ -276,7 +283,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         if (count == 1) {
             mMemoryKey = getmd5key(this
                 .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight)) + "notcomponent"
+                .toArray(), Int64(imageWidth), Int64(imageHeight))
         }
         var realPicWidth = imageWidth
         var realPicHeight = imageHeight
@@ -311,7 +318,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                         let fileExist = FileUtils
                             .getInstance()
                             .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.startsWith("http")) {
+                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
                             fileLruCache.put(mDiskKey, j.size, j)
                         }
                     }

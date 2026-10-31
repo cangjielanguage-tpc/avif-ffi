@@ -1,4 +1,6 @@
 package avif4cj
+import avif4cj.sort.sort
+
 
 class FileLruCache {
 
@@ -119,15 +121,16 @@ class FileLruCache {
           return
         }
         // 如果size满了的话，需要按照LRU的方式删除第一个
-        if (this.lruCache.size() == this.maxFileSize && !this.lruCache.containsKey(key)) {
+        if (this.lruCache.size() >= this.maxFileSize && !this.lruCache.containsKey(key)) {
           remove(this.lruCache.keys()[0])
         } else if (this.lruCache.containsKey(key)) {
           remove(key)
         }
-        let pre = this.lruCache.put(key,value)
-        FileUtils.getInstance().writeDataSync(this.path + key, content)
-        if (let Some(i) <- pre) {
-          this.addMemorySize(i)
+        this.lruCache.put(key,value)
+        if(FileUtils.getInstance().writeDataSync(this.path + key, content)){
+            this.addMemorySize(value)
+        }else{
+            this.lruCache.remove(key)
         }
         trimToSize()
     }
@@ -211,7 +214,7 @@ class FileLruCache {
   private func addMemorySize(value:Int64): Unit {
       synchronized(mtx) {
           this.currentMemorySize += value
-          Hilog.info(0,"currentMemorySize", "FileCache removeMemorySize:${value} currentMemory: ${this.currentMemorySize}")
+          Hilog.info(0,"currentMemorySize", "FileCache addMemorySize:${value} currentMemory: ${this.currentMemorySize}")
       }
   }
 

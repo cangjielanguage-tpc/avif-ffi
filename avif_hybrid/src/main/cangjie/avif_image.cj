@@ -1,6 +1,3 @@
-/*
- * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
- */
 package avif4cj
 
 internal import ohos.component.Image
@@ -27,12 +24,14 @@ internal import ohos.base.Length
 internal import ohos.base.LengthType
 internal import ohos.ark_interop.JSObject
 internal import std.time.DateTime
-internal import std.sort.sort
 internal import std.collection.ArrayList
 internal import std.sync.ReentrantMutex
 internal import std.convert.Parsable
 internal import ohos.device_info.DeviceInfo
 internal import ohos.base.LengthProp
+internal import stdx.net.http.ClientBuilder
+internal import stdx.net.tls.common.{CertificateVerifyMode}
+internal import stdx.net.tls.TlsClientConfig
 internal import stdx.crypto.digest.MD5
 internal import stdx.encoding.hex.toHexString
 internal import ohos.component.CustomView
@@ -68,7 +67,7 @@ public class AvifImage {
     @Link
     var uri: String
 
-    //图片宽度
+    //图片宽度 //这个值要设置setImagePicWidth才有用，不然就是0
     @State
     var imagePicWidth: Int64 = 0
 
@@ -126,59 +125,91 @@ public class AvifImage {
     //判断是否结束循环显示
     var isLoop: Bool = true
 
-    var key = ""
+    var memoryKey = ""
+    var mDiskKey = ""
     var fut:?Future<Unit> = None
 
     protected override func aboutToAppear() {
-        key = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
-        let memPixelMap: ?CacheBean = memoryLruCache.get(key)
-        let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
+        memoryKey = getmd5key(this.uri.toArray(), imagePicWidth, imagePicHeight)
+        let memPixelMap: ?CacheBean = memoryLruCache.get(memoryKey)
 
-        //多图不要内存缓存逻辑
+        //多图没有内存缓存，只有单图有，原因多图做内存缓存 管理池很快就满了
         if (let Some(map) <- memPixelMap) {
-            //如果有值
+            //如果有值,组件这边保存的是pixelMap,接口那边因为互操作保存的是Array<UInt8>
             if(let Some(i) <- map.getPixelMap()){
                 pixelMap = i
                 return
             }
+            if(let Some(i) <- map.getPicData()){
+                try{
+                    //如果是接口那边有字节数据的内存缓存，用仓颉接口转换
+                    let size2: Size = Size(width: Int32(map.memoryWidth), height: Int32(map.memoryHeight))
+                    let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                    let tempPixelMap = createPixelMap(i, opts)
+                    pixelMap = tempPixelMap
+                    return
+                }catch (e:Exception){
+                    Hilog.error(0,"avifErrInfo","e=${e.toString()}")
+                }
+            }
         }
-        if (fileExist) {
-                //单图文件的本地缓存
-                spawn {
-                    //本地缓存改为原图了
-                    let source:?Array<UInt8> = fileLruCache.get(key)
+        //内存缓存优先级最高,上面是所有类型图的内存缓存
+        //下面是本地缓存，只有http的网络图有本地缓存
+        if (this.uri.toAsciiLower().startsWith("http")) {
+            mDiskKey =  getmd5key(this.uri.toArray())
+            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+            if(fileExist){
+                //如果本地缓存存在
+                spawn{
+                    let source:?Array<UInt8> = fileLruCache.get(mDiskKey)
                     if(let Some(i) <- source){
-                        dealWithBuffer(i)
+                        //本地缓存文件有数据
+                        //如果是url图片 判断本地缓存正不正常
+                        let avif: ?AvifDecoder = AvifDecoder.create(i)
+                        if(avif.isSome()){
+                            //表示是正常的
+                            dealWithBuffer2(avif.getOrThrow(),i)
+                        }else{
+                            //表示可能图片已坏 先删掉本地
+                             fileLruCache.remove(mDiskKey)
+                             FileUtils.getInstance().deleteFile(fileLruCache.path + mDiskKey)
+                             //重新去获取
+                             let imageBuffer = getImageFromNet(this.uri)
+                             dealWithBuffer(imageBuffer)
+                        }
                     }else{
-                        Hilog.error(0, "diskcache", "获取的单图本地缓存内容为空")
+                        //本地缓存文件没有数据
+                        //表示可能图片已坏 先删掉本地
+                        fileLruCache.remove(mDiskKey)
+                        FileUtils.getInstance().deleteFile(fileLruCache.path + mDiskKey)
+                        let imageBuffer = getImageFromNet(this.uri)
+                        dealWithBuffer(imageBuffer)
                     }
                 }
-            return
-        } else {
-            if (this.uri.startsWith("http")) {
-                //把数据下载下来
+            }else{
+                //不存在 把数据下载下来
                 spawn {
                     let imageBuffer = getImageFromNet(this.uri)
                     dealWithBuffer(imageBuffer)
                 }
-                return
-            } else if(this.uri.startsWith("rawfile://")){
-                let fileName = this.uri.removePrefix("rawfile://")
-                let imageBuffer = getImageFromRawFile(fileName)
-                dealWithBuffer(imageBuffer)
-            } else if(this.uri.startsWith("media://")){
-                let mediaName = this.uri.removePrefix("media://")
-                let imageBuffer = getImageFromMedia(mediaName)
-                dealWithBuffer(imageBuffer)
-            } else if(this.uri.startsWith("file://")){
-                let localFilePath = this.uri.removePrefix("file://")
-                let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
-                dealWithBuffer(imageBuffer)
-            }else{
-                let localFilePath = this.uri
-                let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
-                dealWithBuffer(imageBuffer)
             }
+            return
+        } else if(this.uri.toAsciiLower().startsWith("rawfile://")){
+            let fileName = String(this.uri.toRuneArray().slice(10,this.uri.size-10))
+            let imageBuffer = getImageFromRawFile(fileName)
+            dealWithBuffer(imageBuffer)
+        } else if(this.uri.toAsciiLower().startsWith("media://")){
+            let mediaName = String(this.uri.toRuneArray().slice(8,this.uri.size-8))
+            let imageBuffer = getImageFromMedia(mediaName)
+            dealWithBuffer(imageBuffer)
+        } else if(this.uri.toAsciiLower().startsWith("file://")){
+            let localFilePath = String(this.uri.toRuneArray().slice(7,this.uri.size-7))
+            let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
+            dealWithBuffer(imageBuffer)
+        }else{
+            let localFilePath = this.uri
+            let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
+            dealWithBuffer(imageBuffer)
         }
     }
 
@@ -208,6 +239,17 @@ public class AvifImage {
         if (let Some(i) <- imageBuffer) {
             let avif: ?AvifDecoder = AvifDecoder.create(i)
             if (let Some(j) <- avif) {
+                dealWithBuffer2(j,i)
+            } else {
+                Hilog.error(0, "aviflog",
+                    "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
+            }
+        } else {
+            Hilog.error(0, "aviflog", "imageBuffer can not be none")
+        }
+    }
+
+    private func dealWithBuffer2(j: AvifDecoder,i:Array<UInt8>): Unit {
                 //分为单帧和多帧
                 let frameCount: Int64 = j.getFrameCount()
                 var imageTempWidth = j.getWidth()
@@ -221,7 +263,7 @@ public class AvifImage {
                 let imageWidth = imageTempWidth
                 let imageHeight = imageTempHeight
                 if (frameCount <= 0) {
-                     Hilog.error(0, "aviflog","frameCount can not be <= 0")
+                    Hilog.error(0, "aviflog","frameCount can not be <= 0")
                 } else {
                     if (frameCount == 1) {
                         //单帧图
@@ -236,13 +278,13 @@ public class AvifImage {
                                 pixelMap = tempPixelMap
                             }
                             //保存一份到本地存储 单图需要本地缓存
-                            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-                            if(!fileExist && this.uri.startsWith("http")){
-                                 fileLruCache.put(key,i.size,i)
+                            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                            if(!fileExist && this.uri.toAsciiLower().startsWith("http")){
+                                 fileLruCache.put(mDiskKey,i.size,i)
                             }
                             //这里生成了就要保存到内存中 单图需要内存缓存
                             let cacheBean:CacheBean = CacheBean(tempPixelMap,Option<Array<UInt8>>.None)
-                            memoryLruCache.put(key, cacheBean)
+                            memoryLruCache.put(memoryKey, cacheBean)
                             j.release()
                         }
                         return
@@ -250,12 +292,12 @@ public class AvifImage {
                         //多帧图
                          isSinglePic = false
                          //仅限网络情况坐下缓存,避免下载
-                         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + key)
-                         if(!fileExist && this.uri.startsWith("http")){
+                         let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                         if(!fileExist && this.uri.toAsciiLower().startsWith("http")){
                             //网络图片这种情况把文件缓存下来
                             spawn{
                                 //多图需要本地缓存
-                                fileLruCache.put(key,i.size,i)
+                                fileLruCache.put(mDiskKey,i.size,i)
                             }
                          }
                         if (j.getFrameDurations().isNone()) {
@@ -309,14 +351,9 @@ public class AvifImage {
                         return
                     }
                 }
-            } else {
-                Hilog.error(0, "aviflog",
-                    "AvifDecoder can not be none,maybe the imageBuffer data is not avif format data")
             }
-        } else {
-            Hilog.error(0, "aviflog", "imageBuffer can not be none")
-        }
-    }
+
+
 
     @Builder
     func Image19() {
