@@ -1,8 +1,9 @@
 // scripts/pre-install.mjs
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import os from 'os'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '../avif4hybrid');
@@ -27,7 +28,7 @@ if (!fs.existsSync(EXTRACT_PATH)) {
 
       // Download ARM64 version
       console.log(`Downloading ARM64 version...`);
-      execSync(`curl -L -o ${ARM64_ZIP_TEMP_PATH} ${ARM64_ZIP_URL}`, {
+      execFileSync('curl', ['-L', '-o', ARM64_ZIP_TEMP_PATH, ARM64_ZIP_URL], {
           stdio: 'inherit',
           cwd: PROJECT_ROOT
       });
@@ -47,10 +48,18 @@ if (!fs.existsSync(EXTRACT_PATH)) {
 
       // Extract ARM64 version
       console.log(`Extracting ARM64 version...`);
-      execSync(`tar -xf ${ARM64_ZIP_TEMP_PATH} -C ${EXTRACT_PATH}`, {
-          stdio: 'inherit',
-          cwd: PROJECT_ROOT
-      });
+      if (os.platform() === 'win32') {
+          execFileSync('tar', ['-xf', ARM64_ZIP_TEMP_PATH, '-C', EXTRACT_PATH], {
+                    stdio: 'inherit',
+                    cwd: PROJECT_ROOT
+                });
+      }else{
+          execFileSync('unzip', ['-o', ARM64_ZIP_TEMP_PATH, '-d', EXTRACT_PATH], {
+                    stdio: 'inherit',
+                    cwd: PROJECT_ROOT
+                });
+      }
+
 
       // Clean up ARM64 temp file
       fs.unlinkSync(ARM64_ZIP_TEMP_PATH);
@@ -58,7 +67,7 @@ if (!fs.existsSync(EXTRACT_PATH)) {
       // Download X64 version if on Windows
       if (process.platform === 'win32') {
           console.log(`Downloading X64 version...`);
-          execSync(`curl -L -o ${X64_ZIP_TEMP_PATH} ${X64_ZIP_URL}`, {
+          execFileSync('curl', ['-L', '-o', X64_ZIP_TEMP_PATH, X64_ZIP_URL], {
               stdio: 'inherit',
               cwd: PROJECT_ROOT
           });
@@ -78,10 +87,18 @@ if (!fs.existsSync(EXTRACT_PATH)) {
 
           // Extract X64 version
           console.log(`Extracting X64 version...`);
-          execSync(`tar -xf ${X64_ZIP_TEMP_PATH} -C ${EXTRACT_PATH}`, {
-              stdio: 'inherit',
-              cwd: PROJECT_ROOT
-          });
+          if (os.platform() === 'win32') {
+              execFileSync('tar', ['-xf', X64_ZIP_TEMP_PATH, '-C', EXTRACT_PATH], {
+                            stdio: 'inherit',
+                            cwd: PROJECT_ROOT
+                        });
+          }else{
+              execFileSync('unzip', ['-o', X64_ZIP_TEMP_PATH, '-d', EXTRACT_PATH], {
+                            stdio: 'inherit',
+                            cwd: PROJECT_ROOT
+                        });
+          }
+
 
           // Clean up X64 temp file
           fs.unlinkSync(X64_ZIP_TEMP_PATH);
