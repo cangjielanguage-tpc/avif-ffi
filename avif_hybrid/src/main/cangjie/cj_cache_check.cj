@@ -30,7 +30,7 @@ public class CJCacheCheck <: SharedObject & JSInteropType<CJCacheCheck> {
 
     public func getMemoryCache(uri: String, imagePicWidth: Int64, imagePicHeight: Int64): ReturnValue {
         let value: ReturnValue = ReturnValue()
-        let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight) + "notcomponent"
+        let key = getmd5key(uri.toArray(), imagePicWidth, imagePicHeight)
         let memCache: ?CacheBean = memoryLruCache.get(key)
         if (let Some(i) <- memCache) {
             let arrData: ?Array<UInt8> = i.getPicData()
