@@ -51,12 +51,16 @@ class MemoryLruCache {
     // 添加缓存键值对
     func put(key: String, value: CacheBean): Unit {
         synchronized(mtx) {
+            if (this.maxSize <= 0) {
+                // maxSize 非法时直接不缓存，避免淘汰分支对空集合取下标
+                return
+            }
             let size = getMemoryDataSize(value)
             if (size <= 0 || size >= this.maxMemory) {
                 return
             }
             // 如果size满了的话，需要按照LRU的方式删除第一个
-            if (this.lruCache.size() >= this.maxSize && !this.lruCache.containsKey(key)) {
+            if (this.lruCache.size() >= this.maxSize && this.lruCache.size() > 0 && !this.lruCache.containsKey(key)) {
                 remove(this.lruCache.keys()[0])
             } else if (this.lruCache.containsKey(key)) {
                 remove(key)
