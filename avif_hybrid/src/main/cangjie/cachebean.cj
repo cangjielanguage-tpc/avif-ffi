@@ -1,8 +1,7 @@
 package avif4cj
 
-//缓存对象
+//缓存对象（内存缓存只存解码字节 color；PixelMap 由显示方自行创建并持有）
 class CacheBean {
-  var pixelMap:?PixelMap = None
   var picData:?Array<UInt8> = None
   var memoryWidth:Int64 = 0
   var memoryHeight:Int64 = 0
@@ -10,18 +9,6 @@ class CacheBean {
 
     func setPicData(picData:?Array<UInt8>){
         this.picData = picData
-    }
-
-    func getAlphaPresent():Bool{
-        return isAlphaPresent
-    }
-
-    func setPixelMap(pixelMap:?PixelMap){
-        this.pixelMap = pixelMap
-    }
-
-    func getPixelMap():?PixelMap{
-        return pixelMap
     }
 
     func getPicData():?Array<UInt8>{
@@ -32,27 +19,30 @@ class CacheBean {
         return memoryWidth
     }
 
-    func getMemoryHeight():Int64{
-        return memoryHeight
-    }
-
     func setMemoryWidth(memoryWidth:Int64){
         this.memoryWidth = memoryWidth
+    }
+
+    func getMemoryHeight():Int64{
+        return memoryHeight
     }
 
     func setMemoryHeight(memoryHeight:Int64){
         this.memoryHeight = memoryHeight
     }
 
-     func setAlphaPresent(isAlphaPresent:Bool){
-         this.isAlphaPresent = isAlphaPresent
-     }
-
-    init(pixelMap:?PixelMap,picData:?Array<UInt8>){
-        this.pixelMap = pixelMap
-        this.picData = picData
+    func setAlphaPresent(isAlphaPresent:Bool){
+        this.isAlphaPresent = isAlphaPresent
     }
 
+    func getAlphaPresent():Bool{
+        return isAlphaPresent
+    }
+
+    // 非 avif 图片的占位标记构造（avif_decoder_wrap 兼容路径）
+    init(picData:?Array<UInt8>){
+        this.picData = picData
+    }
 }
 
 //多图缓存对象

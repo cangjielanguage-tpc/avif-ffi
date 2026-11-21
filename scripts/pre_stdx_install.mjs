@@ -14,7 +14,7 @@ const ARM64_ZIP_FILENAME = 'cangjie-stdx-ohos-aarch64-1.1.3.1.zip';
 const ARM64_ZIP_TEMP_PATH = path.join(PROJECT_ROOT, ARM64_ZIP_FILENAME);
 
 const X64_ZIP_URL = 'https://gitcode.com/Cangjie/cangjie_stdx/releases/download/v1.1.3.1/cangjie-stdx-ohos-x64-1.1.3.1.zip';
-const X64_ZIP_FILENAME = 'cangjie-stdx-linux-x64-1.1.3.1.zip';
+const X64_ZIP_FILENAME = 'cangjie-stdx-ohos-x64-1.1.3.1.zip';
 const X64_ZIP_TEMP_PATH = path.join(PROJECT_ROOT, X64_ZIP_FILENAME);
 
 const EXTRACT_PATH = path.join(PROJECT_ROOT, 'stdx_bin');
@@ -65,44 +65,42 @@ if (!fs.existsSync(EXTRACT_PATH)) {
       fs.unlinkSync(ARM64_ZIP_TEMP_PATH);
 
       // Download X64 version if on Windows
-      if (process.platform === 'win32') {
-          console.log(`Downloading X64 version...`);
-          execFileSync('curl', ['-L', '-o', X64_ZIP_TEMP_PATH, X64_ZIP_URL], {
-              stdio: 'inherit',
-              cwd: PROJECT_ROOT
-          });
+      console.log(`Downloading X64 version...`);
+      execFileSync('curl', ['-L', '-o', X64_ZIP_TEMP_PATH, X64_ZIP_URL], {
+          stdio: 'inherit',
+          cwd: PROJECT_ROOT
+      });
 
-          // Check if file exists and has content
-          if (fs.existsSync(X64_ZIP_TEMP_PATH)) {
-              const stats = fs.statSync(X64_ZIP_TEMP_PATH);
-              if (stats.size === 0) {
-                  console.error(`X64 ZIP file is empty, download failed`);
-                  fs.unlinkSync(X64_ZIP_TEMP_PATH);
-                  process.exit(1);
-              }
-          } else {
-              console.error(`X64 ZIP file not found`);
+      // Check if file exists and has content
+      if (fs.existsSync(X64_ZIP_TEMP_PATH)) {
+          const stats = fs.statSync(X64_ZIP_TEMP_PATH);
+          if (stats.size === 0) {
+              console.error(`X64 ZIP file is empty, download failed`);
+              fs.unlinkSync(X64_ZIP_TEMP_PATH);
               process.exit(1);
           }
-
-          // Extract X64 version
-          console.log(`Extracting X64 version...`);
-          if (os.platform() === 'win32') {
-              execFileSync('tar', ['-xf', X64_ZIP_TEMP_PATH, '-C', EXTRACT_PATH], {
-                            stdio: 'inherit',
-                            cwd: PROJECT_ROOT
-                        });
-          }else{
-              execFileSync('unzip', ['-o', X64_ZIP_TEMP_PATH, '-d', EXTRACT_PATH], {
-                            stdio: 'inherit',
-                            cwd: PROJECT_ROOT
-                        });
-          }
-
-
-          // Clean up X64 temp file
-          fs.unlinkSync(X64_ZIP_TEMP_PATH);
+      } else {
+          console.error(`X64 ZIP file not found`);
+          process.exit(1);
       }
+
+      // Extract X64 version
+      console.log(`Extracting X64 version...`);
+      if (os.platform() === 'win32') {
+          execFileSync('tar', ['-xf', X64_ZIP_TEMP_PATH, '-C', EXTRACT_PATH], {
+                        stdio: 'inherit',
+                        cwd: PROJECT_ROOT
+                    });
+      }else{
+          execFileSync('unzip', ['-o', X64_ZIP_TEMP_PATH, '-d', EXTRACT_PATH], {
+                        stdio: 'inherit',
+                        cwd: PROJECT_ROOT
+                    });
+      }
+
+
+      // Clean up X64 temp file
+      fs.unlinkSync(X64_ZIP_TEMP_PATH);
 
       console.log(`All files downloaded and extracted successfully`);
 
