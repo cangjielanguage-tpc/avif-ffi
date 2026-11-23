@@ -141,7 +141,7 @@ public class AvifDecoderWrap {
             //这里给他缓存
             spawn {
                   memoryKey = getmd5key(this.uri.toArray(), 0, 0) + "notcomponent"
-                  memoryLruCache.put(memoryKey, CacheBean(Option<PixelMap>.None,[0]))
+                  memoryLruCache.put(memoryKey, CacheBean([0]))
 
                  let mDiskKey: String = getmd5key(this.uri.toArray())
                  let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)

@@ -1,9 +1,9 @@
 package ohos_app_cangjie_avif4hybrid
 
-//缓存对象
+//缓存对象（内存缓存只保留 Purgeable 形态；picData 仅用于非 avif 图片的占位标记）
 class CacheBean {
-  var pixelMap:?PixelMap = None
   var picData:?Array<UInt8> = None
+  var purgeFrame:?PurgeableFrame = None
   var memoryWidth:Int64 = 0
   var memoryHeight:Int64 = 0
   var isAlphaPresent:Bool = false
@@ -12,47 +12,51 @@ class CacheBean {
         this.picData = picData
     }
 
-    func setPixelMap(pixelMap:?PixelMap){
-        this.pixelMap = pixelMap
-    }
-
-    func getPixelMap():?PixelMap{
-        return pixelMap
-    }
-
     func getPicData():?Array<UInt8>{
         return picData
     }
 
-    func getMemoryWidth():Int64{
-        return memoryWidth
+    func setPurgeFrame(purgeFrame:?PurgeableFrame){
+        this.purgeFrame = purgeFrame
     }
 
-    func getMemoryHeight():Int64{
-        return memoryHeight
-    }
-
-    func getAlphaPresent():Bool{
-        return isAlphaPresent
+    func getPurgeFrame():?PurgeableFrame{
+        return purgeFrame
     }
 
     func setMemoryWidth(memoryWidth:Int64){
         this.memoryWidth = memoryWidth
     }
 
+    func getMemoryWidth():Int64{
+        return memoryWidth
+    }
+
     func setMemoryHeight(memoryHeight:Int64){
         this.memoryHeight = memoryHeight
+    }
+
+    func getMemoryHeight():Int64{
+        return memoryHeight
     }
 
     func setAlphaPresent(isAlphaPresent:Bool){
         this.isAlphaPresent = isAlphaPresent
     }
 
-    init(pixelMap:?PixelMap,picData:?Array<UInt8>){
-        this.pixelMap = pixelMap
+    func getAlphaPresent():Bool{
+        return isAlphaPresent
+    }
+
+    // 非 avif 图片的占位标记构造（avif_decoder_wrap 兼容路径）
+    init(picData:?Array<UInt8>){
         this.picData = picData
     }
 
+    // Purgeable 构造：帧数据存入可丢弃内存
+    init(purge:PurgeableFrame){
+        this.purgeFrame = Some(purge)
+    }
 }
 
 //多图缓存对象

@@ -75,14 +75,14 @@ class MemoryLruCache {
     }
 
     func removeAll(): Unit {
-        //这里要整体release
         synchronized(mtx) {
             for (item in this.lruCache.list) {
                 let cacheBean: ?CacheBean = item.getValue()
                 if (let Some(i) <- cacheBean) {
-                    let singlePixelMap = i.getPixelMap()
-                    if (let Some(j) <- singlePixelMap) {
-                        j.release()
+                    //Purgeable 帧需要销毁（释放 Purgeable 对象）
+                    let purgeFrame = i.getPurgeFrame()
+                    if (let Some(p) <- purgeFrame) {
+                        p.destroy()
                     }
                 }
             }
@@ -117,17 +117,17 @@ class MemoryLruCache {
     private func removeMemorySize(cacheBean: CacheBean): Unit {
         synchronized(mtx) {
             var totalSize: Int64 = 0
-            let singlePixelMap: ?PixelMap = cacheBean.getPixelMap()
-            if (let Some(i) <- singlePixelMap) {
-                //表示是单图
-                totalSize = Int64(i.getPixelBytesNumber())
-                i.release()
+            let purge = cacheBean.getPurgeFrame()
+            if (let Some(p) <- purge) {
+                //Purgeable 帧：按解码 RGBA 尺寸计账，并销毁释放（Purgeable 对象 + 编码副本）
+                totalSize = Int64(cacheBean.getMemoryWidth() * cacheBean.getMemoryHeight() * 4)
+                p.destroy()
             } else {
-                //接口单图
-                let arrData = cacheBean.getPicData()
-                if(let Some(i) <- arrData){
-                    totalSize = i.size
-                }
+            //非 Purgeable（非 avif 图片的占位标记）
+            let arrData = cacheBean.getPicData()
+            if (let Some(i) <- arrData) {
+                totalSize = i.size
+            }
             }
             this.currentMemory -= totalSize
         }
@@ -135,17 +135,19 @@ class MemoryLruCache {
 
     private func getMemoryDataSize(cacheBean: CacheBean): Int64 {
         var totalSize: Int64 = 0
-        let singlePixelMap: ?PixelMap = cacheBean.getPixelMap()
-        if (let Some(i) <- singlePixelMap) {
-            //表示是单图
-            totalSize = Int64(i.getPixelBytesNumber())
-        } else {
-            //表示是接口单图
+        let purge = cacheBean.getPurgeFrame()
+        if (let Some(p) <- purge) {
+            //Purgeable 帧：按解码 RGBA 尺寸计账
+            if (p.isValid) {
+                totalSize = Int64(cacheBean.getMemoryWidth() * cacheBean.getMemoryHeight() * 4)
+            }
+            return totalSize
+        }
+            //非 Purgeable（非 avif 图片的占位标记）
             let arrData = cacheBean.getPicData()
-            if(let Some(i) <- arrData){
+            if (let Some(i) <- arrData) {
                 totalSize = i.size
             }
-        }
         return totalSize
     }
 }

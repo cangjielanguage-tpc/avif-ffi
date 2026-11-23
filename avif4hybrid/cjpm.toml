@@ -20,6 +20,8 @@
   [ffi.c]
     [ffi.c.avif]
       path = "./libs/${ABI}"
+    [ffi.c.avifpurge]
+      path = "./libs/${ABI}"
 
 [target.aarch64-linux-ohos]
   compile-option = "-lace_napi.z -B \"${DEVECO_CANGJIE_HOME}/compiler/third_party/llvm/bin\" -B \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/sysroot/usr/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/clang/15.0.4/lib/aarch64-linux-ohos\" -L \"${DEVECO_OH_NATIVE_HOME}/llvm/lib/aarch64-linux-ohos\" -L \"${DEVECO_CANGJIE_HOME}/build/linux_ohos_aarch64_llvm/openssl\" --sysroot \"${DEVECO_OH_NATIVE_HOME}/sysroot\""

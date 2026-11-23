@@ -1,6 +1,7 @@
 package ohos_app_cangjie_avif4hybrid
 
 import ohos.ark_interop_macro.Interop
+import ohos.hilog.Hilog
 
 public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
     static init() {
@@ -275,13 +276,19 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
             if (code == 0) {
                 spawn {
                     if (count == 1) {
-                        let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
-                        cacheBean.setMemoryWidth(Int64(cacheWidth))
-                        cacheBean.setMemoryHeight(Int64(cacheHeight))
-                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
-                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
-                        cacheBean.setAlphaPresent(getAlphaPresent())
-                        memoryLruCache.put(mMemoryKey, cacheBean)
+                        // Purgeable Memory：解码 RGBA 存入可丢弃内存。
+                        // 内存缓存只保留 Purgeable（可丢弃解码帧）：
+                        // 内容被系统回收后不做重建，读取返回 None → 上层按未命中走磁盘缓存/重新解码。
+                        let pf = PurgeableFrame(color)
+                        if (pf.isValid) {
+                            let purgeBean: CacheBean = CacheBean(pf)
+                            purgeBean.setMemoryWidth(Int64(cacheWidth))
+                            purgeBean.setMemoryHeight(Int64(cacheHeight))
+                            purgeBean.setAlphaPresent(getAlphaPresent())
+                            memoryLruCache.put(mMemoryKey, purgeBean)
+                        } else {
+                            Hilog.error(0, "aviflog", "PurgeableFrame create failed, skip memory cache")
+                        }
                     }
 
                     if (let Some(j) <- encoded) {
@@ -358,13 +365,19 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
             if (code == 0) {
                 spawn {
                     if (count == 1) {
-                        let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
-                        cacheBean.setMemoryWidth(Int64(cacheWidth))
-                        cacheBean.setMemoryHeight(Int64(cacheHeight))
-                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
-                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
-                        cacheBean.setAlphaPresent(getAlphaPresent())
-                        memoryLruCache.put(mMemoryKey, cacheBean)
+                        // Purgeable Memory：解码 RGBA 存入可丢弃内存（frameIdx=0 与 nthFrameffi(0) 对应）
+                        // Purgeable only: content dropped by system = cache miss (no rebuild logic).
+                        // The existing caller flow (createWithThreadAsync) reads fileLruCache first.
+                        let pf = PurgeableFrame(color)
+                        if (pf.isValid) {
+                            let purgeBean: CacheBean = CacheBean(pf)
+                            purgeBean.setMemoryWidth(Int64(cacheWidth))
+                            purgeBean.setMemoryHeight(Int64(cacheHeight))
+                            purgeBean.setAlphaPresent(getAlphaPresent())
+                            memoryLruCache.put(mMemoryKey, purgeBean)
+                        } else {
+                            Hilog.error(0, "aviflog", "PurgeableFrame create failed, skip memory cache")
+                        }
                     }
 
                     if (let Some(j) <- encoded) {

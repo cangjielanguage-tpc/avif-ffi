@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\worker\\.ohos\\config\\default_avif-ffi_aavJlIJv6adJYJQBqdH4IUVFFTg5bzkir6lZSUObBiA=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001AEFC8EF689D1AA0E734BC0CF43EB8340ACF35915E340C9F5D80AFFB5E69724663041CC12526FF",
+          "profile": "C:\\Users\\worker\\.ohos\\config\\default_avif-ffi_aavJlIJv6adJYJQBqdH4IUVFFTg5bzkir6lZSUObBiA=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\worker\\.ohos\\config\\default_avif-ffi_aavJlIJv6adJYJQBqdH4IUVFFTg5bzkir6lZSUObBiA=.p12",
+          "storePassword": "0000001A8241BE8ED3C65D9ED3560FDA2924025C41C9C3C1538FF3F91DEE7A9C8065958DA032BA836459"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
