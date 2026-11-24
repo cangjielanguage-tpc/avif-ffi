@@ -37,7 +37,7 @@ internal import stdx.net.tls.TlsClientConfig
 import stdx.encoding.url.URL
 import stdx.net.http.HttpRequestBuilder
 
-var memoryLruCache:MemoryLruCache = MemoryLruCache(256, 10 * 1024 * 1024 * 1024)
+var memoryLruCache:MemoryLruCache = MemoryLruCache(1024, 10 * 1024 * 1024 * 1024)
 var fileLruCache:FileLruCache = FileLruCache(1500, 256 * 1024 * 1024)
 
 

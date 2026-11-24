@@ -1,5 +1,7 @@
 package ohos_app_cangjie_avif4hybrid
 
+import ohos.hilog.Hilog
+
 class MemoryLruCache {
     var maxMemory: Int64 = 0
     var currentMemory: Int64 = 0
@@ -10,6 +12,11 @@ class MemoryLruCache {
     let defaultMaxMemorySize: Int64 = 10 * 1024 * 1024 * 1024;
     let defaultMemorySize: Int64 = 1024 * 1024 * 1024;
     private let mtx = ReentrantMutex()
+    // 统计：查询 / 有效命中 / put 计数（均在 mtx 内更新）
+    var queryCount: Int64 = 0      // 查询 LRU 内存缓存次数
+    var validHitCount: Int64 = 0   // 命中且内存缓存有效的次数（Purgeable 未被回收 / picData 有效）
+    var putCount: Int64 = 0        // put 成功次数（每 30 的整数倍触发一次容量统计）
+    let statInterval: Int64 = 30
 
     init(size: Int64, memory: Int64) {
         if (size <= 0 || size > this.defaultMaxSize) {
@@ -54,12 +61,27 @@ class MemoryLruCache {
             this.lruCache.put(key, value)
             this.currentMemory += size
             trimToSize()
+            putCount += 1
+            if (putCount % statInterval == 0) {
+                // 每 30 的整数倍 put：遍历列表统计有效内存缓存总大小
+                logMemoryStat()
+            }
         }
     }
 
     func get(key: String): ?CacheBean {
          synchronized(mtx) {
-            return this.lruCache.get(key)
+            queryCount += 1
+            let result = this.lruCache.get(key)
+            if (let Some(b) <- result) {
+                // 命中且有效（Purgeable 帧未被系统回收 / picData 有效）才计为有效命中
+                if (getMemoryDataSize(b) > 0) {
+                    validHitCount += 1
+                }
+            }
+            // 统计输出：有效命中次数 / 查询次数
+            Hilog.info(0, "memCacheStat", "query=${queryCount}, validHit=${validHitCount}, hitRate=${hitRatePercent()}%")
+            return result
          }
     }
 
@@ -112,6 +134,35 @@ class MemoryLruCache {
                 this.lruCache.remove(delkey)
             }
         }
+    }
+
+    // 每 30 次成功 put 触发：遍历 LRU 列表统计“有效”内存缓存总大小
+    // （Purgeable 帧按 isValid 计入，已被系统回收的条目计 0；非 Purgeable 按 picData.size）
+    func logMemoryStat(): Unit {
+        synchronized(mtx) {
+            var totalSize: Int64 = 0
+            var validCount: Int64 = 0
+            var totalCount: Int64 = 0
+            for (item in this.lruCache.list) {
+                let cacheBean: ?CacheBean = item.getValue()
+                if (let Some(i) <- cacheBean) {
+                    totalCount += 1
+                    let sz = getMemoryDataSize(i)
+                    if (sz > 0) {
+                        validCount += 1
+                        totalSize += sz
+                    }
+                }
+            }
+            Hilog.info(0, "memCacheStat", "stat#${putCount}: validEntries=${validCount}/${totalCount}, validMemSize=${totalSize} bytes, trackedMem=${this.currentMemory} bytes, hit=${validHitCount}/${queryCount} (rate ${hitRatePercent()}%)")
+        }
+    }
+
+    private func hitRatePercent(): Int64 {
+        if (queryCount <= 0) {
+            return 0
+        }
+        return validHitCount * 100 / queryCount
     }
 
     private func removeMemorySize(cacheBean: CacheBean): Unit {
