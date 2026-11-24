@@ -37,6 +37,11 @@ foreign func nthFrame(decoder: Int64, index: Int32, pixels: CPointer<UInt8>, pic
 foreign func decode(result: CPointer<UInt8>, length: Int32, pixels: CPointer<UInt8>, picwidth: Int32, picheight: Int32,
     stride: Int32, formatvalue: Int32, threads: Int32): Bool
 
+// SEC-H3/H：解码尺寸上限——AVIF 头（ispe）声明的宽高与开发者透传值均为外部输入。
+// 维度上限 16384：覆盖 200MP 相机照片（16320×12240）、8K、主流全景图；总像素上限 67M（≈256MB RGBA）是真正的内存闸门。
+const MAX_DIMENSION: Int64 = 16384
+const MAX_PIXELS: Int64 = 8192 * 8192
+
 public class AvifDecoder {
     var decoder: Int64 = 0
 
@@ -57,6 +62,7 @@ public class AvifDecoder {
                 var result: CPointer<DecoderInfo> = createDecoder(i.pointer, Int32(encoded.size), threads)
                 if (result.isNull()) {
                     releaseArrayRawData<UInt8>(i)
+                    handle = None    // 防止二次释放（SEC-M4 顺带修复）
                     return DecoderInfo(0, CPointer<Info>())
                 }
                 let res: DecoderInfo = result.read()
@@ -72,6 +78,7 @@ public class AvifDecoder {
         unsafe {
             if(let Some(i) <- handle){
                 releaseArrayRawData<UInt8>(i)
+                handle = None    // 防止二次释放
             }
             destroyDecoder(address)
         }
@@ -82,25 +89,44 @@ public class AvifDecoder {
         decoder = decoderInfo.address
         let cpointInfo: CPointer<Info> = decoderInfo.info
         unsafe {
-            if (decoder != 0) {
-                let info: Info = cpointInfo.read()
-                width = Int64(info.width)
-                height = Int64(info.height)
-                depth = Int64(info.depth)
-                alphaPresent = info.alphaPresent
-                frameCount = Int64(info.frameCount)
-                repetitionCount = Int64(info.repetitionCount)
-                let durationsPoint: CPointer<Float64> = info.frameDurations
-                frameDurations = Array<Float64>(frameCount, repeat: 0.0)
-                if (let Some(j) <- frameDurations) {
-                    for (i in 0..frameCount) {
-                        let duration: Float64 = durationsPoint.read(Int64(i)) //对象直接read() 数组read(0) read(1) read(2) read(3) ...
-                        j[i] = duration
+            // 供异常路径释放的 native 资源（SEC-M4 修复：构造中断时的泄漏）
+            var durationsPoint: CPointer<Float64> = CPointer<Float64>()
+            try {
+                if (decoder != 0) {
+                    let info: Info = cpointInfo.read()
+                    width = Int64(info.width)
+                    height = Int64(info.height)
+                    depth = Int64(info.depth)
+                    alphaPresent = info.alphaPresent
+                    // SEC-H3 修复：宽高来自外部文件头（ispe），使用前必须校验上限；
+                    // 超限 = 异常/恶意输入：释放全部 native 资源后按解码失败返回（上层走下一层缓存）
+                    if (Int64(info.width) > MAX_DIMENSION || Int64(info.height) > MAX_DIMENSION) {
+                        Hilog.error(0, "aviflog", "image dimensions rejected: ${info.width}x${info.height}")
+                        encoded3Free(info.frameDurations)
+                        encodedFree(cpointInfo)
+                        destroyDecoderffi(decoder)
+                        decoder = 0
+                        return
                     }
+                    frameCount = Int64(info.frameCount)
+                    repetitionCount = Int64(info.repetitionCount)
+                    durationsPoint = info.frameDurations
+                    frameDurations = Array<Float64>(frameCount, repeat: 0.0)
+                    if (let Some(j) <- frameDurations) {
+                        for (i in 0..frameCount) {
+                            let duration: Float64 = durationsPoint.read(Int64(i)) //依次read() 或read(0) read(1) read(2) read(3) ...
+                            j[i] = duration
+                        }
+                    }
+                    encoded3Free(durationsPoint)
                 }
                 encodedFree(cpointInfo)
+            } catch (e: Exception) {
+                Hilog.error(0, "aviflog", "AvifDecoder init failed, release resources: ${e}")
+                // SEC-M4 修复：构造中途异常（OOM/转换失败等）必须释放 native decoder + pin + Info/帧时长，防止泄漏
+                destroyDecoderffi(decoder)
+                decoder = 0
                 encoded3Free(durationsPoint)
-            }else{
                 encodedFree(cpointInfo)
             }
         }
@@ -218,8 +244,16 @@ public class AvifDecoder {
     }
 
     public func nextFrameffi(color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
-        if(color.size == 0){
-            Hilog.error(0,"aviflog","the size of color array must > 0")
+        // SEC-M1 修复：公开 API 校验调用方参数——
+        // 1) 拒绝非正宽高；2) 拒绝超上限宽高（与 SEC-H3 闸门共用 MAX_DIMENSION，防算术溢出）；
+        // 3) color 缓冲必须 >= 宽×高×4（Int64 计算），防止 native 侧对仓颉数组底层内存越界写（堆损坏）
+        if (imageWidth <= 0 || imageHeight <= 0 ||
+            Int64(imageWidth) > MAX_DIMENSION || Int64(imageHeight) > MAX_DIMENSION) {
+            Hilog.error(0, "aviflog", "invalid image dimensions: ${imageWidth}x${imageHeight}")
+            return -1
+        }
+        if (Int64(color.size) < Int64(imageWidth) * Int64(imageHeight) * 4) {
+            Hilog.error(0, "aviflog", "color buffer too small: ${color.size} < ${Int64(imageWidth) * Int64(imageHeight) * 4}")
             return -1
         }
         unsafe {
@@ -233,8 +267,14 @@ public class AvifDecoder {
     }
 
     public func nthFrameffi(index: Int32, color: Array<UInt8>, imageWidth: Int32, imageHeight: Int32): Int32 {
-        if(color.size == 0){
-            Hilog.error(0,"aviflog","the size of color array must > 0")
+        // SEC-M1 修复：同 nextFrameffi——参数与缓冲校验，防止 native 越界写
+        if (imageWidth <= 0 || imageHeight <= 0 ||
+            Int64(imageWidth) > MAX_DIMENSION || Int64(imageHeight) > MAX_DIMENSION) {
+            Hilog.error(0, "aviflog", "invalid image dimensions: ${imageWidth}x${imageHeight}")
+            return -1
+        }
+        if (Int64(color.size) < Int64(imageWidth) * Int64(imageHeight) * 4) {
+            Hilog.error(0, "aviflog", "color buffer too small: ${color.size} < ${Int64(imageWidth) * Int64(imageHeight) * 4}")
             return -1
         }
         unsafe {

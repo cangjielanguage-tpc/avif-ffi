@@ -89,17 +89,7 @@ class MemoryLruCache {
     }
 
     func removeAll(): Unit {
-        //这里要整体release
         synchronized(mtx) {
-            for (item in this.lruCache.list) {
-                let cacheBean: ?CacheBean = item.getValue()
-                if (let Some(i) <- cacheBean) {
-                    let singlePixelMap = i.getPixelMap()
-                    if (let Some(j) <- singlePixelMap) {
-                        j.release()
-                    }
-                }
-            }
             this.lruCache.clear()
             this.currentMemory = 0
         }
@@ -128,20 +118,13 @@ class MemoryLruCache {
         }
     }
 
+    // 计账：缓存条目只存解码字节 color（PixelMap 由显示方持有，不在缓存生命周期内）
     private func removeMemorySize(cacheBean: CacheBean): Unit {
         synchronized(mtx) {
             var totalSize: Int64 = 0
-            let singlePixelMap: ?PixelMap = cacheBean.getPixelMap()
-            if (let Some(i) <- singlePixelMap) {
-                //表示是单图
-                totalSize = Int64(i.getPixelBytesNumber())
-                i.release()
-            } else {
-                //接口单图
-                let arrData = cacheBean.getPicData()
-                if(let Some(i) <- arrData){
-                    totalSize = i.size
-                }
+            let arrData = cacheBean.getPicData()
+            if (let Some(i) <- arrData) {
+                totalSize = i.size
             }
             this.currentMemory -= totalSize
         }
@@ -149,16 +132,9 @@ class MemoryLruCache {
 
     private func getMemoryDataSize(cacheBean: CacheBean): Int64 {
         var totalSize: Int64 = 0
-        let singlePixelMap: ?PixelMap = cacheBean.getPixelMap()
-        if (let Some(i) <- singlePixelMap) {
-            //表示是单图
-            totalSize = Int64(i.getPixelBytesNumber())
-        } else {
-            //表示是接口单图
-            let arrData = cacheBean.getPicData()
-            if(let Some(i) <- arrData){
-                totalSize = i.size
-            }
+        let arrData = cacheBean.getPicData()
+        if (let Some(i) <- arrData) {
+            totalSize = i.size
         }
         return totalSize
     }

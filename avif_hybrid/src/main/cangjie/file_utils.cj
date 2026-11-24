@@ -69,12 +69,16 @@ class FileUtils {
         let length = FileFs.stat(path).size
         let buf = Array<UInt8>(length,repeat: 0)
         let fd = FileFs.open(path, mode: READ_ONLY.mode).fd
-        FileFs.read(fd, buf)
-        FileFs.close(fd)
+        // SEC-L4 fix: close 移入 finally——read 中途抛异常 fd 不再泄漏
+        try {
+            FileFs.read(fd, buf)
+        } finally {
+            FileFs.close(fd)
+        }
         return buf
       }
     } catch (e: Exception) {
-        Hilog.error(0, "readFileSync", e.toString())
+        Hilog.error(0, "readFileSync", "read failed")
     }
     return None
   }
@@ -88,8 +92,12 @@ class FileUtils {
   func writeDataSync(path: String, content: Array<UInt8>): Bool {
     try {
       let file = FileStd(path,ReadWrite)
- 	  file.write(content)
-      file.close()
+      // SEC-L4 fix: close 移入 finally——write 中途抛异常 fd 不再泄漏
+      try {
+          file.write(content)
+      } finally {
+          file.close()
+      }
       return true
     }catch (e: Exception) {
       Hilog.error(0, "writeDataSync", e.toString())
@@ -100,10 +108,14 @@ class FileUtils {
   func writeDataSync(path: String, wh:Array<UInt8>,content: Array<UInt8>): Bool {
     try {
       let fd = FileFs.open(path, mode:(READ_WRITE.mode | CREATE.mode | APPEND.mode)).fd
-      FileFs.write(fd, wh)
-      FileFs.write(fd, content)
-      FileFs.fsync(fd)
-      FileFs.close(fd)
+      // SEC-L4 fix: close 移入 finally——write/fsync 中途抛异常（磁盘满等）fd 不再泄漏
+      try {
+          FileFs.write(fd, wh)
+          FileFs.write(fd, content)
+          FileFs.fsync(fd)
+      } finally {
+          FileFs.close(fd)
+      }
       return true
     }catch (e: Exception) {
       Hilog.error(0, "writeDataSync", e.toString())

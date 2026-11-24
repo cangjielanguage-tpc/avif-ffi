@@ -25,6 +25,7 @@ extend Image{
                 let value:Bool = isBool
                 draggable.call(value.toJSValue(ctx))
             } catch (e: Exception) {
+               Hilog.error(0,"avifInteropDraggableErrInfo","e=${e.toString()}")
             }
         return this
     }
@@ -55,6 +56,7 @@ extend Image{
                 }
                 objectFit.call(value.toJSValue(ctx))
             } catch (e: Exception) {
+                Hilog.error(0,"avifInteropObjectFitErrInfo","e=${e.toString()}")
             }
         return this
     }

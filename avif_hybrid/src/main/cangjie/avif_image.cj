@@ -4,6 +4,7 @@ internal import ohos.component.Image
 internal import ohos.component.ImageFit
 internal import ohos.hilog.Hilog
 import ohos.concurrency.launch
+import std.sync.AtomicBool
 import ohos.component.CJImageComplete
 internal import ohos.file_fs.FileFs
 internal import ohos.ark_interop.JSContext
@@ -30,7 +31,6 @@ internal import std.convert.Parsable
 internal import ohos.device_info.DeviceInfo
 internal import ohos.base.LengthProp
 internal import stdx.net.http.ClientBuilder
-internal import stdx.net.tls.common.{CertificateVerifyMode}
 internal import stdx.net.tls.TlsClientConfig
 internal import stdx.crypto.digest.MD5
 internal import stdx.encoding.hex.toHexString
@@ -120,10 +120,12 @@ public class AvifImage {
 
     //放在外面 利于回收
     let pixelMapList: ArrayList<PixelMap> = ArrayList<PixelMap>()
+    // SEC-M2：pixelMapList 的 add/遍历释放 分属工作线程与 UI 线程，需互斥
+    let listMtx = ReentrantMutex()
     //判断是否是单帧 对后面释放pixelmap有用
     var isSinglePic: Bool = true
     //判断是否结束循环显示
-    var isLoop: Bool = true
+    let isLoop = AtomicBool(true)
 
     var memoryKey = ""
     var mDiskKey = ""
@@ -135,11 +137,6 @@ public class AvifImage {
 
         //多图没有内存缓存，只有单图有，原因多图做内存缓存 管理池很快就满了
         if (let Some(map) <- memPixelMap) {
-            //如果有值,组件这边保存的是pixelMap,接口那边因为互操作保存的是Array<UInt8>
-            if(let Some(i) <- map.getPixelMap()){
-                pixelMap = i
-                return
-            }
             if(let Some(i) <- map.getPicData()){
                 try{
                     //如果是接口那边有字节数据的内存缓存，用仓颉接口转换
@@ -195,15 +192,15 @@ public class AvifImage {
             }
             return
         } else if(this.uri.toAsciiLower().startsWith("rawfile://")){
-            let fileName = String(this.uri.toRuneArray().slice(10,this.uri.size-10))
+            let fileName = this.uri.removePrefix("rawfile://")
             let imageBuffer = getImageFromRawFile(fileName)
             dealWithBuffer(imageBuffer)
         } else if(this.uri.toAsciiLower().startsWith("media://")){
-            let mediaName = String(this.uri.toRuneArray().slice(8,this.uri.size-8))
+            let mediaName = this.uri.removePrefix("media://")
             let imageBuffer = getImageFromMedia(mediaName)
             dealWithBuffer(imageBuffer)
         } else if(this.uri.toAsciiLower().startsWith("file://")){
-            let localFilePath = String(this.uri.toRuneArray().slice(7,this.uri.size-7))
+            let localFilePath = this.uri.removePrefix("file://")
             let imageBuffer: ?Array<UInt8> = FileUtils.getInstance().readFileSync(localFilePath)
             dealWithBuffer(imageBuffer)
         }else{
@@ -214,17 +211,28 @@ public class AvifImage {
     }
 
     protected override func aboutToDisappear() {
-        isLoop = false
+        isLoop.store(false)
         if(let Some(i) <- fut){
             i.cancel()
         }
-        //多图情况pixelmap得释放
-        if(!isSinglePic){
-            for(i in 0..pixelMapList.size){
-                let pixelmap:?PixelMap = pixelMapList.get(i)
-                if(let Some(j) <- pixelmap){
-                    j.release()
+        //单帧：展示用 PixelMap 由组件自己持有并负责释放（SEC-M3 修复：缓存不再持有展示对象）
+        if(isSinglePic){
+            this.pixelMap.release()
+        }
+        //多帧：SEC-M2 修复——与工作线程的 add 互斥；快照后锁外释放
+        else{
+            var released: ArrayList<PixelMap> = ArrayList<PixelMap>()
+            synchronized(listMtx) {
+                for(i in 0..pixelMapList.size){
+                    let pixelmap:?PixelMap = pixelMapList.get(i)
+                    if(let Some(j) <- pixelmap){
+                        released.add(j)
+                    }
                 }
+                pixelMapList.clear()
+            }
+            for(j in released) {
+                j.release()
             }
         }
     }
@@ -262,30 +270,66 @@ public class AvifImage {
                 }
                 let imageWidth = imageTempWidth
                 let imageHeight = imageTempHeight
+                // SEC-H3 修复：尺寸上限校验（ispe 与开发者透传值共用；Int64 乘法防溢出）
+                if (imageWidth > MAX_DIMENSION || imageHeight > MAX_DIMENSION ||
+                    imageWidth * imageHeight > MAX_PIXELS) {
+                    Hilog.error(0, "aviflog", "image dimensions rejected: ${imageWidth}x${imageHeight}")
+                    // SEC-H fix: 拒绝路径必须释放 native 解码器（含 pin 住的编码缓冲）。
+                    // 此时尚未进入任何 spawn，j 的所有权仍在当前线程，直接释放即可；
+                    // 否则每次“加载—拒绝”泄漏一份解码器 + 编码缓冲（外部输入驱动的 native 泄漏）。
+                    j.release()
+                    return
+                }
                 if (frameCount <= 0) {
                     Hilog.error(0, "aviflog","frameCount can not be <= 0")
+                    // SEC-H fix: 原先只记日志后落到函数尾部，解码器同样泄漏；补释放后返回
+                    j.release()
+                    return
                 } else {
                     if (frameCount == 1) {
                         //单帧图
                         spawn {
-                            let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
-                            j.nextFrameffi(colors, Int32(imageWidth), Int32(imageHeight))
-                            //根据生成胡color重新生成pixelmap
-                            let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                            let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                            let tempPixelMap = createPixelMap(colors, opts)
-                            launch {
-                                pixelMap = tempPixelMap
+                            // SEC-H fix: 256MiB 级 colors 分配移入 try——分配失败（OOM）时 finally
+                            // 仍会执行，解码器与 pin 住的编码缓冲不泄漏（#70 原缺陷的未闭合点）
+                            var colors: Array<UInt8> = Array<UInt8>()
+                            try {
+                                colors = Array<UInt8>(Int64(imageWidth * imageHeight * 4), repeat: 0)
+                                // SEC-L3 fix: 校验解码返回码——失败时跳过 PixelMap 创建与缓存写入，
+                                // 避免全黑帧污染内存/磁盘缓存
+                                let code: Int32 = j.nextFrameffi(colors, Int32(imageWidth), Int32(imageHeight))
+                                if (code != 0) {
+                                    Hilog.error(0, "aviflog", "nextFrameffi failed, code: ${code}")
+                                    return
+                                }
+                                // create pixelmap from decoded colors
+                                let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                                let opts: InitializationOptions = InitializationOptions(editable: true, pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                                let tempPixelMap = createPixelMap(colors, opts)
+                                launch {
+                                    pixelMap = tempPixelMap
+                                }
+                                // cache to disk (http only) and memory
+                                let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
+                                if (!fileExist && this.uri.toAsciiLower().startsWith("http")) {
+                                    fileLruCache.put(mDiskKey, i.size, i)
+                                }
+                                // SEC-M3 fix: cache stores decoded BYTES, not the displayed PixelMap object.
+                                // The component owns its own PixelMap; evicting cached bytes can never
+                                // affect a PixelMap currently being rendered (no use-after-release).
+                                let cacheBean: CacheBean = CacheBean(colors)
+                                cacheBean.setMemoryWidth(imageWidth)
+                                cacheBean.setMemoryHeight(imageHeight)
+                                cacheBean.setAlphaPresent(j.getAlphaPresent())
+                                memoryLruCache.put(memoryKey, cacheBean)
+                            } catch (e: Exception) {
+                                // SEC-M4 fix: release native decoder even when mid-steps throw (OOM / createPixelMap validation failure)
+                                Hilog.error(0, "aviflog", "single frame decode failed: ${e}")
+                            } catch (e: Error) {
+                                // SEC-H fix: OOM 属 Error 而非 Exception（scope.cj:33 在库先例），补一档保证日志与优雅收尾
+                                Hilog.error(0, "aviflog", "single frame decode failed (error): ${e}")
+                            } finally {
+                                j.release()
                             }
-                            //保存一份到本地存储 单图需要本地缓存
-                            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + mDiskKey)
-                            if(!fileExist && this.uri.toAsciiLower().startsWith("http")){
-                                 fileLruCache.put(mDiskKey,i.size,i)
-                            }
-                            //这里生成了就要保存到内存中 单图需要内存缓存
-                            let cacheBean:CacheBean = CacheBean(tempPixelMap,Option<Array<UInt8>>.None)
-                            memoryLruCache.put(memoryKey, cacheBean)
-                            j.release()
                         }
                         return
                     } else {
@@ -302,36 +346,62 @@ public class AvifImage {
                          }
                         if (j.getFrameDurations().isNone()) {
                             Hilog.error(0, "aviflog","FrameDurations can not be None")
+                            // SEC-H fix: 多帧校验失败路径释放（fut 尚未创建，所有权未转移，安全）
+                            j.release()
                             return
                         }
                         if (j.getFrameDurations().getOrThrow().size != frameCount) {
                             Hilog.error(0, "aviflog","FrameDurations should be equal to frameCount")
+                            // SEC-H fix: 同上，fut 尚未创建，安全释放
+                            j.release()
                             return
                         }
                         let repeatCount:Int64 = j.getRepetitionCount()
                         let durationList: Array<Float64> = j.getFrameDurations().getOrThrow()
                         fut =  spawn {
-                            while (isLoop) {
+                            while (isLoop.load()) {
                                 if (pixelMapList.size != frameCount) {
-                                    for (k in 0..frameCount) {
-                                        if (Thread.currentThread.hasPendingCancellation) {
-                                            j.release()
-                                            return
+                                    // SEC-H fix: 首轮解码循环整体受 try/catch 保护——循环内 256MiB 级分配 /
+                                    // createPixelMap 抛异常时 j 不再泄漏（释放后结束工作线程）；
+                                    // 取消路径（循环内 return）不经 catch，无双释放。
+                                    try {
+                                        for (k in 0..frameCount) {
+                                            if (Thread.currentThread.hasPendingCancellation) {
+                                                j.release()
+                                                return
+                                            }
+                                            let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
+                                            let code: Int32 = j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
+                                            // SEC-L3 fix: 校验解码返回码——失败帧不产生黑图；解码器仍被后续帧使用，
+                                            // 失败即释放并结束工作线程（否则 pixelMapList 永不达 frameCount，完成释放点失效）
+                                            if (code != 0) {
+                                                Hilog.error(0, "aviflog", "nthFrameffi failed at frame ${k}, code: ${code}")
+                                                j.release()
+                                                return
+                                            }
+                                            let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
+                                            let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
+                                            let tempPixelMap = createPixelMap(colors, opts)
+                                            launch {
+                                                pixelMap = tempPixelMap
+                                            }
+                                            sleep(durationList[Int64(k)] * Duration.second)
+                                            synchronized(listMtx) {
+                                                pixelMapList.add(tempPixelMap)
+                                            }
+                                            if(pixelMapList.size == frameCount){
+                                                 j.release()
+                                                 //多图不需要内存缓存
+                                            }
                                         }
-                                        let colors: Array<UInt8> = Array<UInt8>(Int64(imageWidth * imageHeight * 4),repeat: 0)
-                                        j.nthFrameffi(Int32(k), colors, Int32(imageWidth), Int32(imageHeight))
-                                        let size2: Size = Size(width: Int32(imageWidth), height: Int32(imageHeight))
-                                        let opts: InitializationOptions = InitializationOptions(editable: true,pixelFormat: PixelMapFormat.RGBA_8888, size: size2)
-                                        let tempPixelMap = createPixelMap(colors, opts)
-                                        launch {
-                                            pixelMap = tempPixelMap
-                                        }
-                                        sleep(durationList[Int64(k)] * Duration.second)
-                                        pixelMapList.add(tempPixelMap)
-                                        if(pixelMapList.size == frameCount){
-                                             j.release()
-                                             //多图不需要内存缓存
-                                        }
+                                    } catch (e: Exception) {
+                                        Hilog.error(0, "aviflog", "multi frame decode failed: ${e}")
+                                        j.release()
+                                        return
+                                    } catch (e: Error) {
+                                        Hilog.error(0, "aviflog", "multi frame decode failed (error): ${e}")
+                                        j.release()
+                                        return
                                     }
                                 } else {
                                     //这里做内存缓存处理

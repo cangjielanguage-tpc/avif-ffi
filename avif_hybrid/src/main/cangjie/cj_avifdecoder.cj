@@ -1,6 +1,7 @@
 package avif4cj
 
 import ohos.ark_interop_macro.Interop
+import std.sync.ReentrantMutex
 
 public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
     static init() {
@@ -91,7 +92,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 return false
             }
         } else if (uri.toAsciiLower().startsWith("rawfile://")) {
-            let fileName = String(uri.toRuneArray().slice(10,uri.size-10))
+            let fileName = uri.removePrefix("rawfile://")
             let imageBuffer = getImageFromRawFile(fileName)
             if (let Some(i) <- imageBuffer) {
                 let res = createLoginc(i, threads)
@@ -101,7 +102,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 return false
             }
         } else if (uri.toAsciiLower().startsWith("media://")) {
-            let mediaName = String(uri.toRuneArray().slice(8,uri.size-8))
+            let mediaName = uri.removePrefix("media://")
             let imageBuffer = getImageFromMedia(mediaName)
             if (let Some(i) <- imageBuffer) {
                 let res = createLoginc(i, threads)
@@ -111,7 +112,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
                 return false
             }
         } else if (uri.toAsciiLower().startsWith("file://")) {
-            let localFilePath = String(uri.toRuneArray().slice(7,uri.size-7))
+            let localFilePath = uri.removePrefix("file://")
             let imageBuffer: ?Array<UInt8> = FileUtils
                 .getInstance()
                 .readFileSync(localFilePath)
@@ -201,143 +202,177 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         return 0
     }
 
-    public func nextFrameffiAsync(imageWidth: Int32, imageHeight: Int32): ReturnValue {
+    // ===== SEC-M2 修复：解码流程同步化 =====
+    // 同一 decoder 不允许并发解码或边解码边释放：
+    // 快照（持锁）→ 解码（锁外，release 已被推迟）→ 收尾（持锁处理释放请求）
+    private func decodeFrame(imageWidth: Int32, imageHeight: Int32, nth: Bool, index: Int32): ReturnValue {
         let value: ReturnValue = ReturnValue()
         if (imageWidth < 0 || imageHeight < 0) {
             value.isSuccess = false
             return value
         }
-        let count: Int64 = getFrameCount()
-        if (count <= 0) {
-            value.isSuccess = false
-            return value
-        }
-        mDiskKey = getmd5key(this
-            .mUri
-            .toArray())
-        if (count == 1) {
-            mMemoryKey = getmd5key(this
-                .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight))
-        }
-        var realPicWidth = imageWidth
-        var realPicHeight = imageHeight
-        if (imageWidth == 0) {
-            realPicWidth = Int32(getWidth())
-        }
-        if (imageHeight == 0) {
-            realPicHeight = Int32(getHeight())
-        }
-        let color: Array<Byte> = Array<Byte>(Int64(realPicWidth * realPicHeight * 4), repeat: 0)
-        if (let Some(i) <- decoder) {
-            value.code = i.nextFrameffi(color, realPicWidth, realPicHeight)
-            let cacheWidth = realPicWidth
-            let cacheHeight = realPicHeight
-            if (value.code == 0) {
-                spawn {
-                    if (count == 1) {
-                        let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
-                        cacheBean.setMemoryWidth(Int64(cacheWidth))
-                        cacheBean.setMemoryHeight(Int64(cacheHeight))
-                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
-                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
-                        cacheBean.setAlphaPresent(getAlphaPresent())
-                        memoryLruCache.put(mMemoryKey, cacheBean)
-                    }
-
-                    if (let Some(j) <- encoded) {
-                        let fileExist = FileUtils
-                            .getInstance()
-                            .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
-                            fileLruCache.put(mDiskKey, j.size, j)
-                        }
-                    }
-                }
-                value.isSuccess = true
-                value.color = color
-            } else {
+        var dec: Option<AvifDecoder> = None
+        var count: Int64 = 0
+        var width = imageWidth
+        var height = imageHeight
+        var alpha = false
+        synchronized(mtx) {
+            // 并发解码拒绝 + 释放请求拒绝：同一 decoder 串行使用
+            if (decoder.isNone() || releasePending || decoding) {
                 value.isSuccess = false
+                return value
             }
-            return value
-        } else {
+            let i = decoder.getOrThrow()
+            dec = decoder
+            count = i.getFrameCount()
+            if (count <= 0) {
+                value.isSuccess = false
+                return value
+            }
+            if (imageWidth == 0) {
+                width = Int32(i.getWidth())
+            }
+            if (imageHeight == 0) {
+                height = Int32(i.getHeight())
+            }
+            // SEC-H3 修复：尺寸/乘积校验（imageWidth/Height 为开发者透传值，可能来自外部输入；
+            // Int64 乘法防 Int32 溢出）——同一 decoder 串行使用的前提下载入失败返回
+            if (width > Int32(MAX_DIMENSION) || height > Int32(MAX_DIMENSION) ||
+                Int64(width) * Int64(height) > MAX_PIXELS) {
+                Hilog.error(0, "aviflog", "image dimensions rejected: ${width}x${height}")
+                value.isSuccess = false
+                value.code = -1
+                return value
+            }
+            alpha = i.getAlphaPresent()
+            decoding = true
+        }
+        var color: Array<Byte> = Array<Byte>()
+        var code: Int32 = -1
+        var ok = false
+        // SEC-M fix: 锁外解码段（大缓冲分配 + FFI）包 try/finally——任何异常路径都在
+        // finally 内重新进锁复位 decoding，并按 releasePending 完成销毁，
+        // 杜绝“decoding 卡 true → 对象永久不可用 / release() 永不销毁”的状态机破坏
+        try {
+            color = Array<Byte>(Int64(width) * Int64(height) * 4, repeat: 0)
+            if (let Some(i) <- dec) {
+                if (!nth) {
+                    code = i.nextFrameffi(color, width, height)
+                } else if (count > 1) {
+                    code = i.nthFrameffi(index, color, width, height)
+                } else {
+                    code = i.nthFrameffi(0, color, width, height)
+                }
+            }
+        } finally {
+            synchronized(mtx) {
+                decoding = false
+                if (releasePending) {
+                    // release 已请求：解码结束后立即销毁，本次返回失败
+                    if (let Some(i) <- dec) {
+                        i.release()
+                    }
+                    decoder = None
+                    encoded = None
+                } else if (code == 0) {
+                    ok = true
+                }
+            }
+        }
+        if (!ok) {
             value.isSuccess = false
+            value.code = code
             return value
         }
+        // 缓存写入（key 与首建语义一致：使用调用方传入的宽高，而非解析后的实际宽高，
+        // 与 getMemoryCache(uri, 0, 0) 的读取 key 对齐）
+        if (count == 1) {
+            let cacheBean: CacheBean = CacheBean(color)
+            // bean 记录解析后的真实数据宽高（imageWidth/Height 为 0 时已解析为 decoder 实际尺寸）；
+            // key 仍用调用方传入的宽高对齐（与 getMemoryCache(uri, 0, 0) 的读取一致）
+            cacheBean.setMemoryWidth(Int64(width))
+            cacheBean.setMemoryHeight(Int64(height))
+            cacheBean.setAlphaPresent(alpha)
+            let memKey = getmd5key(mUri.toArray(), Int64(imageWidth), Int64(imageHeight))
+            memoryLruCache.put(memKey, cacheBean)
+        }
+        let diskKey = getmd5key(mUri.toArray())
+        if (let Some(j) <- encoded) {
+            let fileExist = FileUtils.getInstance().exist(fileLruCache.path + diskKey)
+            if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
+                fileLruCache.put(diskKey, j.size, j)
+            }
+        }
+        value.isSuccess = true
+        value.code = code
+        value.color = color
+        return value
+    }
+
+    public func nextFrameffiAsync(imageWidth: Int32, imageHeight: Int32): ReturnValue {
+        return decodeFrame(imageWidth, imageHeight, false, 0)
     }
 
     public func nthFrameffiAsync(index: Int32, imageWidth: Int32, imageHeight: Int32): ReturnValue {
-        let value: ReturnValue = ReturnValue()
-        if (imageWidth < 0 || imageHeight < 0) {
-            value.isSuccess = false
-            return value
-        }
-        let count: Int64 = getFrameCount()
-        if (count <= 0) {
-            value.isSuccess = false
-            return value
-        }
-        mDiskKey = getmd5key(this
-            .mUri
-            .toArray())
-        if (count == 1) {
-            mMemoryKey = getmd5key(this
-                .mUri
-                .toArray(), Int64(imageWidth), Int64(imageHeight))
-        }
-        var realPicWidth = imageWidth
-        var realPicHeight = imageHeight
-        if (imageWidth == 0) {
-            realPicWidth = Int32(getWidth())
-        }
-        if (imageHeight == 0) {
-            realPicHeight = Int32(getHeight())
-        }
-        let color: Array<Byte> = Array<Byte>(Int64(realPicWidth * realPicHeight * 4), repeat: 0)
-        if (let Some(i) <- decoder) {
-            if (count == 1) {
-                value.code = i.nthFrameffi(0, color, realPicWidth, realPicHeight)
-            } else {
-                value.code = i.nthFrameffi(index, color, realPicWidth, realPicHeight)
-            }
-            let cacheWidth = realPicWidth
-            let cacheHeight = realPicHeight
-            if (value.code == 0) {
-                spawn {
-                    if (count == 1) {
-                        let cacheBean: CacheBean = CacheBean(Option<PixelMap>.None, color)
-                        cacheBean.setMemoryWidth(Int64(cacheWidth))
-                        cacheBean.setMemoryHeight(Int64(cacheHeight))
-                        // 注意：alphaPremultiplied 已改为 AVIF_FALSE（非预乘模式）
-                        // 需要正确传递 alpha 状态，以避免透明图片显示全黑或灰色
-                        cacheBean.setAlphaPresent(getAlphaPresent())
-                        memoryLruCache.put(mMemoryKey, cacheBean)
-                    }
+        return decodeFrame(imageWidth, imageHeight, true, index)
+    }
 
-                    if (let Some(j) <- encoded) {
-                        let fileExist = FileUtils
-                            .getInstance()
-                            .exist(fileLruCache.path + mDiskKey)
-                        if (!fileExist && mUri.toAsciiLower().startsWith("http")) {
-                            fileLruCache.put(mDiskKey, j.size, j)
-                        }
-                    }
-                }
-                value.isSuccess = true
-                value.color = color
-            } else {
-                value.isSuccess = false
-            }
-            return value
-        } else {
-            value.isSuccess = false
-            return value
+    // SEC-M2/异常安全：spawn 内只捕获 let（不可变），异常在方法内部转为失败返回值，
+    // 保证互操作 Promise 必定 resolve（不因异常逃逸导致 await 永久挂起）
+    private func safeCreateAsync(uri: String): Bool {
+        try {
+            return createAsync(uri)
+        } catch (e: Exception) {
+            Hilog.error(0, "aviflog", "createAsync exception: ${e}")
+            return false
+        }
+    }
+
+    private func safeCreateWithThreadAsync(uri: String, threads: Int32): Bool {
+        try {
+            return createWithThreadAsync(uri, threads)
+        } catch (e: Exception) {
+            Hilog.error(0, "aviflog", "createWithThreadAsync exception: ${e}")
+            return false
+        }
+    }
+
+    private func safeNextFrame(imageWidth: Int32, imageHeight: Int32): ReturnValue {
+        try {
+            return nextFrameffiAsync(imageWidth, imageHeight)
+        } catch (e: Exception) {
+            Hilog.error(0, "aviflog", "nextFrame exception: ${e}")
+            let v = ReturnValue()
+            v.code = -1
+            v.isSuccess = false
+            return v
+        }
+    }
+
+    private func safeNthFrame(index: Int32, imageWidth: Int32, imageHeight: Int32): ReturnValue {
+        try {
+            return nthFrameffiAsync(index, imageWidth, imageHeight)
+        } catch (e: Exception) {
+            Hilog.error(0, "aviflog", "nthFrame exception: ${e}")
+            let v = ReturnValue()
+            v.code = -1
+            v.isSuccess = false
+            return v
         }
     }
 
     public func release(): Unit {
-        if (let Some(i) <- decoder) {
-            return i.release()
+        // SEC-M2 修复：与解码线程协同——解码进行中只标记 releasePending，
+        // 解码线程结束后自行销毁；避免 use-after-free，且不阻塞 JS 线程
+        synchronized(mtx) {
+            releasePending = true
+            if (!decoding) {
+                if (let Some(i) <- decoder) {
+                    i.release()
+                }
+                decoder = None
+                encoded = None
+            }
         }
     }
 
@@ -352,7 +387,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         JSCurrentJSContext.set(context)
         let promise = context.promiseCapability()
         spawn {
-            let RET = clazz.createAsync(arg1774848261264216600)
+            let RET = clazz.safeCreateAsync(arg1774848261264216600)
             context.postJSTask {
                 newScope(context) {
                     promise.resolve(RET.toJSValue(context))
@@ -375,7 +410,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         JSCurrentJSContext.set(context)
         let promise = context.promiseCapability()
         spawn {
-            let RET = clazz.createWithThreadAsync(arg1774848261265021900, arg1774848261265048800)
+            let RET = clazz.safeCreateWithThreadAsync(arg1774848261265021900, arg1774848261265048800)
             context.postJSTask {
                 newScope(context) {
                     promise.resolve(RET.toJSValue(context))
@@ -508,7 +543,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         JSCurrentJSContext.set(context)
         let promise = context.promiseCapability()
         spawn {
-            let RET = clazz.nextFrameffiAsync(arg1774848261267312300, arg1774848261267338400)
+            let RET = clazz.safeNextFrame(arg1774848261267312300, arg1774848261267338400)
             context.postJSTask {
                 newScope(context) {
                     let obj = context.object()
@@ -550,7 +585,7 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
         JSCurrentJSContext.set(context)
         let promise = context.promiseCapability()
         spawn {
-            let RET = clazz.nthFrameffiAsync(arg1774848261267937800, arg1774848261267976000, arg1774848261268000400)
+            let RET = clazz.safeNthFrame(arg1774848261267937800, arg1774848261267976000, arg1774848261268000400)
             context.postJSTask {
                 newScope(context) {
                     let obj = context.object()
@@ -667,20 +702,23 @@ public class CJAvifDecoder <: SharedObject & JSInteropType<CJAvifDecoder> {
     }
 
     private var decoder: Option<AvifDecoder> = None
-    var mMemoryKey = ""
-    var mDiskKey = ""
     var mUri = ""
     var encoded: ?Array<Byte> = None
+    private let mtx = ReentrantMutex()       // SEC-M2: 保护 decoder 状态与 native 调用
+    private var decoding = false             // mtx 保护：native 解码进行中
+    private var releasePending = false       // mtx 保护：release 已请求，解码结束后销毁
     func createLoginc(buffer: Array<UInt8>, threads: Int32): Option<CJAvifDecoder> {
-        encoded = buffer
-        decoder = AvifDecoder(buffer, threads)
-        if (let Some(k) <- decoder) {
-            if (k.decoder == 0) {
+        synchronized(mtx) {
+            encoded = buffer
+            decoder = AvifDecoder(buffer, threads)
+            if (let Some(k) <- decoder) {
+                if (k.decoder == 0) {
+                    return Option<CJAvifDecoder>.None
+                }
+                return this
+            } else {
                 return Option<CJAvifDecoder>.None
             }
-            return this
-        } else {
-            return Option<CJAvifDecoder>.None
         }
     }
 }

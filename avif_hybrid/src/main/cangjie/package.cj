@@ -57,8 +57,9 @@ let MAX_DOWNLOAD_SIZE: Int64 = 8 * 1024 * 1024
  func getImageFromNet(urlStr: String): ?Array<UInt8> {
      try {
          let fut: Future<?Array<UInt8>> = spawn {
+             // TLS 使用默认证书校验（Default）：校验失败即终止连接，不加载内容
+             // （修复 #66：原代码显式配置 TrustAll 关闭校验，中间人可替换图像内容）
              var tlsConfig = TlsClientConfig()
-             tlsConfig.verifyMode = TrustAll
              let client = ClientBuilder().tlsConfig(tlsConfig).readTimeout(Duration.second * 60).build()
              try{
                  let ret = client.send(HttpRequestBuilder().get().url(fixUrlForStdx(urlStr)).build())
