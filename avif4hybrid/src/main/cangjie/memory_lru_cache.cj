@@ -80,7 +80,7 @@ class MemoryLruCache {
                 }
             }
             // 统计输出：有效命中次数 / 查询次数
-            Hilog.info(0, "memCacheStat", "query=${queryCount}, validHit=${validHitCount}, hitRate=${hitRatePercent()}%")
+            Hilog.info(0, "memCacheStat", "purgable query=${queryCount}, validHit=${validHitCount}, hitRate=${hitRatePercent()}%")
             return result
          }
     }
@@ -154,7 +154,7 @@ class MemoryLruCache {
                     }
                 }
             }
-            Hilog.info(0, "memCacheStat", "stat#${putCount}: validEntries=${validCount}/${totalCount}, validMemSize=${totalSize} bytes, trackedMem=${this.currentMemory} bytes, hit=${validHitCount}/${queryCount} (rate ${hitRatePercent()}%)")
+            Hilog.info(0, "memCacheStat", "purgable stat#${putCount}: validEntries=${validCount}/${totalCount}, validMemSize=${totalSize} bytes, trackedMem=${this.currentMemory} bytes, hit=${validHitCount}/${queryCount} (rate ${hitRatePercent()}%)")
         }
     }
 
